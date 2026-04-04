@@ -2,7 +2,7 @@
 
 Interactive health monitoring dashboard for iGaming platform across 10 GEO markets.
 
-**Zero dependencies. Dynamic data. Auto-sync from Google Sheets.**
+**Zero dependencies. Dynamic data. Auto-sync from Google Drive.**
 
 ## 🚀 Quick Start
 
