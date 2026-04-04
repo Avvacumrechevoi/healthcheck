@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Health Check · SapphireBet · Март 2026</title>
+<title>Health Check · SapphireBet</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -39,16 +39,38 @@ h1{font-size:17px;font-weight:700;background:linear-gradient(90deg,#7c83ff,#00e6
 .rank-row{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;margin-bottom:2px;cursor:pointer}
 .rank-row:hover{filter:brightness(1.3)}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#7c83ff;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:2000;animation:fi .2s ease}
+.hdr-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:#3a3a55;border:none;background:none}
+.hdr-btn:hover{color:#7c83ff}
+.overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.85);display:flex;justify-content:center;padding-top:3vh}
+.modal{width:100%;max-width:500px;max-height:94vh;background:#0e0e1a;border:1px solid #1e1e35;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;animation:fi .25s ease}
+.modal-head{padding:14px 16px 10px;border-bottom:1px solid #1a1a2e;flex-shrink:0}
+.modal-body{flex:1;overflow-y:auto;padding:10px 16px;-webkit-overflow-scrolling:touch}
+.modal-foot{padding:10px 16px;border-top:1px solid #1a1a2e;flex-shrink:0}
+.btn-primary{width:100%;padding:10px;border-radius:8px;border:none;cursor:pointer;background:#7c83ff;color:#fff;font-size:13px;font-weight:600;min-height:40px}
+.btn-primary:hover{background:#6b72ee}
+.btn-secondary{padding:8px 14px;border-radius:6px;border:1px solid #252540;cursor:pointer;background:#111122;color:#aaa;font-size:12px;font-weight:600}
+.btn-secondary:hover{background:#1a1a30;color:#ccc}
+.btn-danger{padding:8px 14px;border-radius:6px;border:1px solid #ff174433;cursor:pointer;background:#1a0810;color:#ff8a80;font-size:12px;font-weight:600}
+.btn-danger:hover{background:#2a0818}
+.ed-input{width:100%;padding:7px;background:#0a0a14;border:1px solid #252540;border-radius:6px;color:#7c83ff;font-size:13px;font-family:monospace;font-weight:600;outline:none;min-height:36px}
+.ed-input:focus{border-color:#7c83ff44}
+.ed-textarea{width:100%;padding:10px;background:#0a0a14;border:1px solid #252540;border-radius:8px;color:#8c8caa;font-size:11px;font-family:monospace;outline:none;resize:vertical;min-height:200px;line-height:1.5}
+.ed-textarea:focus{border-color:#7c83ff44}
+.tab-bar{display:flex;gap:2px;overflow-x:auto;padding-bottom:4px}
+.tab-btn{padding:6px 10px;border-radius:5px;font-size:12px;cursor:pointer;border:none;flex-shrink:0;min-height:32px;transition:background .15s}
+.geo-ed-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:#111122;margin-bottom:3px;cursor:pointer}
+.geo-ed-row:hover{background:#181830}
+.data-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app"><div style="text-align:center;padding:80px 20px"><div class="mono" style="color:#333;font-size:12px">loading...</div></div></div>
 <script>
 /*
- * HEALTH CHECK DASHBOARD · SapphireBet · v27
- * Standalone HTML, zero dependencies.
- * v27: +platform sparkline, +NGR under spheres, +block→GEO ranking, +Telegram export
+ * HEALTH CHECK DASHBOARD · SapphireBet · v28
+ * Dynamic version: loads data from data.json, editable via built-in UI.
+ * Data priority: localStorage (edited) → data.json (file) → fallback empty.
  */
 
 // ═══ 1. CONFIG ═══
@@ -62,6 +84,7 @@ const DEF_TH = {
   bettor_pct:{g:15,y:5,u:"%",l:"% бетторов",d:"h"},active_daily:{g:100,y:30,u:"",l:"Активных/день",d:"h"},bettor_ret:{g:40,y:25,u:"%",l:"Ret бетторов",d:"h"},whale_top20:{g:50,y:70,u:"%",l:"Top20 NGR%",d:"l"},
   frt_sec:{g:30,y:60,u:"с",l:"FRT (медиана)",d:"l"},csat:{g:70,y:55,u:"%",l:"CSAT",d:"h"},abandon_rate:{g:3,y:8,u:"%",l:"AR% пропущено",d:"l"},aht_min:{g:10,y:18,u:"м",l:"AHT (медиана)",d:"l"},
 };
+const ALL_METRICS = Object.keys(DEF_TH);
 
 const CATS = {
   payments:{l:"Платежи",i:"💳",m:["dep_approval","wd_approval","avg_deposit","cashout_pct"],w:25},
@@ -74,21 +97,72 @@ const CATS = {
   support:{l:"Саппорт",i:"🎧",m:["frt_sec","csat","abandon_rate","aht_min"],w:3},
 };
 const SM = ["ngr","ngr_mom","dep_approval","core_retention","d90_retention","csat"];
-const FLAGS = {"🇵🇪 Peru":{icon:"⛔",msg:"Платёжки не работают",detail:"Все ПС отключены."}};
 
-// ═══ 2. SETTINGS (MUST be before scoring) ═══
+// ═══ 2. SETTINGS ═══
 let customTH = {};
 try { customTH = JSON.parse(localStorage.getItem("hc_th") || "{}"); } catch(e) {}
 let settingsCat = "payments";
 function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DEF_TH[mk]; }
 
-// ═══ 3. DATA ═══
-const PREV = {"🇧🇷 Brazil":{ngr:58365},"🇦🇷 Argentina":{ngr:40850},"🇨🇱 Chile":{ngr:51512},"🇲🇽 Mexico":{ngr:16108},"🇵🇪 Peru":{ngr:46812},"🇨🇴 Colombia":{ngr:241},"🇮🇳 India":{ngr:5554},"🇧🇩 Bangladesh":{ngr:5037},"🇵🇱 Poland":{ngr:10006},"🇵🇹 Portugal":{ngr:5617}};
-const TREND = {"🇧🇷 Brazil":[55383,51287,79210,86152,79061,108068,58365,81765],"🇦🇷 Argentina":[2879,14918,20640,25357,63106,29006,40850,35907],"🇨🇱 Chile":[1054,57613,38497,25018,12184,12270,51512,20039],"🇲🇽 Mexico":[25950,-6631,-193,8374,21232,17241,16108,10482],"🇵🇪 Peru":[7163,12803,2007,-8704,5787,21407,46812,-1174],"🇨🇴 Colombia":[1005,1093,5292,11613,2764,1216,241,652],"🇮🇳 India":[1823,5302,18150,7973,5335,6080,5554,6305],"🇧🇩 Bangladesh":[156,4491,-1566,-195,8363,6369,5037,5488],"🇵🇱 Poland":[9492,8058,2739,9074,12309,15432,10006,14457],"🇵🇹 Portugal":[5357,2038,5471,5825,2122,9179,5617,802]};
-const PLAT_TREND = [110262,150972,170247,170487,212263,226268,240102,174723];
-const TL = ["Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"];
+// ═══ 3. DYNAMIC DATA ═══
+let D = {}, PREV = {}, TREND = {}, PLAT_TREND = [], TL = [], FLAGS = {};
+let META = { month: "", month_short: "", prev_month_short: "", version: "v28", updated: "" };
+let dataSource = "none";
 
-const D = {"🇧🇷 Brazil":{au:1297,ftd_count:810,reg_ftd_conv:18.2,cac:null,dep_approval:86.6,wd_approval:64.1,avg_deposit:36.7,cashout_pct:80.4,ngr:81765,ngr_mom:40.1,ngr_target:54.5,arppu:65.52,casino_share:25.1,casino_margin:2.9,casino_players:2312,sport_margin:8.3,sport_players:631,avg_bet:21.4,d30_retention:15.3,d90_retention:7.2,core_retention:14.7,active_mom:35.9,bettor_pct:10.9,bettor_ret:37.7,active_daily:184,whale_top20:null,frt_sec:18,csat:54.4,abandon_rate:0.2,aht_min:15.8,casino_ggr_mom:null,sport_ggr_mom:null},"🇦🇷 Argentina":{au:2195,ftd_count:1696,reg_ftd_conv:31.0,cac:null,dep_approval:75.4,wd_approval:82.9,avg_deposit:19.6,cashout_pct:83.2,ngr:35907,ngr_mom:-12.1,ngr_target:23.9,arppu:17.10,casino_share:22.9,casino_margin:2.0,casino_players:4386,sport_margin:16.7,sport_players:164,avg_bet:30.9,d30_retention:13.1,d90_retention:4.1,core_retention:8.0,active_mom:53.8,bettor_pct:16.1,bettor_ret:26.0,active_daily:221,whale_top20:null,frt_sec:60,csat:52.8,abandon_rate:4.1,aht_min:18.5,casino_ggr_mom:null,sport_ggr_mom:null},"🇨🇱 Chile":{au:522,ftd_count:423,reg_ftd_conv:17.3,cac:null,dep_approval:61.2,wd_approval:48.1,avg_deposit:28.6,cashout_pct:53.3,ngr:20039,ngr_mom:-61.1,ngr_target:13.4,arppu:39.37,casino_share:33.1,casino_margin:1.6,casino_players:979,sport_margin:10.7,sport_players:17,avg_bet:17.1,d30_retention:13.1,d90_retention:3.7,core_retention:6.4,active_mom:176.9,bettor_pct:8.2,bettor_ret:21.7,active_daily:42,whale_top20:null,frt_sec:52,csat:60.0,abandon_rate:4.6,aht_min:20.2,casino_ggr_mom:null,sport_ggr_mom:null},"🇲🇽 Mexico":{au:225,ftd_count:123,reg_ftd_conv:1.7,cac:null,dep_approval:55.9,wd_approval:78.6,avg_deposit:58.6,cashout_pct:83.0,ngr:10482,ngr_mom:-34.9,ngr_target:7.0,arppu:54.88,casino_share:27.8,casino_margin:1.4,casino_players:604,sport_margin:6.2,sport_players:91,avg_bet:16.1,d30_retention:10.7,d90_retention:3.2,core_retention:7.8,active_mom:9.9,bettor_pct:3.7,bettor_ret:46.8,active_daily:35,whale_top20:null,frt_sec:52,csat:68.8,abandon_rate:2.0,aht_min:16.9,casino_ggr_mom:null,sport_ggr_mom:null},"🇵🇪 Peru":{au:161,ftd_count:84,reg_ftd_conv:9.4,cac:null,dep_approval:0,wd_approval:0,avg_deposit:121.4,cashout_pct:100.9,ngr:-1174,ngr_mom:-102.5,ngr_target:-0.8,arppu:-8.39,casino_margin:0.6,casino_players:491,sport_margin:-8.0,sport_players:52,avg_bet:107.2,d30_retention:17.3,d90_retention:6.6,core_retention:14.9,active_mom:31.8,bettor_pct:3.0,bettor_ret:38.7,active_daily:22,whale_top20:null,frt_sec:49,csat:67.6,abandon_rate:5.3,aht_min:20.9,casino_share:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇨🇴 Colombia":{ftd_count:67,reg_ftd_conv:22.6,cac:null,dep_approval:86.1,wd_approval:34.1,avg_deposit:6.1,ngr:652,ngr_mom:170.1,ngr_target:0.4,sport_margin:1.8,sport_players:12,avg_bet:12.1,d30_retention:22.6,d90_retention:5.3,core_retention:14.5,active_mom:50.7,bettor_pct:2.3,bettor_ret:51.6,active_daily:15,whale_top20:null,frt_sec:43,csat:76.9,abandon_rate:6.7,aht_min:19.2,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇮🇳 India":{ftd_count:27,reg_ftd_conv:5.2,cac:null,dep_approval:24.1,wd_approval:62.4,avg_deposit:49.1,ngr:6305,ngr_mom:13.5,ngr_target:4.2,sport_margin:8.4,sport_players:205,avg_bet:15.5,d30_retention:26.5,d90_retention:7.2,core_retention:32.6,active_mom:14.2,bettor_pct:4.5,bettor_ret:82.2,active_daily:22,whale_top20:null,frt_sec:115,csat:37.1,abandon_rate:14.4,aht_min:25.5,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇧🇩 Bangladesh":{ftd_count:243,reg_ftd_conv:16.7,cac:null,dep_approval:47.3,wd_approval:59.5,avg_deposit:26.4,ngr:5488,ngr_mom:8.9,ngr_target:3.7,sport_margin:4.6,sport_players:148,avg_bet:14.6,d30_retention:24.8,d90_retention:7.9,core_retention:5.8,active_mom:2.8,bettor_pct:21.3,bettor_ret:35.4,active_daily:40,whale_top20:null,frt_sec:162,csat:57.4,abandon_rate:11.9,aht_min:19.6,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇵🇱 Poland":{ftd_count:14,reg_ftd_conv:4.8,cac:null,dep_approval:84.7,wd_approval:73.9,avg_deposit:32.3,ngr:14457,ngr_mom:44.5,ngr_target:9.6,sport_margin:5.6,sport_players:38,avg_bet:17.9,d30_retention:21.0,d90_retention:11.3,core_retention:24.7,active_mom:-23.4,bettor_pct:7.2,bettor_ret:73.5,active_daily:20,whale_top20:null,frt_sec:159,csat:36.1,abandon_rate:21.7,aht_min:18.7,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇵🇹 Portugal":{ftd_count:30,reg_ftd_conv:9.6,cac:null,dep_approval:77.5,wd_approval:60.0,avg_deposit:48.3,ngr:802,ngr_mom:-85.7,ngr_target:0.5,sport_margin:0.9,sport_players:55,avg_bet:25.7,d30_retention:15.5,d90_retention:4.1,core_retention:8.8,active_mom:128.0,bettor_pct:2.5,bettor_ret:43.8,active_daily:6,whale_top20:null,frt_sec:25,csat:58.3,abandon_rate:0.0,aht_min:17.5,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null}};
+function hasLocalData() {
+  try { return !!localStorage.getItem("hc_data"); } catch(e) { return false; }
+}
+
+function loadLocalData() {
+  try {
+    const raw = localStorage.getItem("hc_data");
+    if (!raw) return false;
+    return applyDataset(JSON.parse(raw), "localStorage");
+  } catch(e) { return false; }
+}
+
+function applyDataset(ds, source) {
+  try {
+    if (ds.meta) META = {...META, ...ds.meta};
+    D = ds.data || {};
+    PREV = ds.prev || {};
+    TREND = ds.trend || {};
+    PLAT_TREND = ds.plat_trend || [];
+    TL = ds.trend_labels || [];
+    FLAGS = ds.flags || {};
+    dataSource = source || "unknown";
+    document.title = `Health Check · SapphireBet · ${META.month}`;
+    return true;
+  } catch(e) { return false; }
+}
+
+function saveDataToLocal() {
+  const ds = { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, prev: PREV, trend: TREND, data: D };
+  localStorage.setItem("hc_data", JSON.stringify(ds));
+  dataSource = "localStorage";
+}
+
+function getDataset() {
+  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, prev: PREV, trend: TREND, data: D };
+}
+
+async function loadData() {
+  if (loadLocalData()) {
+    rebuildGeoList();
+    render();
+    return;
+  }
+  try {
+    const res = await fetch("data.json?" + Date.now());
+    if (!res.ok) throw new Error(res.status);
+    const ds = await res.json();
+    applyDataset(ds, "data.json");
+  } catch(e) {
+    dataSource = "empty";
+  }
+  rebuildGeoList();
+  render();
+}
 
 // ═══ 4. SCORING ═══
 const NO = v => v == null || v === undefined;
@@ -129,7 +203,8 @@ function metricHTML(mk, val, prev) {
   const hasPrev = !NO(prev); const delta = hasPrev ? (val - prev) : 0;
   const arrow = hasPrev ? (delta > 0 ? "↑" : delta < 0 ? "↓" : "→") : "";
   const arrowC = hasPrev ? (t.d === "h" ? (delta > 0 ? "#00e67688" : "#ff174488") : (delta < 0 ? "#00e67688" : "#ff174488")) : "";
-  return `<div class="metric-row" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} фев ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:#282840;font-size:8px;flex-shrink:0;width:36px;text-align:right">${t.d==="h"?"≥":"≤"}${fmt(t.g)}</span></div>`;
+  const prevLabel = META.prev_month_short || "prev";
+  return `<div class="metric-row" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} ${prevLabel} ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:#282840;font-size:8px;flex-shrink:0;width:36px;text-align:right">${t.d==="h"?"≥":"≤"}${fmt(t.g)}</span></div>`;
 }
 
 function summaryHTML(d, prev) {
@@ -154,16 +229,17 @@ function buildSparkSVG(data, h, w) {
 }
 
 function sparkHTML(geo) {
-  const data = TREND[geo]; if (!data) return "";
+  const data = TREND[geo]; if (!data || !data.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(data, 48, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#666":"#222"};font-size:7px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR тренд (8 мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR тренд (${data.length} мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 function platSparkHTML() {
+  if (!PLAT_TREND.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 40, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#666":"#222"};font-size:7px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR платформа (8 мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR платформа (${PLAT_TREND.length} мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 function platBlocksHTML(geos) {
@@ -173,7 +249,6 @@ function platBlocksHTML(geos) {
     const s = vals.length ? vals.reduce((a,b) => a+b, 0)/vals.length : null;
     const c = cl(s);
     html += `<div class="plat-block" onclick="toggleRanking('${ck}')" style="background:${c.bg}33;border-left-color:${NO(s)?"#252540":c.gw}"><span style="font-size:14px;width:20px;text-align:center">${ct.i}</span><div style="flex:1;min-width:0"><div style="color:${NO(s)?"#444":"#bbb"};font-size:11px;font-weight:600">${ct.l}</div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:${Math.min(100,Math.max(3,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div></div><span class="mono" style="color:${NO(s)?"#333":c.tx};font-weight:700;font-size:14px;min-width:28px;text-align:right">${NO(s)?"—":Math.round(s)}</span><span class="mono" style="color:#282840;font-size:8px;min-width:24px;text-align:right">${ct.w}%</span></div>`;
-    // Ranking dropdown (hidden by default, toggled by toggleRanking)
     html += `<div id="rank-${ck}" style="display:none;padding:2px 0 6px 28px">`;
     const ranked = geos.map(g => ({g:g.g, s:catSc(g.d, ck), d:g.d})).filter(r => r.s !== null).sort((a,b) => b.s - a.s);
     ranked.forEach((r, i) => {
@@ -199,29 +274,40 @@ function navHTML(idx) {
 
 // ═══ 6. RENDER ═══
 let state = {geo: null, cat: null};
-const geoList = Object.keys(D);
+let geoList = [];
+function rebuildGeoList() { geoList = Object.keys(D); }
 
 function render() {
   const app = document.getElementById("app");
+  if (!Object.keys(D).length) {
+    app.innerHTML = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${META.version}</p></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button></div></div><div style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:16px">📊</div><div style="color:#666;font-size:14px;margin-bottom:8px">Нет данных</div><div style="color:#444;font-size:12px;margin-bottom:20px">Загрузите data.json или введите данные вручную</div><button class="btn-primary" onclick="openDataEditor()" style="max-width:260px;margin:0 auto">📝 Открыть редактор данных</button></div>`;
+    return;
+  }
+
   const geos = Object.entries(D).map(([g,d]) => ({g, s:geoSc(d), d, flag:!!FLAGS[g]})).sort((a,b) => (a.s??-1) - (b.s??-1));
   const valid = geos.filter(g => !NO(g.s));
   const ps = valid.length ? valid.reduce((a,g) => a+g.s, 0)/valid.length : null;
   const crit = geos.filter(g => !NO(g.s) && g.s < 40).length;
 
-  let html = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">март 2026 · v27</p></div><div style="display:flex;gap:2px"><button onclick="copyTelegramReport()" title="Telegram" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:#3a3a55;border:none;background:none" onmouseenter="this.style.color='#7c83ff'" onmouseleave="this.style.color='#3a3a55'"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button onclick="openSettings()" title="Настройки" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:#3a3a55;border:none;background:none" onmouseenter="this.style.color='#7c83ff'" onmouseleave="this.style.color='#3a3a55'"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
+  const srcBadge = dataSource === "localStorage"
+    ? `<span class="data-badge" style="background:#7c83ff22;color:#7c83ff">✎ local</span>`
+    : dataSource === "data.json"
+    ? `<span class="data-badge" style="background:#00e67622;color:#00e676">📄 json</span>`
+    : `<span class="data-badge" style="background:#ff174422;color:#ff1744">⚠ нет</span>`;
+
+  let html = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${META.month||""} · ${META.version} ${srcBadge}</p></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
 
   if (!state.geo) {
     html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${crit} crit · ${geos.length} geo`)}</div>`;
     html += platSparkHTML();
     html += `<div class="line"></div>`;
-    // v27: NGR under spheres instead of status text
     html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,fmtNGR(d.ngr),flag)}</div>`).join("")}</div>`;
     html += platBlocksHTML(geos);
     if (crit > 0) {
       html += `<div class="problems"><div class="mono" style="color:#ff1744;font-size:10px;font-weight:700;margin-bottom:6px">🚨 ПРОБЛЕМЫ</div>`;
       geos.filter(g => !NO(g.s) && g.s < 40).forEach(g => {
         const fl = FLAGS[g.g];
-        const w = Object.keys(DEF_TH).map(k => ({k, s:scr(k, g.d[k])})).filter(m => !NO(m.s) && m.s < 25).slice(0,3).map(m => DEF_TH[m.k].l);
+        const w = ALL_METRICS.map(k => ({k, s:scr(k, g.d[k])})).filter(m => !NO(m.s) && m.s < 25).slice(0,3).map(m => DEF_TH[m.k].l);
         html += `<div class="problems-item" onclick="nav('${g.g}')"><span class="mono" style="color:#ff8a80;font-size:11px">${fl?fl.icon+" ":""}${g.g} · ${Math.round(g.s)}pt</span><div style="color:#553344;font-size:9px;margin-top:2px">${fl?fl.msg+(w.length?" · ":""):""} ${w.join(" · ")}</div></div>`;
       });
       html += `</div>`;
@@ -238,9 +324,9 @@ function render() {
     html += `<div class="line"></div><div class="grid-cat">`;
     Object.entries(CATS).forEach(([ck, ct]) => { const cs = catSc(d, ck); html += `<div onclick="navCat('${ck}')" style="animation:fi .3s ease">${sphereHTML(cs,54,`${ct.i} ${ct.l}`,`${ct.w}% · ${cl(cs).lb}`)}</div>`; });
     html += `</div>`;
-    const worst = Object.keys(DEF_TH).map(k => ({k, s:scr(k, d[k]), v:d[k]})).filter(m => !NO(m.s) && m.s < 40).sort((a,b) => a.s - b.s);
+    const worst = ALL_METRICS.map(k => ({k, s:scr(k, d[k]), v:d[k]})).filter(m => !NO(m.s) && m.s < 40).sort((a,b) => a.s - b.s);
     if (worst.length) html += `<div style="margin-top:18px"><div class="mono" style="color:#ff1744;font-size:10px;font-weight:700;margin-bottom:8px;text-align:center">⚠ КРАСНЫЕ (${worst.length})</div><div style="display:flex;flex-direction:column;gap:5px">${worst.slice(0,6).map(m => metricHTML(m.k, m.v, prev[m.k])).join("")}</div></div>`;
-    const filled = Object.keys(DEF_TH).filter(k => !NO(d[k])).length;
+    const filled = ALL_METRICS.filter(k => !NO(d[k])).length;
     html += `<div style="margin-top:12px;padding:10px;background:#111122;border-radius:8px;border:1px solid #1e1e35"><div class="mono" style="color:#444;font-size:9px">${filled}/32 метрик</div></div>`;
   } else if (state.geo && state.cat) {
     const g = state.geo, d = D[g], ct = CATS[state.cat], prev = PREV[g] || {}, fl = FLAGS[g];
@@ -268,10 +354,8 @@ function copyTelegramReport() {
   const ps = valid.length ? valid.reduce((a,g) => a+g.s, 0)/valid.length : null;
   const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr || 0), 0);
 
-  let txt = `📊 HEALTH CHECK · Март 2026\n`;
+  let txt = `📊 HEALTH CHECK · ${META.month}\n`;
   txt += `Платформа: ${Math.round(ps)}pt · NGR: ${fmtNGR(totalNGR)}\n\n`;
-
-  // GEO ranking
   txt += `🏆 Рейтинг GEO:\n`;
   geos.forEach((g, i) => {
     const icon = g.flag ? "⛔" : g.s >= 70 ? "🟢" : g.s >= 40 ? "🟡" : "🔴";
@@ -279,19 +363,15 @@ function copyTelegramReport() {
     if (g.d.ngr_mom) txt += ` (${g.d.ngr_mom > 0 ? "+" : ""}${g.d.ngr_mom.toFixed(0)}% MoM)`;
     txt += `\n`;
   });
-
-  // Problems
   const reds = geos.filter(g => !NO(g.s) && g.s < 40);
   if (reds.length) {
     txt += `\n🚨 Проблемные GEO:\n`;
     reds.forEach(g => {
       const fl = FLAGS[g.g];
-      const worst = Object.keys(DEF_TH).map(k => ({k, s:scr(k, g.d[k])})).filter(m => !NO(m.s) && m.s < 25).slice(0,3).map(m => DEF_TH[m.k].l);
+      const worst = ALL_METRICS.map(k => ({k, s:scr(k, g.d[k])})).filter(m => !NO(m.s) && m.s < 25).slice(0,3).map(m => DEF_TH[m.k].l);
       txt += `• ${fl?fl.icon+" ":""}${g.g}: ${worst.join(", ")}\n`;
     });
   }
-
-  // Platform blocks
   txt += `\n📦 Блоки платформы:\n`;
   Object.entries(CATS).forEach(([ck, ct]) => {
     const vals = geos.map(g => catSc(g.d, ck)).filter(x => x !== null);
@@ -300,33 +380,227 @@ function copyTelegramReport() {
     txt += `${ct.i} ${ct.l}: ${icon} ${NO(s)?"—":Math.round(s)}pt (${ct.w}%)\n`;
   });
 
-  navigator.clipboard.writeText(txt).then(() => {
-    const t = document.createElement("div");
-    t.className = "toast";
-    t.textContent = "📋 Скопировано для Telegram";
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2000);
-  }).catch(() => {
-    prompt("Скопируйте текст:", txt);
-  });
+  navigator.clipboard.writeText(txt).then(() => { showToast("📋 Скопировано для Telegram"); }).catch(() => { prompt("Скопируйте текст:", txt); });
 }
 
-// ═══ 9. SETTINGS MODAL ═══
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+// ═══ 9. DATA EDITOR ═══
+let editorTab = "json";
+let editorGeo = null;
+
+function openDataEditor() {
+  const overlay = document.createElement("div");
+  overlay.id = "data-editor-overlay";
+  overlay.className = "overlay";
+  overlay.onclick = e => { if (e.target === overlay) closeDataEditor(); };
+
+  function buildEditor() {
+    let h = `<div class="modal"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">📝 Данные</span><button onclick="closeDataEditor()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div class="tab-bar" style="margin-top:10px">`;
+    const tabs = [
+      {id:"json",l:"📄 JSON"},
+      {id:"geo",l:"🌍 По GEO"},
+      {id:"meta",l:"⚙ Мета"},
+    ];
+    tabs.forEach(t => {
+      h += `<button class="tab-btn" onclick="editorTab='${t.id}';editorGeo=null;refreshDataEditor()" style="background:${editorTab===t.id?"#1e1e35":"transparent"};color:${editorTab===t.id?"#ccc":"#444"}">${t.l}</button>`;
+    });
+    h += `</div></div><div class="modal-body">`;
+
+    if (editorTab === "json") {
+      h += buildJsonTab();
+    } else if (editorTab === "geo") {
+      h += buildGeoTab();
+    } else if (editorTab === "meta") {
+      h += buildMetaTab();
+    }
+
+    h += `</div><div class="modal-foot"><div style="display:flex;gap:6px;flex-wrap:wrap">`;
+    if (hasLocalData()) {
+      h += `<button class="btn-danger" onclick="resetToFile()">🗑 Сбросить к файлу</button>`;
+    }
+    h += `<button class="btn-secondary" onclick="downloadJson()">⬇ Скачать JSON</button>`;
+    h += `</div></div></div>`;
+    return h;
+  }
+
+  function buildJsonTab() {
+    const ds = getDataset();
+    const json = JSON.stringify(ds, null, 2);
+    return `<div style="margin-bottom:10px"><div style="color:#666;font-size:11px;margin-bottom:8px">Вставьте полный JSON или загрузите файл. Формат: <code style="color:#7c83ff">{meta, flags, data, prev, trend, ...}</code></div><div style="display:flex;gap:6px;margin-bottom:10px"><label class="btn-secondary" style="cursor:pointer"><input type="file" accept=".json" onchange="handleFileUpload(event)" style="display:none">📂 Загрузить файл</label></div><textarea id="json-editor" class="ed-textarea" style="min-height:300px">${escHtml(json)}</textarea></div><button class="btn-primary" onclick="applyJsonEditor()">💾 Применить JSON</button>`;
+  }
+
+  function buildGeoTab() {
+    if (editorGeo) return buildGeoDetailTab(editorGeo);
+    let h = `<div style="color:#666;font-size:11px;margin-bottom:10px">Выберите GEO для редактирования метрик</div>`;
+    const geos = Object.keys(D);
+    if (!geos.length) {
+      h += `<div style="color:#444;font-size:12px;padding:20px;text-align:center">Нет GEO. Загрузите JSON или добавьте вручную.</div>`;
+    }
+    geos.forEach(g => {
+      const d = D[g];
+      const gs = geoSc(d);
+      const c = cl(gs);
+      const filled = ALL_METRICS.filter(k => !NO(d[k])).length;
+      h += `<div class="geo-ed-row" onclick="editorGeo='${g}';refreshDataEditor()"><div style="width:8px;height:8px;border-radius:50%;background:${c.gw};flex-shrink:0"></div><span style="flex:1;font-size:12px">${g}</span><span class="mono" style="color:${c.tx};font-size:12px;font-weight:700">${NO(gs)?"—":Math.round(gs)}pt</span><span class="mono" style="color:#333;font-size:9px">${filled}/32</span><span style="color:#333;font-size:12px">›</span></div>`;
+    });
+    return h;
+  }
+
+  function buildGeoDetailTab(geo) {
+    const d = D[geo] || {};
+    let h = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px"><button class="btn-secondary" onclick="editorGeo=null;refreshDataEditor()" style="padding:4px 8px">‹</button><span style="color:#ccc;font-size:13px;font-weight:600">${geo}</span></div>`;
+    Object.entries(CATS).forEach(([ck, ct]) => {
+      h += `<div style="margin-bottom:12px"><div style="color:#666;font-size:10px;font-weight:600;margin-bottom:6px">${ct.i} ${ct.l}</div>`;
+      ct.m.forEach(mk => {
+        const t = DEF_TH[mk];
+        const val = d[mk];
+        const s = scr(mk, val);
+        const c = cl(s);
+        h += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="width:6px;height:6px;border-radius:50%;background:${NO(val)?"#333":c.gw};flex-shrink:0"></div><label style="color:#888;font-size:10px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.l}">${t.l}</label><input type="number" step="any" value="${NO(val)?"":val}" placeholder="null" onchange="updateGeoMetric('${geo}','${mk}',this.value)" class="ed-input" style="width:90px;font-size:12px;padding:5px;color:${NO(val)?"#333":c.tx}"><span class="mono" style="color:#252540;font-size:8px;width:14px">${t.u}</span></div>`;
+      });
+      h += `</div>`;
+    });
+    h += `<button class="btn-primary" onclick="saveGeoEdits()">💾 Сохранить GEO</button>`;
+    return h;
+  }
+
+  function buildMetaTab() {
+    let h = `<div style="color:#666;font-size:11px;margin-bottom:12px">Настройки периода и флаги</div>`;
+    const fields = [
+      {k:"month",l:"Месяц (полный)",ph:"Апрель 2026"},
+      {k:"month_short",l:"Месяц (кратко)",ph:"Apr"},
+      {k:"prev_month_short",l:"Пред. месяц (кратко)",ph:"мар"},
+      {k:"version",l:"Версия",ph:"v28"},
+      {k:"updated",l:"Дата обновления",ph:"2026-05-01"},
+    ];
+    fields.forEach(f => {
+      h += `<div style="margin-bottom:8px"><label style="color:#888;font-size:10px">${f.l}</label><input type="text" value="${escHtml(META[f.k]||"")}" placeholder="${f.ph}" onchange="META['${f.k}']=this.value" class="ed-input" style="margin-top:3px"></div>`;
+    });
+    h += `<div style="margin-top:16px;margin-bottom:8px"><div style="color:#888;font-size:10px;margin-bottom:4px">Trend Labels (через запятую)</div><input type="text" value="${escHtml(TL.join(","))}" onchange="TL=this.value.split(',').map(s=>s.trim()).filter(Boolean)" class="ed-input"></div>`;
+    h += `<div style="margin-top:16px"><div style="color:#888;font-size:10px;margin-bottom:4px">Flags (JSON)</div><textarea id="flags-editor" class="ed-textarea" style="min-height:80px">${escHtml(JSON.stringify(FLAGS,null,2))}</textarea></div>`;
+    h += `<button class="btn-primary" style="margin-top:10px" onclick="saveMetaEdits()">💾 Сохранить мету</button>`;
+    return h;
+  }
+
+  window.refreshDataEditor = () => { const c = document.getElementById("dec"); if (c) c.innerHTML = buildEditor(); };
+  overlay.innerHTML = `<div id="dec" style="width:100%;max-width:500px">${buildEditor()}</div>`;
+  document.body.appendChild(overlay);
+}
+
+function escHtml(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function closeDataEditor() { const o = document.getElementById("data-editor-overlay"); if (o) o.remove(); }
+
+function handleFileUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const ds = JSON.parse(ev.target.result);
+      applyDataset(ds, "localStorage");
+      saveDataToLocal();
+      rebuildGeoList();
+      closeDataEditor();
+      render();
+      showToast("✅ Данные загружены из файла");
+    } catch(err) {
+      showToast("❌ Ошибка парсинга JSON: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function applyJsonEditor() {
+  const textarea = document.getElementById("json-editor");
+  if (!textarea) return;
+  try {
+    const ds = JSON.parse(textarea.value);
+    applyDataset(ds, "localStorage");
+    saveDataToLocal();
+    rebuildGeoList();
+    closeDataEditor();
+    render();
+    showToast("✅ JSON применён");
+  } catch(err) {
+    showToast("❌ Ошибка: " + err.message);
+  }
+}
+
+function updateGeoMetric(geo, mk, val) {
+  if (!D[geo]) D[geo] = {};
+  D[geo][mk] = val === "" ? null : parseFloat(val);
+}
+
+function saveGeoEdits() {
+  saveDataToLocal();
+  rebuildGeoList();
+  showToast("✅ GEO сохранён");
+  refreshDataEditor();
+}
+
+function saveMetaEdits() {
+  try {
+    const fe = document.getElementById("flags-editor");
+    if (fe) FLAGS = JSON.parse(fe.value);
+  } catch(err) {
+    showToast("❌ Ошибка в FLAGS JSON"); return;
+  }
+  saveDataToLocal();
+  showToast("✅ Мета сохранена");
+  render();
+}
+
+function downloadJson() {
+  const ds = getDataset();
+  const blob = new Blob([JSON.stringify(ds, null, 2)], {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `health-check-${META.month_short||"data"}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast("⬇ JSON скачан");
+}
+
+async function resetToFile() {
+  localStorage.removeItem("hc_data");
+  dataSource = "none";
+  D = {}; PREV = {}; TREND = {}; PLAT_TREND = []; TL = []; FLAGS = {};
+  try {
+    const res = await fetch("data.json?" + Date.now());
+    if (res.ok) {
+      const ds = await res.json();
+      applyDataset(ds, "data.json");
+    }
+  } catch(e) {}
+  rebuildGeoList();
+  closeDataEditor();
+  render();
+  showToast("🔄 Сброшено к файлу");
+}
+
+// ═══ 10. SETTINGS MODAL ═══
 function openSettings() {
   const overlay = document.createElement("div");
   overlay.id = "settings-overlay";
-  overlay.style.cssText = "position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.85);display:flex;justify-content:center;padding-top:5vh";
+  overlay.className = "overlay";
   overlay.onclick = e => { if (e.target === overlay) closeSettings(); };
   function build() {
     const metrics = CATS[settingsCat]?.m || [];
-    let h = `<div style="width:100%;max-width:460px;max-height:90vh;background:#0e0e1a;border:1px solid #1e1e35;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;animation:fi .25s ease"><div style="padding:14px 16px 10px;border-bottom:1px solid #1a1a2e;flex-shrink:0"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">⚙ Пороги</span><button onclick="closeSettings()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div style="display:flex;gap:2px;margin-top:10px;overflow-x:auto">`;
-    Object.entries(CATS).forEach(([ck, ct]) => { h += `<button onclick="settingsCat='${ck}';refreshSettings()" style="padding:6px 10px;border-radius:5px;font-size:12px;cursor:pointer;border:none;background:${settingsCat===ck?"#1e1e35":"transparent"};color:${settingsCat===ck?"#ccc":"#444"};flex-shrink:0;min-height:32px">${ct.i} ${ct.w}%</button>`; });
-    h += `</div></div><div style="flex:1;overflow-y:auto;padding:10px 16px;-webkit-overflow-scrolling:touch">`;
+    let h = `<div class="modal"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">⚙ Пороги</span><button onclick="closeSettings()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div class="tab-bar" style="margin-top:10px">`;
+    Object.entries(CATS).forEach(([ck, ct]) => { h += `<button class="tab-btn" onclick="settingsCat='${ck}';refreshSettings()" style="background:${settingsCat===ck?"#1e1e35":"transparent"};color:${settingsCat===ck?"#ccc":"#444"}">${ct.i} ${ct.w}%</button>`; });
+    h += `</div></div><div class="modal-body">`;
     metrics.forEach(mk => {
       const t = DEF_TH[mk]; const cur = getTH(mk);
-      h += `<div style="padding:12px;background:#111122;border-radius:10px;margin-bottom:8px;border:1px solid #1a1a2e"><div style="color:#bbb;font-size:12px;font-weight:600;margin-bottom:8px">${t.l}</div><div style="display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#00e676"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"}</span></div><input type="number" value="${cur.g}" onchange="updateTH('${mk}','g',this.value)" style="width:100%;padding:7px;background:#0a0a14;border:1px solid #252540;border-radius:6px;color:#00e676;font-size:14px;font-family:monospace;font-weight:600;outline:none;min-height:36px"></div><div style="color:#222;padding-top:14px">→</div><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#ffc107"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"}</span></div><input type="number" value="${cur.y}" onchange="updateTH('${mk}','y',this.value)" style="width:100%;padding:7px;background:#0a0a14;border:1px solid #252540;border-radius:6px;color:#ffc107;font-size:14px;font-family:monospace;font-weight:600;outline:none;min-height:36px"></div></div></div>`;
+      h += `<div style="padding:12px;background:#111122;border-radius:10px;margin-bottom:8px;border:1px solid #1a1a2e"><div style="color:#bbb;font-size:12px;font-weight:600;margin-bottom:8px">${t.l}</div><div style="display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#00e676"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"}</span></div><input type="number" value="${cur.g}" onchange="updateTH('${mk}','g',this.value)" class="ed-input" style="color:#00e676"></div><div style="color:#222;padding-top:14px">→</div><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#ffc107"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"}</span></div><input type="number" value="${cur.y}" onchange="updateTH('${mk}','y',this.value)" class="ed-input" style="color:#ffc107"></div></div></div>`;
     });
-    h += `</div><div style="padding:10px 16px;border-top:1px solid #1a1a2e;flex-shrink:0"><button onclick="saveSettings()" style="width:100%;padding:10px;border-radius:8px;border:none;cursor:pointer;background:#7c83ff;color:#fff;font-size:13px;font-weight:600;min-height:40px">Сохранить</button></div></div>`;
+    h += `</div><div class="modal-foot"><button class="btn-primary" onclick="saveSettings()">Сохранить</button></div></div>`;
     return h;
   }
   window.refreshSettings = () => { const c = document.getElementById("stc"); if (c) c.innerHTML = build(); };
@@ -337,14 +611,14 @@ function updateTH(mk, f, val) { if (!customTH[mk]) customTH[mk] = {...DEF_TH[mk]
 function saveSettings() { localStorage.setItem("hc_th", JSON.stringify(customTH)); closeSettings(); render(); }
 function closeSettings() { const o = document.getElementById("settings-overlay"); if (o) o.remove(); }
 
-// ═══ 10. NAVIGATION ═══
+// ═══ 11. NAVIGATION ═══
 function nav(g)    { state.geo = g; state.cat = null; render(); window.scrollTo(0,0); }
 function navCat(c) { state.cat = c; render(); window.scrollTo(0,0); }
 function navGeo()  { state.cat = null; render(); window.scrollTo(0,0); }
 function navHome() { state.geo = null; state.cat = null; render(); window.scrollTo(0,0); }
 
 // ═══ INIT ═══
-render();
+loadData();
 </script>
 </body>
 </html>
