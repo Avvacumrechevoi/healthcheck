@@ -1,6 +1,22 @@
 # Changelog
 
-## v27 (2026-04-01) — Current
+## v28 (2026-04-04) — Current
+### Added
+- **Dynamic data**: extracted all data from index.html into `data.json`
+- **Data editor**: built-in UI with 3 tabs (JSON / Per GEO / Meta)
+- **File upload**: drag & drop or file picker for JSON import
+- **JSON export**: download current data as JSON file
+- **localStorage persistence**: edits survive page reload
+- **Reset to file**: one-click revert to data.json
+- Data source badge in header (local/json/empty)
+
+### Changed
+- Data no longer hardcoded in index.html
+- Dashboard loads data.json on startup, localStorage takes priority
+- Telegram report uses dynamic month from meta
+- Version bumped to v28
+
+## v27 (2026-04-01)
 ### Added
 - Platform NGR sparkline on main screen (8-month trend)
 - NGR dollar amounts under GEO spheres (replaces status text)

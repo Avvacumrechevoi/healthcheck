@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "month": "Март 2026",
+    "month_short": "Mar",
+    "prev_month_short": "фев",
+    "version": "v28",
+    "updated": "2026-04-04"
+  },
+  "flags": {
+    "🇵🇪 Peru": {"icon": "⛔", "msg": "Платёжки не работают", "detail": "Все ПС отключены."}
+  },
+  "trend_labels": ["Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"],
+  "plat_trend": [110262,150972,170247,170487,212263,226268,240102,174723],
+  "prev": {
+    "🇧🇷 Brazil": {"ngr": 58365},
+    "🇦🇷 Argentina": {"ngr": 40850},
+    "🇨🇱 Chile": {"ngr": 51512},
+    "🇲🇽 Mexico": {"ngr": 16108},
+    "🇵🇪 Peru": {"ngr": 46812},
+    "🇨🇴 Colombia": {"ngr": 241},
+    "🇮🇳 India": {"ngr": 5554},
+    "🇧🇩 Bangladesh": {"ngr": 5037},
+    "🇵🇱 Poland": {"ngr": 10006},
+    "🇵🇹 Portugal": {"ngr": 5617}
+  },
+  "trend": {
+    "🇧🇷 Brazil": [55383,51287,79210,86152,79061,108068,58365,81765],
+    "🇦🇷 Argentina": [2879,14918,20640,25357,63106,29006,40850,35907],
+    "🇨🇱 Chile": [1054,57613,38497,25018,12184,12270,51512,20039],
+    "🇲🇽 Mexico": [25950,-6631,-193,8374,21232,17241,16108,10482],
+    "🇵🇪 Peru": [7163,12803,2007,-8704,5787,21407,46812,-1174],
+    "🇨🇴 Colombia": [1005,1093,5292,11613,2764,1216,241,652],
+    "🇮🇳 India": [1823,5302,18150,7973,5335,6080,5554,6305],
+    "🇧🇩 Bangladesh": [156,4491,-1566,-195,8363,6369,5037,5488],
+    "🇵🇱 Poland": [9492,8058,2739,9074,12309,15432,10006,14457],
+    "🇵🇹 Portugal": [5357,2038,5471,5825,2122,9179,5617,802]
+  },
+  "data": {
+    "🇧🇷 Brazil": {
+      "au": 1297, "ftd_count": 810, "reg_ftd_conv": 18.2, "cac": null,
+      "dep_approval": 86.6, "wd_approval": 64.1, "avg_deposit": 36.7, "cashout_pct": 80.4,
+      "ngr": 81765, "ngr_mom": 40.1, "ngr_target": 54.5, "arppu": 65.52,
+      "casino_share": 25.1, "casino_margin": 2.9, "casino_players": 2312, "casino_ggr_mom": null,
+      "sport_margin": 8.3, "sport_players": 631, "sport_ggr_mom": null, "avg_bet": 21.4,
+      "d30_retention": 15.3, "d90_retention": 7.2, "core_retention": 14.7, "active_mom": 35.9,
+      "bettor_pct": 10.9, "active_daily": 184, "bettor_ret": 37.7, "whale_top20": null,
+      "frt_sec": 18, "csat": 54.4, "abandon_rate": 0.2, "aht_min": 15.8
+    },
+    "🇦🇷 Argentina": {
+      "au": 2195, "ftd_count": 1696, "reg_ftd_conv": 31.0, "cac": null,
+      "dep_approval": 75.4, "wd_approval": 82.9, "avg_deposit": 19.6, "cashout_pct": 83.2,
+      "ngr": 35907, "ngr_mom": -12.1, "ngr_target": 23.9, "arppu": 17.10,
+      "casino_share": 22.9, "casino_margin": 2.0, "casino_players": 4386, "casino_ggr_mom": null,
+      "sport_margin": 16.7, "sport_players": 164, "sport_ggr_mom": null, "avg_bet": 30.9,
+      "d30_retention": 13.1, "d90_retention": 4.1, "core_retention": 8.0, "active_mom": 53.8,
+      "bettor_pct": 16.1, "active_daily": 221, "bettor_ret": 26.0, "whale_top20": null,
+      "frt_sec": 60, "csat": 52.8, "abandon_rate": 4.1, "aht_min": 18.5
+    },
+    "🇨🇱 Chile": {
+      "au": 522, "ftd_count": 423, "reg_ftd_conv": 17.3, "cac": null,
+      "dep_approval": 61.2, "wd_approval": 48.1, "avg_deposit": 28.6, "cashout_pct": 53.3,
+      "ngr": 20039, "ngr_mom": -61.1, "ngr_target": 13.4, "arppu": 39.37,
+      "casino_share": 33.1, "casino_margin": 1.6, "casino_players": 979, "casino_ggr_mom": null,
+      "sport_margin": 10.7, "sport_players": 17, "sport_ggr_mom": null, "avg_bet": 17.1,
+      "d30_retention": 13.1, "d90_retention": 3.7, "core_retention": 6.4, "active_mom": 176.9,
+      "bettor_pct": 8.2, "active_daily": 42, "bettor_ret": 21.7, "whale_top20": null,
+      "frt_sec": 52, "csat": 60.0, "abandon_rate": 4.6, "aht_min": 20.2
+    },
+    "🇲🇽 Mexico": {
+      "au": 225, "ftd_count": 123, "reg_ftd_conv": 1.7, "cac": null,
+      "dep_approval": 55.9, "wd_approval": 78.6, "avg_deposit": 58.6, "cashout_pct": 83.0,
+      "ngr": 10482, "ngr_mom": -34.9, "ngr_target": 7.0, "arppu": 54.88,
+      "casino_share": 27.8, "casino_margin": 1.4, "casino_players": 604, "casino_ggr_mom": null,
+      "sport_margin": 6.2, "sport_players": 91, "sport_ggr_mom": null, "avg_bet": 16.1,
+      "d30_retention": 10.7, "d90_retention": 3.2, "core_retention": 7.8, "active_mom": 9.9,
+      "bettor_pct": 3.7, "active_daily": 35, "bettor_ret": 46.8, "whale_top20": null,
+      "frt_sec": 52, "csat": 68.8, "abandon_rate": 2.0, "aht_min": 16.9
+    },
+    "🇵🇪 Peru": {
+      "au": 161, "ftd_count": 84, "reg_ftd_conv": 9.4, "cac": null,
+      "dep_approval": 0, "wd_approval": 0, "avg_deposit": 121.4, "cashout_pct": 100.9,
+      "ngr": -1174, "ngr_mom": -102.5, "ngr_target": -0.8, "arppu": -8.39,
+      "casino_share": null, "casino_margin": 0.6, "casino_players": 491, "casino_ggr_mom": null,
+      "sport_margin": -8.0, "sport_players": 52, "sport_ggr_mom": null, "avg_bet": 107.2,
+      "d30_retention": 17.3, "d90_retention": 6.6, "core_retention": 14.9, "active_mom": 31.8,
+      "bettor_pct": 3.0, "active_daily": 22, "bettor_ret": 38.7, "whale_top20": null,
+      "frt_sec": 49, "csat": 67.6, "abandon_rate": 5.3, "aht_min": 20.9
+    },
+    "🇨🇴 Colombia": {
+      "au": null, "ftd_count": 67, "reg_ftd_conv": 22.6, "cac": null,
+      "dep_approval": 86.1, "wd_approval": 34.1, "avg_deposit": 6.1, "cashout_pct": null,
+      "ngr": 652, "ngr_mom": 170.1, "ngr_target": 0.4, "arppu": null,
+      "casino_share": null, "casino_margin": null, "casino_players": null, "casino_ggr_mom": null,
+      "sport_margin": 1.8, "sport_players": 12, "sport_ggr_mom": null, "avg_bet": 12.1,
+      "d30_retention": 22.6, "d90_retention": 5.3, "core_retention": 14.5, "active_mom": 50.7,
+      "bettor_pct": 2.3, "active_daily": 15, "bettor_ret": 51.6, "whale_top20": null,
+      "frt_sec": 43, "csat": 76.9, "abandon_rate": 6.7, "aht_min": 19.2
+    },
+    "🇮🇳 India": {
+      "au": null, "ftd_count": 27, "reg_ftd_conv": 5.2, "cac": null,
+      "dep_approval": 24.1, "wd_approval": 62.4, "avg_deposit": 49.1, "cashout_pct": null,
+      "ngr": 6305, "ngr_mom": 13.5, "ngr_target": 4.2, "arppu": null,
+      "casino_share": null, "casino_margin": null, "casino_players": null, "casino_ggr_mom": null,
+      "sport_margin": 8.4, "sport_players": 205, "sport_ggr_mom": null, "avg_bet": 15.5,
+      "d30_retention": 26.5, "d90_retention": 7.2, "core_retention": 32.6, "active_mom": 14.2,
+      "bettor_pct": 4.5, "active_daily": 22, "bettor_ret": 82.2, "whale_top20": null,
+      "frt_sec": 115, "csat": 37.1, "abandon_rate": 14.4, "aht_min": 25.5
+    },
+    "🇧🇩 Bangladesh": {
+      "au": null, "ftd_count": 243, "reg_ftd_conv": 16.7, "cac": null,
+      "dep_approval": 47.3, "wd_approval": 59.5, "avg_deposit": 26.4, "cashout_pct": null,
+      "ngr": 5488, "ngr_mom": 8.9, "ngr_target": 3.7, "arppu": null,
+      "casino_share": null, "casino_margin": null, "casino_players": null, "casino_ggr_mom": null,
+      "sport_margin": 4.6, "sport_players": 148, "sport_ggr_mom": null, "avg_bet": 14.6,
+      "d30_retention": 24.8, "d90_retention": 7.9, "core_retention": 5.8, "active_mom": 2.8,
+      "bettor_pct": 21.3, "active_daily": 40, "bettor_ret": 35.4, "whale_top20": null,
+      "frt_sec": 162, "csat": 57.4, "abandon_rate": 11.9, "aht_min": 19.6
+    },
+    "🇵🇱 Poland": {
+      "au": null, "ftd_count": 14, "reg_ftd_conv": 4.8, "cac": null,
+      "dep_approval": 84.7, "wd_approval": 73.9, "avg_deposit": 32.3, "cashout_pct": null,
+      "ngr": 14457, "ngr_mom": 44.5, "ngr_target": 9.6, "arppu": null,
+      "casino_share": null, "casino_margin": null, "casino_players": null, "casino_ggr_mom": null,
+      "sport_margin": 5.6, "sport_players": 38, "sport_ggr_mom": null, "avg_bet": 17.9,
+      "d30_retention": 21.0, "d90_retention": 11.3, "core_retention": 24.7, "active_mom": -23.4,
+      "bettor_pct": 7.2, "active_daily": 20, "bettor_ret": 73.5, "whale_top20": null,
+      "frt_sec": 159, "csat": 36.1, "abandon_rate": 21.7, "aht_min": 18.7
+    },
+    "🇵🇹 Portugal": {
+      "au": null, "ftd_count": 30, "reg_ftd_conv": 9.6, "cac": null,
+      "dep_approval": 77.5, "wd_approval": 60.0, "avg_deposit": 48.3, "cashout_pct": null,
+      "ngr": 802, "ngr_mom": -85.7, "ngr_target": 0.5, "arppu": null,
+      "casino_share": null, "casino_margin": null, "casino_players": null, "casino_ggr_mom": null,
+      "sport_margin": 0.9, "sport_players": 55, "sport_ggr_mom": null, "avg_bet": 25.7,
+      "d30_retention": 15.5, "d90_retention": 4.1, "core_retention": 8.8, "active_mom": 128.0,
+      "bettor_pct": 2.5, "active_daily": 6, "bettor_ret": 43.8, "whale_top20": null,
+      "frt_sec": 25, "csat": 58.3, "abandon_rate": 0.0, "aht_min": 17.5
+    }
+  }
+}
