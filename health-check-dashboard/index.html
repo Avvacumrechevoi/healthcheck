@@ -61,6 +61,15 @@ h1{font-size:17px;font-weight:700;background:linear-gradient(90deg,#7c83ff,#00e6
 .geo-ed-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:#111122;margin-bottom:3px;cursor:pointer}
 .geo-ed-row:hover{background:#181830}
 .data-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600}
+.mini-kpi{background:#0e0e1c;border-radius:8px;padding:7px 8px;border:1px solid #1a1a2e;display:flex;flex-direction:column;gap:2px}
+.mini-kpi-label{color:#555;font-size:8px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-kpi-val{display:flex;align-items:baseline;gap:3px}
+.signal-item{padding:7px 10px;border-radius:8px;margin-bottom:4px;cursor:pointer;transition:background .15s;display:flex;align-items:flex-start;gap:6px}
+.signal-item:hover{filter:brightness(1.2)}
+.signal-icon{font-size:11px;flex-shrink:0;line-height:1.5}
+.signal-text{font-size:11px;line-height:1.4}
+.seg-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px}
+.hist-spark-row{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#0a0a16;border:1px solid #1a1a2e;border-radius:8px;margin-bottom:5px}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
 </style>
 </head>
@@ -68,10 +77,9 @@ h1{font-size:17px;font-weight:700;background:linear-gradient(90deg,#7c83ff,#00e6
 <div id="app"><div style="text-align:center;padding:80px 20px"><div class="mono" style="color:#333;font-size:12px">loading...</div></div></div>
 <script>
 /*
- * HEALTH CHECK DASHBOARD · SapphireBet · v29
- * Dynamic version: loads data from data.json, editable via built-in UI.
+ * HEALTH CHECK DASHBOARD · SapphireBet · v30
+ * Signal-driven CEO dashboard for iGaming platform.
  * Data priority: localStorage (edited) → data.json (file) → fallback empty.
- * v29: +CSV import with auto column mapping and country detection.
  */
 
 // ═══ 1. CONFIG ═══
@@ -106,8 +114,8 @@ let settingsCat = "payments";
 function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DEF_TH[mk]; }
 
 // ═══ 3. DYNAMIC DATA ═══
-let D = {}, PREV = {}, TREND = {}, PLAT_TREND = [], TL = [], FLAGS = {};
-let META = { month: "", month_short: "", prev_month_short: "", version: "v28", updated: "" };
+let D = {}, PREV = {}, TREND = {}, HISTORY = {}, PLAT_TREND = [], PLAT_HISTORY = {}, TL = [], FLAGS = {}, SEGMENTS = {};
+let META = { month: "", month_short: "", prev_month_short: "", version: "v30", updated: "" };
 let dataSource = "none";
 
 function hasLocalData() {
@@ -128,9 +136,12 @@ function applyDataset(ds, source) {
     D = ds.data || {};
     PREV = ds.prev || {};
     TREND = ds.trend || {};
+    HISTORY = ds.history || {};
     PLAT_TREND = ds.plat_trend || [];
+    PLAT_HISTORY = ds.plat_history || {};
     TL = ds.trend_labels || [];
     FLAGS = ds.flags || {};
+    SEGMENTS = ds.segments || {};
     dataSource = source || "unknown";
     document.title = `Health Check · SapphireBet · ${META.month}`;
     return true;
@@ -138,13 +149,13 @@ function applyDataset(ds, source) {
 }
 
 function saveDataToLocal() {
-  const ds = { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, prev: PREV, trend: TREND, data: D };
+  const ds = getDataset();
   localStorage.setItem("hc_data", JSON.stringify(ds));
   dataSource = "localStorage";
 }
 
 function getDataset() {
-  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, prev: PREV, trend: TREND, data: D };
+  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS };
 }
 
 async function loadData() {
@@ -208,17 +219,21 @@ function metricHTML(mk, val, prev) {
   return `<div class="metric-row" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} ${prevLabel} ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:#282840;font-size:8px;flex-shrink:0;width:36px;text-align:right">${t.d==="h"?"≥":"≤"}${fmt(t.g)}</span></div>`;
 }
 
-function summaryHTML(d, prev) {
+function summaryHTML(d, prev, hist) {
   return `<div style="margin-bottom:10px"><div class="grid-sum">${SM.map(mk => {
     const t = getTH(mk); const v = d[mk]; const pv = prev?.[mk]; const s = scr(mk, v); const c = cl(s);
     const hasPrev = !NO(pv); const delta = hasPrev ? (v-pv) : 0;
     const arrow = hasPrev ? (delta > 0 ? "↑" : delta < 0 ? "↓" : "") : "";
     const arrowC = hasPrev ? (t.d === "h" ? (delta > 0 ? "#00e67688" : "#ff174488") : (delta < 0 ? "#00e67688" : "#ff174488")) : "";
-    return `<div style="background:#0e0e1c;border-radius:8px;padding:7px 9px;border:1px solid ${!NO(v)?c.gw+"22":"#1a1a2e"};opacity:${NO(v)?.35:1}"><div style="color:#555;font-size:8px;margin-bottom:3px;line-height:1.2">${t.l}</div><div style="display:flex;align-items:baseline;gap:3px"><span class="mono" style="color:${!NO(v)?c.tx:"#333"};font-size:14px;font-weight:700">${!NO(v)&&v>0&&mk.includes("mom")?"+":""}${fmt(v)}${!NO(v)?t.u:""}</span>${hasPrev&&!NO(v)?`<span class="mono" style="color:${arrowC};font-size:8px">${arrow}</span>`:""}</div></div>`;
+    const histKey = mk === "ngr" ? "ngr" : mk === "d90_retention" ? null : mk === "core_retention" ? null : mk === "dep_approval" ? null : mk === "csat" ? null : mk === "ngr_mom" ? null : null;
+    const hData = hist && histKey ? hist[histKey] : null;
+    const miniSpark = hData && hData.length >= 2 ? buildSparkSVG(hData, 20, 60).svg : "";
+    return `<div style="background:#0e0e1c;border-radius:8px;padding:7px 9px;border:1px solid ${!NO(v)?c.gw+"22":"#1a1a2e"};opacity:${NO(v)?.35:1}"><div style="color:#555;font-size:8px;margin-bottom:3px;line-height:1.2">${t.l}</div><div style="display:flex;align-items:baseline;gap:3px"><span class="mono" style="color:${!NO(v)?c.tx:"#333"};font-size:14px;font-weight:700">${!NO(v)&&v>0&&mk.includes("mom")?"+":""}${fmt(v)}${!NO(v)?t.u:""}</span>${hasPrev&&!NO(v)?`<span class="mono" style="color:${arrowC};font-size:8px">${arrow}</span>`:""}</div>${miniSpark?`<div style="margin-top:2px">${miniSpark}</div>`:""}</div>`;
   }).join("")}</div></div>`;
 }
 
 function buildSparkSVG(data, h, w) {
+  if (!data || data.length < 2) return {svg:"", lastV:0, lastC:"#555"};
   const pad = 4, cw = w-pad*2, ch = h-pad*2;
   const mn = Math.min(...data), mx = Math.max(...data), range = mx-mn || 1;
   const pts = data.map((v,i) => `${pad+i/(data.length-1)*cw},${pad+ch-(v-mn)/range*ch}`).join(" ");
@@ -241,6 +256,169 @@ function platSparkHTML() {
   const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 40, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#666":"#222"};font-size:7px">${l}</span>`).join("");
   return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR платформа (${PLAT_TREND.length} мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+}
+
+// ═══ 5b. MINI KPI CARDS (Platform Pulse) ═══
+function platPulseHTML() {
+  const ph = PLAT_HISTORY;
+  const items = [
+    {label:"NGR",data:ph.ngr,fmt:v=>fmtNGR(v)},
+    {label:"Deposits",data:ph.deposits,fmt:v=>fmtNGR(v)},
+    {label:"Margin%",data:ph.margin_pct,fmt:v=>NO(v)?"—":v.toFixed(1)+"%"},
+    {label:"Players",data:null,fmt:v=>fmt(v)},
+  ];
+  const totalPlayers = Object.values(D).reduce((s,d) => s + (d.au || 0), 0);
+  let h = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px">`;
+  items.forEach(item => {
+    const data = item.data;
+    const hasData = data && data.length >= 2;
+    const cur = hasData ? data[data.length-1] : (item.label === "Players" ? totalPlayers : null);
+    const prev = hasData ? data[data.length-2] : null;
+    const delta = (cur !== null && prev !== null) ? ((cur - prev) / Math.max(Math.abs(prev), 1) * 100) : null;
+    const deltaStr = delta !== null ? (delta >= 0 ? "+" : "") + delta.toFixed(0) + "%" : "";
+    const deltaC = delta !== null ? (delta >= 0 ? "#00e676" : "#ff1744") : "#555";
+    const miniSpark = hasData ? buildSparkSVG(data, 24, 80).svg : "";
+    const valStr = item.label === "Players" ? fmt(totalPlayers) : (cur !== null ? item.fmt(cur) : "—");
+    h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#ccc;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} MoM</div>`:""}</div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+// ═══ 5c. SIGNALS GENERATOR ═══
+function generateSignals(geos) {
+  const signals = [];
+  const platNgr = PLAT_TREND;
+  if (platNgr.length >= 2) {
+    const cur = platNgr[platNgr.length-1], prev = platNgr[platNgr.length-2];
+    const pct = (cur - prev) / Math.max(Math.abs(prev), 1) * 100;
+    if (pct < -15) signals.push({type:"critical",icon:"🔴",text:`Platform NGR ${pct.toFixed(0)}% MoM (${fmtNGR(cur)} ← ${fmtNGR(prev)})`,geo:null,priority:100});
+  }
+
+  geos.forEach(({g,s,d,flag}) => {
+    if (flag) {
+      const fl = FLAGS[g];
+      signals.push({type:"critical",icon:"🔴",text:`${g}: ${fl?fl.msg:"ПС отключены"} — NGR ${fmtNGR(d.ngr)}`,geo:g,priority:95});
+    }
+    if (!NO(s) && s < 40 && !flag) {
+      signals.push({type:"critical",icon:"🔴",text:`${g} Score ${Math.round(s)}pt — проблемная зона`,geo:g,priority:80});
+    }
+    if (!NO(d.ngr_mom)) {
+      if (d.ngr_mom < -30) {
+        const curNgr = d.ngr, prevNgr = PREV[g]?.ngr;
+        signals.push({type:"critical",icon:"🔴",text:`${g} NGR ${d.ngr_mom>0?"+":""}${d.ngr_mom.toFixed(0)}% MoM (${fmtNGR(curNgr)}${prevNgr?" ← "+fmtNGR(prevNgr):""})`,geo:g,priority:85});
+      } else if (d.ngr_mom > 30) {
+        signals.push({type:"growth",icon:"🟢",text:`${g} NGR +${d.ngr_mom.toFixed(0)}% MoM (${fmtNGR(d.ngr)})`,geo:g,priority:50});
+      }
+    }
+    ALL_METRICS.forEach(mk => {
+      const sc = scr(mk, d[mk]);
+      if (sc !== null && sc === 0) {
+        signals.push({type:"critical",icon:"🔴",text:`${g}: ${DEF_TH[mk].l} = ${fmt(d[mk])}${DEF_TH[mk].u} (score 0)`,geo:g,priority:70});
+      }
+    });
+  });
+
+  let worstSupport = null, worstCSAT = 999, worstFRT = 0;
+  geos.forEach(({g,d}) => {
+    if (!NO(d.csat) && d.csat < worstCSAT) { worstCSAT = d.csat; worstSupport = g; }
+    if (!NO(d.frt_sec) && d.frt_sec > worstFRT) { worstFRT = d.frt_sec; }
+  });
+  if (worstSupport && worstCSAT < 55) {
+    const wd = D[worstSupport];
+    signals.push({type:"warning",icon:"🟡",text:`${worstSupport} Support: FRT ${fmt(wd.frt_sec)}с, CSAT ${fmt(wd.csat)}% — worst`,geo:worstSupport,priority:60});
+  }
+
+  const segKeys = Object.keys(SEGMENTS).sort();
+  if (segKeys.length >= 2) {
+    const prev = SEGMENTS[segKeys[segKeys.length-2]];
+    const cur = SEGMENTS[segKeys[segKeys.length-1]];
+    if (prev && cur && prev["Вип++"] && cur["Вип++"]) {
+      const pNgr = prev["Вип++"].ngr, cNgr = cur["Вип++"].ngr;
+      const delta = cNgr - pNgr;
+      if (Math.abs(delta) > 5000) {
+        const ic = delta < 0 ? "🔴" : "🟢";
+        const tp = delta < 0 ? "critical" : "growth";
+        signals.push({type:tp,icon:ic,text:`VIP++ NGR ${fmtNGR(cNgr)} (было ${fmtNGR(pNgr)}, Δ${delta>0?"+":""}${fmtNGR(delta)})`,geo:null,priority:75});
+      }
+    }
+  }
+
+  signals.sort((a,b) => b.priority - a.priority);
+  const seen = new Set();
+  return signals.filter(s => {
+    const key = s.text.substring(0,40);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 6);
+}
+
+function signalsHTML(geos) {
+  const signals = generateSignals(geos);
+  if (!signals.length) return "";
+  const bgMap = {critical:"#1a081022",warning:"#1a150822",growth:"#081a0c22"};
+  const borderMap = {critical:"#ff174422",warning:"#ffc10722",growth:"#00e67622"};
+  let h = `<div style="margin-bottom:14px;background:#0c0c18;border-radius:12px;border:1px solid #1a1a2e;padding:10px"><div class="mono" style="color:#888;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">🚨 СИГНАЛЫ</div>`;
+  signals.forEach(s => {
+    const onclick = s.geo ? `onclick="nav('${s.geo}')"` : "";
+    h += `<div class="signal-item" ${onclick} style="background:${bgMap[s.type]||"#12121e"};border:1px solid ${borderMap[s.type]||"#1a1a2e"};${s.geo?"cursor:pointer":"cursor:default"}"><span class="signal-icon">${s.icon}</span><span class="signal-text" style="color:${s.type==="growth"?"#00e676cc":s.type==="warning"?"#ffc107cc":"#ff8a80"}">${s.text}</span></div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+// ═══ 5d. SEGMENTS SECTION ═══
+function segmentsHTML() {
+  const segKeys = Object.keys(SEGMENTS).sort();
+  if (segKeys.length < 1) return "";
+  const hasPrev = segKeys.length >= 2;
+  const curKey = segKeys[segKeys.length-1];
+  const prevKey = hasPrev ? segKeys[segKeys.length-2] : null;
+  const curSeg = SEGMENTS[curKey];
+  const prevSeg = hasPrev ? SEGMENTS[prevKey] : null;
+  if (!curSeg) return "";
+
+  const segNames = Object.keys(curSeg);
+  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📊 СЕГМЕНТЫ · ${prevKey||""} → ${curKey}</div>`;
+  segNames.forEach(name => {
+    const c = curSeg[name];
+    const p = prevSeg ? prevSeg[name] : null;
+    const ngrDelta = p ? c.ngr - p.ngr : null;
+    const ngrPct = p && p.ngr !== 0 ? ((c.ngr - p.ngr) / Math.abs(p.ngr) * 100) : null;
+    const deltaColor = c.ngr < 0 ? "#ff1744" : (ngrDelta !== null && ngrDelta < 0 ? "#ff1744" : "#00e676");
+    const icon = c.ngr < 0 ? "🔴" : (ngrPct !== null && ngrPct < -20 ? "🔴" : ngrPct !== null && ngrPct > 20 ? "🟢" : "⚪");
+    h += `<div class="seg-row" style="background:#111122"><span style="font-size:10px;color:#aaa;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="mono" style="color:#555;font-size:9px;min-width:36px;text-align:center">${c.players}p</span><span class="mono" style="color:${deltaColor};font-size:10px;font-weight:600;min-width:55px;text-align:right">${fmtNGR(c.ngr)}</span>${ngrPct!==null?`<span class="mono" style="color:${ngrPct>=0?"#00e67688":"#ff174488"};font-size:8px;min-width:36px;text-align:right">${ngrPct>=0?"+":""}${ngrPct.toFixed(0)}%</span>`:`<span style="min-width:36px"></span>`}<span style="font-size:10px;min-width:16px;text-align:center">${icon}</span></div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+// ═══ 5e. HISTORY SPARKLINES (GEO detail) ═══
+function historySparkHTML(geo) {
+  const hist = HISTORY[geo];
+  if (!hist) return "";
+  const metrics = [
+    {key:"unique_players",label:"Игроки",fmt:v=>fmt(v)},
+    {key:"arppu",label:"ARPPU",fmt:v=>"$"+v.toFixed(1)},
+    {key:"margin_pct",label:"Маржа%",fmt:v=>v.toFixed(1)+"%"},
+    {key:"cashout_pct",label:"Cashout%",fmt:v=>v.toFixed(1)+"%"},
+  ];
+  const available = metrics.filter(m => hist[m.key] && hist[m.key].length >= 2);
+  if (!available.length) return "";
+  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#444;font-size:9px;font-weight:600;margin-bottom:6px;text-align:center">📈 ТРЕНДЫ МЕТРИК</div>`;
+  available.forEach(m => {
+    const data = hist[m.key];
+    const {svg, lastV, lastC} = buildSparkSVG(data, 28, 100);
+    const cur = data[data.length-1];
+    const prev = data[data.length-2];
+    const delta = prev !== 0 ? ((cur - prev) / Math.max(Math.abs(prev), 1) * 100) : 0;
+    const deltaStr = (delta >= 0 ? "+" : "") + delta.toFixed(0) + "%";
+    const deltaC = delta >= 0 ? "#00e67688" : "#ff174488";
+    h += `<div class="hist-spark-row"><span style="color:#888;font-size:10px;min-width:62px">${m.label}</span><div style="flex:1;min-width:0">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${m.fmt(cur)}</span><span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span></div></div>`;
+  });
+  h += `</div>`;
+  return h;
 }
 
 function platBlocksHTML(geos) {
@@ -299,29 +477,24 @@ function render() {
   let html = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${META.month||""} · ${META.version} ${srcBadge}</p></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
 
   if (!state.geo) {
-    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${crit} crit · ${geos.length} geo`)}</div>`;
+    html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${crit} crit · ${geos.length} geo`)}</div>`;
+    html += platPulseHTML();
     html += platSparkHTML();
+    html += signalsHTML(geos);
     html += `<div class="line"></div>`;
     html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,fmtNGR(d.ngr),flag)}</div>`).join("")}</div>`;
     html += platBlocksHTML(geos);
-    if (crit > 0) {
-      html += `<div class="problems"><div class="mono" style="color:#ff1744;font-size:10px;font-weight:700;margin-bottom:6px">🚨 ПРОБЛЕМЫ</div>`;
-      geos.filter(g => !NO(g.s) && g.s < 40).forEach(g => {
-        const fl = FLAGS[g.g];
-        const w = ALL_METRICS.map(k => ({k, s:scr(k, g.d[k])})).filter(m => !NO(m.s) && m.s < 25).slice(0,3).map(m => DEF_TH[m.k].l);
-        html += `<div class="problems-item" onclick="nav('${g.g}')"><span class="mono" style="color:#ff8a80;font-size:11px">${fl?fl.icon+" ":""}${g.g} · ${Math.round(g.s)}pt</span><div style="color:#553344;font-size:9px;margin-top:2px">${fl?fl.msg+(w.length?" · ":""):""} ${w.join(" · ")}</div></div>`;
-      });
-      html += `</div>`;
-    }
+    html += segmentsHTML();
   } else if (state.geo && !state.cat) {
-    const g = state.geo, d = D[g], fl = FLAGS[g], prev = PREV[g] || {};
+    const g = state.geo, d = D[g], fl = FLAGS[g], prev = PREV[g] || {}, hist = HISTORY[g] || {};
     const gs = geoSc(d); const idx = geoList.indexOf(g);
     html += crumbHTML(g);
     html += navHTML(idx);
     if (fl) html += `<div class="alert"><span class="mono" style="color:#ff8a80;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span><span style="color:#55333e;font-size:9px;margin-left:6px">${fl.detail}</span></div>`;
     html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}</div>`;
-    html += summaryHTML(d, prev);
+    html += summaryHTML(d, prev, hist);
     html += sparkHTML(g);
+    html += historySparkHTML(g);
     html += `<div class="line"></div><div class="grid-cat">`;
     Object.entries(CATS).forEach(([ck, ct]) => { const cs = catSc(d, ck); html += `<div onclick="navCat('${ck}')" style="animation:fi .3s ease">${sphereHTML(cs,54,`${ct.i} ${ct.l}`,`${ct.w}% · ${cl(cs).lb}`)}</div>`; });
     html += `</div>`;
@@ -380,6 +553,12 @@ function copyTelegramReport() {
     const icon = NO(s) ? "⬜" : s >= 70 ? "🟢" : s >= 40 ? "🟡" : "🔴";
     txt += `${ct.i} ${ct.l}: ${icon} ${NO(s)?"—":Math.round(s)}pt (${ct.w}%)\n`;
   });
+
+  const signals = generateSignals(geos);
+  if (signals.length) {
+    txt += `\n🚨 Сигналы:\n`;
+    signals.forEach(s => { txt += `${s.icon} ${s.text}\n`; });
+  }
 
   navigator.clipboard.writeText(txt).then(() => { showToast("📋 Скопировано для Telegram"); }).catch(() => { prompt("Скопируйте текст:", txt); });
 }
@@ -643,7 +822,7 @@ function openDataEditor() {
       {k:"month",l:"Месяц (полный)",ph:"Апрель 2026"},
       {k:"month_short",l:"Месяц (кратко)",ph:"Apr"},
       {k:"prev_month_short",l:"Пред. месяц (кратко)",ph:"мар"},
-      {k:"version",l:"Версия",ph:"v28"},
+      {k:"version",l:"Версия",ph:"v30"},
       {k:"updated",l:"Дата обновления",ph:"2026-05-01"},
     ];
     fields.forEach(f => {
@@ -775,7 +954,7 @@ function downloadJson() {
 async function resetToFile() {
   localStorage.removeItem("hc_data");
   dataSource = "none";
-  D = {}; PREV = {}; TREND = {}; PLAT_TREND = []; TL = []; FLAGS = {};
+  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {};
   try {
     const res = await fetch("data.json?" + Date.now());
     if (res.ok) {
@@ -789,7 +968,7 @@ async function resetToFile() {
   showToast("🔄 Сброшено к файлу");
 }
 
-// ═══ 10. SETTINGS MODAL ═══
+// ═══ 11. SETTINGS MODAL ═══
 function openSettings() {
   const overlay = document.createElement("div");
   overlay.id = "settings-overlay";
@@ -815,7 +994,7 @@ function updateTH(mk, f, val) { if (!customTH[mk]) customTH[mk] = {...DEF_TH[mk]
 function saveSettings() { localStorage.setItem("hc_th", JSON.stringify(customTH)); closeSettings(); render(); }
 function closeSettings() { const o = document.getElementById("settings-overlay"); if (o) o.remove(); }
 
-// ═══ 11. NAVIGATION ═══
+// ═══ 12. NAVIGATION ═══
 function nav(g)    { state.geo = g; state.cat = null; render(); window.scrollTo(0,0); }
 function navCat(c) { state.cat = c; render(); window.scrollTo(0,0); }
 function navGeo()  { state.cat = null; render(); window.scrollTo(0,0); }
