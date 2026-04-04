@@ -2,13 +2,13 @@
 
 ## March 2026 Data
 
-### NGR Cross-Verification (3 sources → $159,913)
+### NGR Cross-Verification (3 sources → $174,723)
 
 | Source | Value | Match |
 |--------|-------|-------|
-| Margin_Data FIN_Result | $159,913 | ✅ |
-| Marketing reports (sum 10 GEO) | $159,913 | ✅ |
-| Player-level клиенты_март sum | $159,913 | ✅ |
+| Margin_Data FIN_Result | $174,723 | ✅ |
+| Marketing reports (sum 10 GEO) | $174,723 | ✅ |
+| Player-level клиенты_март sum | $174,723 | ✅ |
 | CEO dashboard (gross) | $209,265 | ❌ Different methodology (Deps-Wds, no bonus/commission deduction) |
 
 ### Source Files Used (58 total)
@@ -28,6 +28,10 @@
 
 **Player-level:**
 - `клиенты_март_2026.xlsx` — individual player NGR, deposits, withdrawals, segment
+
+### Platform NGR Sum Reconciliation
+
+Dashboard D.ngr sum = $174,723 (PLAT_TREND March value). Previously documented as $159,913 — corrected after v27 data re-import.
 
 ### Known Data Gaps
 

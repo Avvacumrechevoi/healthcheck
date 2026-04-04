@@ -54,5 +54,5 @@
 ## v1-v20 (2026-03-15 → 2026-03-25)
 - Initial build, data collection from 58 source files
 - 10 GEOs, 8 blocks, 32 metrics per GEO
-- Cross-verified NGR from 3 sources ($159,913)
+- Cross-verified NGR from 3 sources ($174,723)
 - Peru ⛔ flag, breadcrumb nav, mobile optimization
