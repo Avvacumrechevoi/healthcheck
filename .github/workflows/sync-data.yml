@@ -1,0 +1,39 @@
+name: Sync data from Google Sheet
+
+on:
+  schedule:
+    - cron: '0 8,20 * * *'   # 08:00 and 20:00 UTC (2x/day)
+  workflow_dispatch:           # manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Sync Google Sheet → data.json
+        env:
+          SHEET_ID: ${{ vars.SHEET_ID }}
+          SHEET_GID: ${{ vars.SHEET_GID || '0' }}
+        run: python sync/sync_google_sheet.py
+
+      - name: Check for changes
+        id: diff
+        run: |
+          git diff --quiet health-check-dashboard/data.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add health-check-dashboard/data.json
+          git commit -m "data: auto-sync from Google Sheet $(date -u +%Y-%m-%d_%H:%M)"
+          git push
