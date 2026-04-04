@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Health Check · SapphireBet · Март 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(180deg,#08080f,#0c0c18 50%,#08080f);color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+#app{max-width:520px;margin:0 auto;padding:env(safe-area-inset-top,12px) 12px env(safe-area-inset-bottom,12px)}
+.mono{font-family:'JetBrains Mono',monospace}
+@keyframes pr{0%,100%{box-shadow:0 0 20px #ff174466}50%{box-shadow:0 0 35px #ff174488}}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sphere{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:transform .15s}
+.sphere:hover{transform:scale(1.06)}
+.sphere-orb{border-radius:50%;display:flex;align-items:center;justify-content:center}
+.sphere-label{color:#bbb;font-weight:600;text-align:center;line-height:1.15}
+.sphere-sub{font-size:9px;font-weight:500}
+.line{width:2px;height:18px;margin:0 auto 10px;background:linear-gradient(180deg,#2a2a40,#12121e)}
+.grid-geo{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:12px;justify-items:center}
+.grid-cat{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px;justify-items:center}
+.grid-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.metric-row{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;min-height:48px;border-left:3px solid}
+.bar-track{height:3px;background:#1a1a2e;border-radius:2px;margin-top:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .5s}
+.plat-block{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border-left:3px solid;cursor:pointer;transition:background .15s}
+.plat-block:hover{filter:brightness(1.2)}
+.crumb{display:flex;align-items:center;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.crumb span{font-size:11px;padding:3px 6px;border-radius:4px;cursor:pointer}
+.nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:6px;min-height:36px}
+.nav button{background:none;border:none;font-size:18px;cursor:pointer;padding:4px 8px}
+.alert{background:#1a0810;border:1px solid #ff174433;border-radius:10px;padding:8px 12px;margin-bottom:10px}
+.problems{margin-top:14px;background:#140810;border:1px solid #ff174422;border-radius:10px;padding:12px}
+.problems-item{padding:6px 0;cursor:pointer;border-bottom:1px solid #1a0a10}
+.spark{background:#0a0a16;border-radius:8px;padding:8px 10px;border:1px solid #1a1a2e;margin-bottom:10px}
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;padding-top:4px}
+h1{font-size:17px;font-weight:700;background:linear-gradient(90deg,#7c83ff,#00e676);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.rank-row{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;margin-bottom:2px;cursor:pointer}
+.rank-row:hover{filter:brightness(1.3)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#7c83ff;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:2000;animation:fi .2s ease}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/*
+ * HEALTH CHECK DASHBOARD · SapphireBet · v27
+ * Standalone HTML, zero dependencies.
+ * v27: +platform sparkline, +NGR under spheres, +block→GEO ranking, +Telegram export
+ */
+
+// ═══ 1. CONFIG ═══
+const DEF_TH = {
+  ftd_count:{g:200,y:50,u:"",l:"FTD за месяц",d:"h"},reg_ftd_conv:{g:15,y:10,u:"%",l:"Reg → FTD",d:"h"},au:{g:500,y:150,u:"",l:"Active Unique",d:"h"},cac:{g:25,y:40,u:"$",l:"CAC",d:"l"},
+  dep_approval:{g:80,y:60,u:"%",l:"Approval депозитов",d:"h"},wd_approval:{g:75,y:55,u:"%",l:"Approval выводов",d:"h"},avg_deposit:{g:25,y:12,u:"$",l:"Средний депозит",d:"h"},cashout_pct:{g:90,y:100,u:"%",l:"Cashout %",d:"l"},
+  ngr:{g:30000,y:10000,u:"$",l:"NGR",d:"h"},ngr_mom:{g:5,y:-15,u:"%",l:"NGR MoM",d:"h"},ngr_target:{g:50,y:20,u:"%",l:"NGR vs $150K",d:"h"},arppu:{g:20,y:5,u:"$",l:"ARPPU",d:"h"},
+  casino_share:{g:30,y:20,u:"%",l:"Доля Casino GGR",d:"h"},casino_margin:{g:5,y:2,u:"%",l:"Маржа Casino",d:"h"},casino_players:{g:1000,y:300,u:"",l:"Casino игроки",d:"h"},casino_ggr_mom:{g:0,y:-10,u:"%",l:"Casino GGR MoM",d:"h"},
+  sport_margin:{g:8,y:4,u:"%",l:"Маржа Sport",d:"h"},sport_players:{g:20,y:5,u:"",l:"Sport ставок/день",d:"h"},sport_ggr_mom:{g:0,y:-10,u:"%",l:"Sport GGR MoM",d:"h"},avg_bet:{g:15,y:5,u:"$",l:"Средняя ставка",d:"h"},
+  d30_retention:{g:25,y:15,u:"%",l:"Ret M1 (активация)",d:"h"},d90_retention:{g:10,y:5,u:"%",l:"Ret M3 (стабилиз.)",d:"h"},core_retention:{g:25,y:12,u:"%",l:"Удержание ядра (4+/6м)",d:"h"},active_mom:{g:10,y:0,u:"%",l:"Активные MoM",d:"h"},
+  bettor_pct:{g:15,y:5,u:"%",l:"% бетторов",d:"h"},active_daily:{g:100,y:30,u:"",l:"Активных/день",d:"h"},bettor_ret:{g:40,y:25,u:"%",l:"Ret бетторов",d:"h"},whale_top20:{g:50,y:70,u:"%",l:"Top20 NGR%",d:"l"},
+  frt_sec:{g:30,y:60,u:"с",l:"FRT (медиана)",d:"l"},csat:{g:70,y:55,u:"%",l:"CSAT",d:"h"},abandon_rate:{g:3,y:8,u:"%",l:"AR% пропущено",d:"l"},aht_min:{g:10,y:18,u:"м",l:"AHT (медиана)",d:"l"},
+};
+
+const CATS = {
+  payments:{l:"Платежи",i:"💳",m:["dep_approval","wd_approval","avg_deposit","cashout_pct"],w:25},
+  revenue:{l:"Выручка",i:"💰",m:["ngr","ngr_mom","ngr_target","arppu"],w:20},
+  acquisition:{l:"Привлечение",i:"📥",m:["au","ftd_count","reg_ftd_conv","cac"],w:15},
+  retention:{l:"Удержание",i:"🔄",m:["d30_retention","d90_retention","core_retention","active_mom"],w:15},
+  sport:{l:"Спорт",i:"⚽",m:["sport_margin","sport_players","sport_ggr_mom","avg_bet"],w:10},
+  casino:{l:"Казино",i:"🎰",m:["casino_share","casino_margin","casino_players","casino_ggr_mom"],w:7},
+  player_health:{l:"База",i:"👥",m:["bettor_pct","active_daily","bettor_ret","whale_top20"],w:5},
+  support:{l:"Саппорт",i:"🎧",m:["frt_sec","csat","abandon_rate","aht_min"],w:3},
+};
+const SM = ["ngr","ngr_mom","dep_approval","core_retention","d90_retention","csat"];
+const FLAGS = {"🇵🇪 Peru":{icon:"⛔",msg:"Платёжки не работают",detail:"Все ПС отключены."}};
+
+// ═══ 2. SETTINGS (MUST be before scoring) ═══
+let customTH = {};
+try { customTH = JSON.parse(localStorage.getItem("hc_th") || "{}"); } catch(e) {}
+let settingsCat = "payments";
+function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DEF_TH[mk]; }
+
+// ═══ 3. DATA ═══
+const PREV = {"🇧🇷 Brazil":{ngr:58365},"🇦🇷 Argentina":{ngr:40850},"🇨🇱 Chile":{ngr:51512},"🇲🇽 Mexico":{ngr:16108},"🇵🇪 Peru":{ngr:46812},"🇨🇴 Colombia":{ngr:241},"🇮🇳 India":{ngr:5554},"🇧🇩 Bangladesh":{ngr:5037},"🇵🇱 Poland":{ngr:10006},"🇵🇹 Portugal":{ngr:5617}};
+const TREND = {"🇧🇷 Brazil":[55383,51287,79210,86152,79061,108068,58365,81765],"🇦🇷 Argentina":[2879,14918,20640,25357,63106,29006,40850,35907],"🇨🇱 Chile":[1054,57613,38497,25018,12184,12270,51512,20039],"🇲🇽 Mexico":[25950,-6631,-193,8374,21232,17241,16108,10482],"🇵🇪 Peru":[7163,12803,2007,-8704,5787,21407,46812,-1174],"🇨🇴 Colombia":[1005,1093,5292,11613,2764,1216,241,652],"🇮🇳 India":[1823,5302,18150,7973,5335,6080,5554,6305],"🇧🇩 Bangladesh":[156,4491,-1566,-195,8363,6369,5037,5488],"🇵🇱 Poland":[9492,8058,2739,9074,12309,15432,10006,14457],"🇵🇹 Portugal":[5357,2038,5471,5825,2122,9179,5617,802]};
+const PLAT_TREND = [110262,150972,170247,170487,212263,226268,240102,174723];
+const TL = ["Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"];
+
+const D = {"🇧🇷 Brazil":{au:1297,ftd_count:810,reg_ftd_conv:18.2,cac:null,dep_approval:86.6,wd_approval:64.1,avg_deposit:36.7,cashout_pct:80.4,ngr:81765,ngr_mom:40.1,ngr_target:54.5,arppu:65.52,casino_share:25.1,casino_margin:2.9,casino_players:2312,sport_margin:8.3,sport_players:631,avg_bet:21.4,d30_retention:15.3,d90_retention:7.2,core_retention:14.7,active_mom:35.9,bettor_pct:10.9,bettor_ret:37.7,active_daily:184,whale_top20:null,frt_sec:18,csat:54.4,abandon_rate:0.2,aht_min:15.8,casino_ggr_mom:null,sport_ggr_mom:null},"🇦🇷 Argentina":{au:2195,ftd_count:1696,reg_ftd_conv:31.0,cac:null,dep_approval:75.4,wd_approval:82.9,avg_deposit:19.6,cashout_pct:83.2,ngr:35907,ngr_mom:-12.1,ngr_target:23.9,arppu:17.10,casino_share:22.9,casino_margin:2.0,casino_players:4386,sport_margin:16.7,sport_players:164,avg_bet:30.9,d30_retention:13.1,d90_retention:4.1,core_retention:8.0,active_mom:53.8,bettor_pct:16.1,bettor_ret:26.0,active_daily:221,whale_top20:null,frt_sec:60,csat:52.8,abandon_rate:4.1,aht_min:18.5,casino_ggr_mom:null,sport_ggr_mom:null},"🇨🇱 Chile":{au:522,ftd_count:423,reg_ftd_conv:17.3,cac:null,dep_approval:61.2,wd_approval:48.1,avg_deposit:28.6,cashout_pct:53.3,ngr:20039,ngr_mom:-61.1,ngr_target:13.4,arppu:39.37,casino_share:33.1,casino_margin:1.6,casino_players:979,sport_margin:10.7,sport_players:17,avg_bet:17.1,d30_retention:13.1,d90_retention:3.7,core_retention:6.4,active_mom:176.9,bettor_pct:8.2,bettor_ret:21.7,active_daily:42,whale_top20:null,frt_sec:52,csat:60.0,abandon_rate:4.6,aht_min:20.2,casino_ggr_mom:null,sport_ggr_mom:null},"🇲🇽 Mexico":{au:225,ftd_count:123,reg_ftd_conv:1.7,cac:null,dep_approval:55.9,wd_approval:78.6,avg_deposit:58.6,cashout_pct:83.0,ngr:10482,ngr_mom:-34.9,ngr_target:7.0,arppu:54.88,casino_share:27.8,casino_margin:1.4,casino_players:604,sport_margin:6.2,sport_players:91,avg_bet:16.1,d30_retention:10.7,d90_retention:3.2,core_retention:7.8,active_mom:9.9,bettor_pct:3.7,bettor_ret:46.8,active_daily:35,whale_top20:null,frt_sec:52,csat:68.8,abandon_rate:2.0,aht_min:16.9,casino_ggr_mom:null,sport_ggr_mom:null},"🇵🇪 Peru":{au:161,ftd_count:84,reg_ftd_conv:9.4,cac:null,dep_approval:0,wd_approval:0,avg_deposit:121.4,cashout_pct:100.9,ngr:-1174,ngr_mom:-102.5,ngr_target:-0.8,arppu:-8.39,casino_margin:0.6,casino_players:491,sport_margin:-8.0,sport_players:52,avg_bet:107.2,d30_retention:17.3,d90_retention:6.6,core_retention:14.9,active_mom:31.8,bettor_pct:3.0,bettor_ret:38.7,active_daily:22,whale_top20:null,frt_sec:49,csat:67.6,abandon_rate:5.3,aht_min:20.9,casino_share:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇨🇴 Colombia":{ftd_count:67,reg_ftd_conv:22.6,cac:null,dep_approval:86.1,wd_approval:34.1,avg_deposit:6.1,ngr:652,ngr_mom:170.1,ngr_target:0.4,sport_margin:1.8,sport_players:12,avg_bet:12.1,d30_retention:22.6,d90_retention:5.3,core_retention:14.5,active_mom:50.7,bettor_pct:2.3,bettor_ret:51.6,active_daily:15,whale_top20:null,frt_sec:43,csat:76.9,abandon_rate:6.7,aht_min:19.2,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇮🇳 India":{ftd_count:27,reg_ftd_conv:5.2,cac:null,dep_approval:24.1,wd_approval:62.4,avg_deposit:49.1,ngr:6305,ngr_mom:13.5,ngr_target:4.2,sport_margin:8.4,sport_players:205,avg_bet:15.5,d30_retention:26.5,d90_retention:7.2,core_retention:32.6,active_mom:14.2,bettor_pct:4.5,bettor_ret:82.2,active_daily:22,whale_top20:null,frt_sec:115,csat:37.1,abandon_rate:14.4,aht_min:25.5,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇧🇩 Bangladesh":{ftd_count:243,reg_ftd_conv:16.7,cac:null,dep_approval:47.3,wd_approval:59.5,avg_deposit:26.4,ngr:5488,ngr_mom:8.9,ngr_target:3.7,sport_margin:4.6,sport_players:148,avg_bet:14.6,d30_retention:24.8,d90_retention:7.9,core_retention:5.8,active_mom:2.8,bettor_pct:21.3,bettor_ret:35.4,active_daily:40,whale_top20:null,frt_sec:162,csat:57.4,abandon_rate:11.9,aht_min:19.6,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇵🇱 Poland":{ftd_count:14,reg_ftd_conv:4.8,cac:null,dep_approval:84.7,wd_approval:73.9,avg_deposit:32.3,ngr:14457,ngr_mom:44.5,ngr_target:9.6,sport_margin:5.6,sport_players:38,avg_bet:17.9,d30_retention:21.0,d90_retention:11.3,core_retention:24.7,active_mom:-23.4,bettor_pct:7.2,bettor_ret:73.5,active_daily:20,whale_top20:null,frt_sec:159,csat:36.1,abandon_rate:21.7,aht_min:18.7,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null},"🇵🇹 Portugal":{ftd_count:30,reg_ftd_conv:9.6,cac:null,dep_approval:77.5,wd_approval:60.0,avg_deposit:48.3,ngr:802,ngr_mom:-85.7,ngr_target:0.5,sport_margin:0.9,sport_players:55,avg_bet:25.7,d30_retention:15.5,d90_retention:4.1,core_retention:8.8,active_mom:128.0,bettor_pct:2.5,bettor_ret:43.8,active_daily:6,whale_top20:null,frt_sec:25,csat:58.3,abandon_rate:0.0,aht_min:17.5,au:null,arppu:null,cashout_pct:null,casino_share:null,casino_margin:null,casino_players:null,casino_ggr_mom:null,sport_ggr_mom:null}};
+
+// ═══ 4. SCORING ═══
+const NO = v => v == null || v === undefined;
+function scr(k, v) {
+  if (NO(v)) return null;
+  const t = getTH(k); if (!t) return 50;
+  const {g, y, d} = t;
+  if (d === "h") {
+    if (v >= g) return 100;
+    if (v <= y) { return y > 0 ? Math.max(0, v/y*49) : Math.max(0, 49*(1-(y-v)/Math.max(Math.abs(y),1))); }
+    return 50 + ((v-y)/(g-y)) * 50;
+  } else {
+    if (v <= g) return 100;
+    if (v >= y) return Math.max(0, 49*(1-(v-y)/Math.max(Math.abs(y),1)));
+    return 50 + ((y-v)/(y-g)) * 50;
+  }
+}
+function catSc(d, ck) { const s = CATS[ck].m.map(m => scr(m, d[m])).filter(x => x !== null); return s.length ? s.reduce((a,b) => a+b, 0)/s.length : null; }
+function geoSc(d) { let tw=0, ts=0; Object.entries(CATS).forEach(([k,c]) => { const s = catSc(d,k); if (s !== null) { tw += c.w; ts += s*c.w; } }); return tw ? ts/tw : null; }
+function cl(s) { if (NO(s)) return {bg:"#1a1a2e",gw:"#555",tx:"#555",lb:"—"}; if (s>=70) return {bg:"#0f5132",gw:"#00e676",tx:"#00e676",lb:"Норма"}; if (s>=40) return {bg:"#664d03",gw:"#ffc107",tx:"#ffc107",lb:"Внимание"}; return {bg:"#6b1523",gw:"#ff1744",tx:"#ff1744",lb:"Проблема"}; }
+function fmt(v) { if (NO(v)) return "—"; if (typeof v !== "number") return v; if (v<0 && Math.abs(v)>=1000) return "-"+(Math.abs(v)/1000).toFixed(1)+"K"; if (Math.abs(v)>=10000) return (v/1000).toFixed(0)+"K"; if (Math.abs(v)>=1000) return (v/1000).toFixed(1)+"K"; return Number.isInteger(v) ? String(v) : v.toFixed(1); }
+function fmtNGR(v) { if (NO(v)) return "—"; if (v<0) return "-$"+(Math.abs(v)/1000).toFixed(1)+"K"; return "$"+(v/1000).toFixed(v>=100000?0:1)+"K"; }
+
+// ═══ 5. UI BUILDERS ═══
+function sphereHTML(s, sz, label, sub, flag) {
+  const c = flag ? {bg:"#4a0010",gw:"#ff1744",tx:"#ff1744"} : cl(s);
+  const anim = ((s !== null && s < 40) || flag) ? "animation:pr 2s infinite;" : "";
+  const bg = flag ? "radial-gradient(circle at 35% 35%,#ff174444,#3a0010 70%)" : `radial-gradient(circle at 35% 35%,${c.gw}44,${c.bg} 70%)`;
+  const shadow = `0 0 ${sz/3}px ${flag?"#ff174466":c.gw+"55"},inset 0 -${sz/6}px ${sz/4}px ${flag?"#ff174422":c.gw+"22"}`;
+  const txt = flag ? "⛔" : NO(s) ? "?" : Math.round(s);
+  const subTxt = flag ? "ПС отключены" : sub || "";
+  return `<div class="sphere" style="max-width:${sz*1.8}px"><div class="sphere-orb" style="width:${sz}px;height:${sz}px;background:${bg};box-shadow:${shadow};${anim}"><span class="mono" style="color:#fff;font-weight:700;font-size:${flag?sz/3.5:sz/3.2}px;text-shadow:0 0 8px ${c.gw}88">${txt}</span></div><span class="sphere-label" style="font-size:${Math.max(10,sz/7.5)}px;color:${flag?"#ff8a80":"#bbb"}">${label}</span>${subTxt ? `<span class="sphere-sub mono" style="color:${c.tx}">${subTxt}</span>` : ""}</div>`;
+}
+
+function metricHTML(mk, val, prev) {
+  const t = getTH(mk); const s = scr(mk, val); const c = cl(s); const n = NO(val);
+  const sign = !n && val > 0 && (mk.includes("mom") || mk === "active_mom") ? "+" : "";
+  const hasPrev = !NO(prev); const delta = hasPrev ? (val - prev) : 0;
+  const arrow = hasPrev ? (delta > 0 ? "↑" : delta < 0 ? "↓" : "→") : "";
+  const arrowC = hasPrev ? (t.d === "h" ? (delta > 0 ? "#00e67688" : "#ff174488") : (delta < 0 ? "#00e67688" : "#ff174488")) : "";
+  return `<div class="metric-row" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} фев ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:#282840;font-size:8px;flex-shrink:0;width:36px;text-align:right">${t.d==="h"?"≥":"≤"}${fmt(t.g)}</span></div>`;
+}
+
+function summaryHTML(d, prev) {
+  return `<div style="margin-bottom:10px"><div class="grid-sum">${SM.map(mk => {
+    const t = getTH(mk); const v = d[mk]; const pv = prev?.[mk]; const s = scr(mk, v); const c = cl(s);
+    const hasPrev = !NO(pv); const delta = hasPrev ? (v-pv) : 0;
+    const arrow = hasPrev ? (delta > 0 ? "↑" : delta < 0 ? "↓" : "") : "";
+    const arrowC = hasPrev ? (t.d === "h" ? (delta > 0 ? "#00e67688" : "#ff174488") : (delta < 0 ? "#00e67688" : "#ff174488")) : "";
+    return `<div style="background:#0e0e1c;border-radius:8px;padding:7px 9px;border:1px solid ${!NO(v)?c.gw+"22":"#1a1a2e"};opacity:${NO(v)?.35:1}"><div style="color:#555;font-size:8px;margin-bottom:3px;line-height:1.2">${t.l}</div><div style="display:flex;align-items:baseline;gap:3px"><span class="mono" style="color:${!NO(v)?c.tx:"#333"};font-size:14px;font-weight:700">${!NO(v)&&v>0&&mk.includes("mom")?"+":""}${fmt(v)}${!NO(v)?t.u:""}</span>${hasPrev&&!NO(v)?`<span class="mono" style="color:${arrowC};font-size:8px">${arrow}</span>`:""}</div></div>`;
+  }).join("")}</div></div>`;
+}
+
+function buildSparkSVG(data, h, w) {
+  const pad = 4, cw = w-pad*2, ch = h-pad*2;
+  const mn = Math.min(...data), mx = Math.max(...data), range = mx-mn || 1;
+  const pts = data.map((v,i) => `${pad+i/(data.length-1)*cw},${pad+ch-(v-mn)/range*ch}`).join(" ");
+  const lastV = data[data.length-1]; const lastC = lastV >= 0 ? "#00e676" : "#ff1744";
+  const zeroY = mn < 0 ? pad+ch-(-mn)/range*ch : null;
+  const circles = data.map((v,i) => {const x=pad+i/(data.length-1)*cw;const y_=pad+ch-(v-mn)/range*ch;const c=v>=0?"#00e676":"#ff1744";return `<circle cx="${x}" cy="${y_}" r="${i===data.length-1?3:1.5}" fill="${i===data.length-1?c:c+'66'}" ${i===data.length-1?'stroke="#fff" stroke-width="1"':""}/>`}).join("");
+  const zeroLine = zeroY ? `<line x1="${pad}" y1="${zeroY}" x2="${w-pad}" y2="${zeroY}" stroke="#ffffff11" stroke-dasharray="3,3"/>` : "";
+  return {svg:`<svg width="100%" viewBox="0 0 ${w} ${h}" style="display:block">${zeroLine}<polyline points="${pts}" fill="none" stroke="${lastC}88" stroke-width="1.5" stroke-linejoin="round"/>${circles}</svg>`, lastV, lastC};
+}
+
+function sparkHTML(geo) {
+  const data = TREND[geo]; if (!data) return "";
+  const {svg, lastV, lastC} = buildSparkSVG(data, 48, 200);
+  const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#666":"#222"};font-size:7px">${l}</span>`).join("");
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR тренд (8 мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+}
+
+function platSparkHTML() {
+  const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 40, 200);
+  const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#666":"#222"};font-size:7px">${l}</span>`).join("");
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR платформа (8 мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+}
+
+function platBlocksHTML(geos) {
+  let html = `<div style="margin-top:18px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:10px;text-align:center">ПЛАТФОРМА · БЛОКИ (avg по GEO)</div><div style="display:flex;flex-direction:column;gap:4px">`;
+  Object.entries(CATS).forEach(([ck, ct]) => {
+    const vals = geos.map(g => catSc(g.d, ck)).filter(x => x !== null);
+    const s = vals.length ? vals.reduce((a,b) => a+b, 0)/vals.length : null;
+    const c = cl(s);
+    html += `<div class="plat-block" onclick="toggleRanking('${ck}')" style="background:${c.bg}33;border-left-color:${NO(s)?"#252540":c.gw}"><span style="font-size:14px;width:20px;text-align:center">${ct.i}</span><div style="flex:1;min-width:0"><div style="color:${NO(s)?"#444":"#bbb"};font-size:11px;font-weight:600">${ct.l}</div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:${Math.min(100,Math.max(3,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div></div><span class="mono" style="color:${NO(s)?"#333":c.tx};font-weight:700;font-size:14px;min-width:28px;text-align:right">${NO(s)?"—":Math.round(s)}</span><span class="mono" style="color:#282840;font-size:8px;min-width:24px;text-align:right">${ct.w}%</span></div>`;
+    // Ranking dropdown (hidden by default, toggled by toggleRanking)
+    html += `<div id="rank-${ck}" style="display:none;padding:2px 0 6px 28px">`;
+    const ranked = geos.map(g => ({g:g.g, s:catSc(g.d, ck), d:g.d})).filter(r => r.s !== null).sort((a,b) => b.s - a.s);
+    ranked.forEach((r, i) => {
+      const rc = cl(r.s);
+      html += `<div class="rank-row" onclick="nav('${r.g}')" style="background:${rc.bg}33"><span class="mono" style="color:#444;font-size:9px;width:16px">${i+1}</span><span style="font-size:10px;flex:1">${r.g}</span><span class="mono" style="color:${rc.tx};font-weight:700;font-size:12px">${Math.round(r.s)}</span></div>`;
+    });
+    html += `</div>`;
+  });
+  return html + `</div></div>`;
+}
+
+function crumbHTML(geo, cat) {
+  let h = `<div class="crumb"><span onclick="navHome()" style="color:#555">GEO</span><span style="color:#252540;font-size:10px;padding:0">›</span>`;
+  h += `<span onclick="navGeo()" style="color:${cat?"#555":"#888"};background:${cat?"transparent":"#1a1a2e"}">${geo.split(" ").pop()}</span>`;
+  if (cat) { const ct = CATS[cat]; h += `<span style="color:#252540;font-size:10px;padding:0">›</span><span style="color:#888;background:#1a1a2e;cursor:default">${ct.i} ${ct.l}</span>`; }
+  return h + `</div>`;
+}
+
+function navHTML(idx) {
+  const p = idx > 0 ? geoList[idx-1] : null, nx = idx < geoList.length-1 ? geoList[idx+1] : null;
+  return `<div class="nav"><button style="color:${p?"#555":"#1a1a28"}" ${p?`onclick="nav('${p}')"`:"disabled"}>‹</button><span class="mono" style="color:#666;font-size:11px">${idx+1}/${geoList.length}</span><button style="color:${nx?"#555":"#1a1a28"}" ${nx?`onclick="nav('${nx}')"`:"disabled"}>›</button></div>`;
+}
+
+// ═══ 6. RENDER ═══
+let state = {geo: null, cat: null};
+const geoList = Object.keys(D);
+
+function render() {
+  const app = document.getElementById("app");
+  const geos = Object.entries(D).map(([g,d]) => ({g, s:geoSc(d), d, flag:!!FLAGS[g]})).sort((a,b) => (a.s??-1) - (b.s??-1));
+  const valid = geos.filter(g => !NO(g.s));
+  const ps = valid.length ? valid.reduce((a,g) => a+g.s, 0)/valid.length : null;
+  const crit = geos.filter(g => !NO(g.s) && g.s < 40).length;
+
+  let html = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">март 2026 · v27</p></div><div style="display:flex;gap:2px"><button onclick="copyTelegramReport()" title="Telegram" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:#3a3a55;border:none;background:none" onmouseenter="this.style.color='#7c83ff'" onmouseleave="this.style.color='#3a3a55'"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button onclick="openSettings()" title="Настройки" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:#3a3a55;border:none;background:none" onmouseenter="this.style.color='#7c83ff'" onmouseleave="this.style.color='#3a3a55'"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
+
+  if (!state.geo) {
+    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${crit} crit · ${geos.length} geo`)}</div>`;
+    html += platSparkHTML();
+    html += `<div class="line"></div>`;
+    // v27: NGR under spheres instead of status text
+    html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,fmtNGR(d.ngr),flag)}</div>`).join("")}</div>`;
+    html += platBlocksHTML(geos);
+    if (crit > 0) {
+      html += `<div class="problems"><div class="mono" style="color:#ff1744;font-size:10px;font-weight:700;margin-bottom:6px">🚨 ПРОБЛЕМЫ</div>`;
+      geos.filter(g => !NO(g.s) && g.s < 40).forEach(g => {
+        const fl = FLAGS[g.g];
+        const w = Object.keys(DEF_TH).map(k => ({k, s:scr(k, g.d[k])})).filter(m => !NO(m.s) && m.s < 25).slice(0,3).map(m => DEF_TH[m.k].l);
+        html += `<div class="problems-item" onclick="nav('${g.g}')"><span class="mono" style="color:#ff8a80;font-size:11px">${fl?fl.icon+" ":""}${g.g} · ${Math.round(g.s)}pt</span><div style="color:#553344;font-size:9px;margin-top:2px">${fl?fl.msg+(w.length?" · ":""):""} ${w.join(" · ")}</div></div>`;
+      });
+      html += `</div>`;
+    }
+  } else if (state.geo && !state.cat) {
+    const g = state.geo, d = D[g], fl = FLAGS[g], prev = PREV[g] || {};
+    const gs = geoSc(d); const idx = geoList.indexOf(g);
+    html += crumbHTML(g);
+    html += navHTML(idx);
+    if (fl) html += `<div class="alert"><span class="mono" style="color:#ff8a80;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span><span style="color:#55333e;font-size:9px;margin-left:6px">${fl.detail}</span></div>`;
+    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}</div>`;
+    html += summaryHTML(d, prev);
+    html += sparkHTML(g);
+    html += `<div class="line"></div><div class="grid-cat">`;
+    Object.entries(CATS).forEach(([ck, ct]) => { const cs = catSc(d, ck); html += `<div onclick="navCat('${ck}')" style="animation:fi .3s ease">${sphereHTML(cs,54,`${ct.i} ${ct.l}`,`${ct.w}% · ${cl(cs).lb}`)}</div>`; });
+    html += `</div>`;
+    const worst = Object.keys(DEF_TH).map(k => ({k, s:scr(k, d[k]), v:d[k]})).filter(m => !NO(m.s) && m.s < 40).sort((a,b) => a.s - b.s);
+    if (worst.length) html += `<div style="margin-top:18px"><div class="mono" style="color:#ff1744;font-size:10px;font-weight:700;margin-bottom:8px;text-align:center">⚠ КРАСНЫЕ (${worst.length})</div><div style="display:flex;flex-direction:column;gap:5px">${worst.slice(0,6).map(m => metricHTML(m.k, m.v, prev[m.k])).join("")}</div></div>`;
+    const filled = Object.keys(DEF_TH).filter(k => !NO(d[k])).length;
+    html += `<div style="margin-top:12px;padding:10px;background:#111122;border-radius:8px;border:1px solid #1e1e35"><div class="mono" style="color:#444;font-size:9px">${filled}/32 метрик</div></div>`;
+  } else if (state.geo && state.cat) {
+    const g = state.geo, d = D[g], ct = CATS[state.cat], prev = PREV[g] || {}, fl = FLAGS[g];
+    const cs = catSc(d, state.cat); const idx = geoList.indexOf(g);
+    html += crumbHTML(g, state.cat);
+    html += navHTML(idx);
+    if (fl && state.cat === "payments") html += `<div class="alert"><span class="mono" style="color:#ff8a80;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span></div>`;
+    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(cs,68,`${ct.i} ${ct.l}`,`${ct.w}% веса · ${g.split(" ").pop()}`)}</div><div class="line"></div>`;
+    html += `<div style="display:flex;flex-direction:column;gap:5px">${ct.m.map(mk => metricHTML(mk, d[mk], prev[mk])).join("")}</div>`;
+  }
+  app.innerHTML = html;
+}
+
+// ═══ 7. BLOCK RANKING TOGGLE ═══
+function toggleRanking(ck) {
+  const el = document.getElementById("rank-" + ck);
+  if (!el) return;
+  el.style.display = el.style.display === "none" ? "block" : "none";
+}
+
+// ═══ 8. TELEGRAM REPORT ═══
+function copyTelegramReport() {
+  const geos = Object.entries(D).map(([g,d]) => ({g, s:geoSc(d), d, flag:!!FLAGS[g]})).sort((a,b) => (b.s??-1) - (a.s??-1));
+  const valid = geos.filter(g => !NO(g.s));
+  const ps = valid.length ? valid.reduce((a,g) => a+g.s, 0)/valid.length : null;
+  const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr || 0), 0);
+
+  let txt = `📊 HEALTH CHECK · Март 2026\n`;
+  txt += `Платформа: ${Math.round(ps)}pt · NGR: ${fmtNGR(totalNGR)}\n\n`;
+
+  // GEO ranking
+  txt += `🏆 Рейтинг GEO:\n`;
+  geos.forEach((g, i) => {
+    const icon = g.flag ? "⛔" : g.s >= 70 ? "🟢" : g.s >= 40 ? "🟡" : "🔴";
+    txt += `${icon} ${g.g} — ${Math.round(g.s)}pt · ${fmtNGR(g.d.ngr)}`;
+    if (g.d.ngr_mom) txt += ` (${g.d.ngr_mom > 0 ? "+" : ""}${g.d.ngr_mom.toFixed(0)}% MoM)`;
+    txt += `\n`;
+  });
+
+  // Problems
+  const reds = geos.filter(g => !NO(g.s) && g.s < 40);
+  if (reds.length) {
+    txt += `\n🚨 Проблемные GEO:\n`;
+    reds.forEach(g => {
+      const fl = FLAGS[g.g];
+      const worst = Object.keys(DEF_TH).map(k => ({k, s:scr(k, g.d[k])})).filter(m => !NO(m.s) && m.s < 25).slice(0,3).map(m => DEF_TH[m.k].l);
+      txt += `• ${fl?fl.icon+" ":""}${g.g}: ${worst.join(", ")}\n`;
+    });
+  }
+
+  // Platform blocks
+  txt += `\n📦 Блоки платформы:\n`;
+  Object.entries(CATS).forEach(([ck, ct]) => {
+    const vals = geos.map(g => catSc(g.d, ck)).filter(x => x !== null);
+    const s = vals.length ? vals.reduce((a,b) => a+b, 0)/vals.length : null;
+    const icon = NO(s) ? "⬜" : s >= 70 ? "🟢" : s >= 40 ? "🟡" : "🔴";
+    txt += `${ct.i} ${ct.l}: ${icon} ${NO(s)?"—":Math.round(s)}pt (${ct.w}%)\n`;
+  });
+
+  navigator.clipboard.writeText(txt).then(() => {
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.textContent = "📋 Скопировано для Telegram";
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2000);
+  }).catch(() => {
+    prompt("Скопируйте текст:", txt);
+  });
+}
+
+// ═══ 9. SETTINGS MODAL ═══
+function openSettings() {
+  const overlay = document.createElement("div");
+  overlay.id = "settings-overlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.85);display:flex;justify-content:center;padding-top:5vh";
+  overlay.onclick = e => { if (e.target === overlay) closeSettings(); };
+  function build() {
+    const metrics = CATS[settingsCat]?.m || [];
+    let h = `<div style="width:100%;max-width:460px;max-height:90vh;background:#0e0e1a;border:1px solid #1e1e35;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;animation:fi .25s ease"><div style="padding:14px 16px 10px;border-bottom:1px solid #1a1a2e;flex-shrink:0"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">⚙ Пороги</span><button onclick="closeSettings()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div style="display:flex;gap:2px;margin-top:10px;overflow-x:auto">`;
+    Object.entries(CATS).forEach(([ck, ct]) => { h += `<button onclick="settingsCat='${ck}';refreshSettings()" style="padding:6px 10px;border-radius:5px;font-size:12px;cursor:pointer;border:none;background:${settingsCat===ck?"#1e1e35":"transparent"};color:${settingsCat===ck?"#ccc":"#444"};flex-shrink:0;min-height:32px">${ct.i} ${ct.w}%</button>`; });
+    h += `</div></div><div style="flex:1;overflow-y:auto;padding:10px 16px;-webkit-overflow-scrolling:touch">`;
+    metrics.forEach(mk => {
+      const t = DEF_TH[mk]; const cur = getTH(mk);
+      h += `<div style="padding:12px;background:#111122;border-radius:10px;margin-bottom:8px;border:1px solid #1a1a2e"><div style="color:#bbb;font-size:12px;font-weight:600;margin-bottom:8px">${t.l}</div><div style="display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#00e676"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"}</span></div><input type="number" value="${cur.g}" onchange="updateTH('${mk}','g',this.value)" style="width:100%;padding:7px;background:#0a0a14;border:1px solid #252540;border-radius:6px;color:#00e676;font-size:14px;font-family:monospace;font-weight:600;outline:none;min-height:36px"></div><div style="color:#222;padding-top:14px">→</div><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#ffc107"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"}</span></div><input type="number" value="${cur.y}" onchange="updateTH('${mk}','y',this.value)" style="width:100%;padding:7px;background:#0a0a14;border:1px solid #252540;border-radius:6px;color:#ffc107;font-size:14px;font-family:monospace;font-weight:600;outline:none;min-height:36px"></div></div></div>`;
+    });
+    h += `</div><div style="padding:10px 16px;border-top:1px solid #1a1a2e;flex-shrink:0"><button onclick="saveSettings()" style="width:100%;padding:10px;border-radius:8px;border:none;cursor:pointer;background:#7c83ff;color:#fff;font-size:13px;font-weight:600;min-height:40px">Сохранить</button></div></div>`;
+    return h;
+  }
+  window.refreshSettings = () => { const c = document.getElementById("stc"); if (c) c.innerHTML = build(); };
+  overlay.innerHTML = `<div id="stc">${build()}</div>`;
+  document.body.appendChild(overlay);
+}
+function updateTH(mk, f, val) { if (!customTH[mk]) customTH[mk] = {...DEF_TH[mk]}; customTH[mk][f] = parseFloat(val) || 0; }
+function saveSettings() { localStorage.setItem("hc_th", JSON.stringify(customTH)); closeSettings(); render(); }
+function closeSettings() { const o = document.getElementById("settings-overlay"); if (o) o.remove(); }
+
+// ═══ 10. NAVIGATION ═══
+function nav(g)    { state.geo = g; state.cat = null; render(); window.scrollTo(0,0); }
+function navCat(c) { state.cat = c; render(); window.scrollTo(0,0); }
+function navGeo()  { state.cat = null; render(); window.scrollTo(0,0); }
+function navHome() { state.geo = null; state.cat = null; render(); window.scrollTo(0,0); }
+
+// ═══ INIT ═══
+render();
+</script>
+</body>
+</html>
