@@ -354,6 +354,49 @@ function generateSignals(geos) {
   }).slice(0, 6);
 }
 
+function execSummaryHTML(geos, ps) {
+  const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr||0), 0);
+  const prevNGR = PLAT_TREND.length >= 2 ? PLAT_TREND[PLAT_TREND.length-2] : null;
+  const ngrDelta = prevNGR ? ((totalNGR - prevNGR) / Math.abs(prevNGR) * 100) : null;
+  const crit = geos.filter(g => !NO(g.s) && g.s < 40).length;
+  const green = geos.filter(g => !NO(g.s) && g.s >= 70).length;
+  const sorted = [...geos].filter(g => !NO(g.d.ngr)).sort((a,b) => (b.d.ngr||0) - (a.d.ngr||0));
+  const top2 = sorted.slice(0,2);
+  const top2pct = totalNGR > 0 ? ((top2[0]?.d.ngr||0) + (top2[1]?.d.ngr||0)) / totalNGR * 100 : 0;
+
+  let lines = [];
+  const ngrStr = ngrDelta !== null ? `${ngrDelta > 0 ? "+" : ""}${ngrDelta.toFixed(0)}%` : "";
+  lines.push(`Платформа <span style="color:#ccc;font-weight:700">${fmtNGR(totalNGR)}</span> NGR${ngrStr ? ` (${ngrDelta>0?"📈":"📉"} ${ngrStr} MoM)` : ""}, score <span style="color:${cl(ps).tx};font-weight:700">${NO(ps)?"—":Math.round(ps)}pt</span>.`);
+
+  if (crit > 0 && green > 0) lines.push(`<span style="color:#00e676">${green} GEO в норме</span>, <span style="color:#ff1744">${crit} проблемных</span>.`);
+  else if (crit > 0) lines.push(`<span style="color:#ff1744">${crit} из ${geos.length} GEO в красной зоне.</span>`);
+  else lines.push(`<span style="color:#00e676">Все ${geos.length} GEO в норме.</span>`);
+
+  if (top2pct > 60) lines.push(`⚠️ Концентрация: ${top2[0]?.g.split(" ").pop()} + ${top2[1]?.g.split(" ").pop()} = <span style="color:#ffc107">${top2pct.toFixed(0)}%</span> NGR.`);
+
+  return `<div style="background:#0c0c18;border-radius:10px;border:1px solid #1a1a2e;padding:10px 12px;margin-bottom:10px"><div style="color:#888;font-size:11px;line-height:1.6">${lines.join(" ")}</div></div>`;
+}
+
+function ngrContribHTML(geos) {
+  const sorted = [...geos].filter(g => g.d.ngr > 0).sort((a,b) => (b.d.ngr||0) - (a.d.ngr||0));
+  const total = sorted.reduce((s,g) => s + (g.d.ngr||0), 0);
+  if (!total) return "";
+  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#444;font-size:9px;margin-bottom:4px">NGR вклад по GEO</div><div style="display:flex;border-radius:6px;overflow:hidden;height:18px">`;
+  const colors = ["#7c83ff","#00e676","#ffc107","#ff6b35","#e040fb","#00bcd4","#8bc34a","#ff5722","#9c27b0","#607d8b"];
+  sorted.forEach((g, i) => {
+    const pct = (g.d.ngr / total * 100);
+    if (pct < 2) return;
+    h += `<div onclick="nav('${g.g}')" style="width:${pct}%;background:${colors[i%colors.length]};cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden" title="${g.g}: ${fmtNGR(g.d.ngr)} (${pct.toFixed(0)}%)"><span class="mono" style="color:#fff;font-size:7px;font-weight:600;text-shadow:0 0 3px #000">${pct>=8?g.g.split(" ").pop():""}</span></div>`;
+  });
+  h += `</div><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">`;
+  sorted.forEach((g, i) => {
+    const pct = (g.d.ngr / total * 100);
+    h += `<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;color:#555"><span style="width:6px;height:6px;border-radius:2px;background:${colors[i%colors.length]}"></span>${g.g.split(" ").pop()} ${pct.toFixed(0)}%</span>`;
+  });
+  h += `</div></div>`;
+  return h;
+}
+
 function signalsHTML(geos) {
   const signals = generateSignals(geos);
   if (!signals.length) return "";
@@ -479,11 +522,20 @@ function render() {
 
   if (!state.geo) {
     html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${crit} crit · ${geos.length} geo`)}</div>`;
+    html += execSummaryHTML(geos, ps);
     html += platPulseHTML();
+    html += ngrContribHTML(geos);
     html += platSparkHTML();
     html += signalsHTML(geos);
     html += `<div class="line"></div>`;
-    html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,fmtNGR(d.ngr),flag)}</div>`).join("")}</div>`;
+    html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => {
+      const mom = d.ngr_mom;
+      const momArrow = !NO(mom) ? (mom > 5 ? "↑" : mom < -5 ? "↓" : "→") : "";
+      const momC = !NO(mom) ? (mom > 5 ? "#00e676" : mom < -5 ? "#ff1744" : "#555") : "";
+      const tier = (d.ngr||0) > 20000 ? "" : (d.ngr||0) > 5000 ? "" : "🌱";
+      const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}</span>`:""}`;
+      return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag)}</div>`;
+    }).join("")}</div>`;
     html += platBlocksHTML(geos);
     html += segmentsHTML();
   } else if (state.geo && !state.cat) {
@@ -492,7 +544,8 @@ function render() {
     html += crumbHTML(g);
     html += navHTML(idx);
     if (fl) html += `<div class="alert"><span class="mono" style="color:#ff8a80;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span><span style="color:#55333e;font-size:9px;margin-left:6px">${fl.detail}</span></div>`;
-    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}</div>`;
+    const tierLabel = (d.ngr||0) > 20000 ? "🏆 Tier 1" : (d.ngr||0) > 5000 ? "📈 Tier 2" : "🌱 Tier 3";
+    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}<div class="mono" style="color:#333;font-size:8px;margin-top:2px">${tierLabel} · NGR ${fmtNGR(d.ngr)}</div></div>`;
     html += summaryHTML(d, prev, hist);
     html += sparkHTML(g);
     html += historySparkHTML(g);
