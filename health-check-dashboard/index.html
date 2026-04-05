@@ -527,6 +527,7 @@ function render() {
     html += ngrContribHTML(geos);
     html += platSparkHTML();
     html += signalsHTML(geos);
+    html += aiInsightPlaceholder(null);
     html += `<div class="line"></div>`;
     html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => {
       const mom = d.ngr_mom;
@@ -549,6 +550,7 @@ function render() {
     html += summaryHTML(d, prev, hist);
     html += sparkHTML(g);
     html += historySparkHTML(g);
+    html += aiInsightPlaceholder(g);
     html += `<div class="line"></div><div class="grid-cat">`;
     Object.entries(CATS).forEach(([ck, ct]) => { const cs = catSc(d, ck); html += `<div onclick="navCat('${ck}')" style="animation:fi .3s ease">${sphereHTML(cs,54,`${ct.i} ${ct.l}`,`${ct.w}% · ${cl(cs).lb}`)}</div>`; });
     html += `</div>`;
@@ -568,7 +570,166 @@ function render() {
   app.innerHTML = html;
 }
 
-// ═══ 7. BLOCK RANKING TOGGLE ═══
+// ═══ 7. AI ANALYST ═══
+let aiCache = {};
+try { aiCache = JSON.parse(localStorage.getItem("hc_ai_cache") || "{}"); } catch(e) {}
+
+function getAIKey() {
+  return localStorage.getItem("hc_ai_key") || "";
+}
+
+function setAIKey(key) {
+  localStorage.setItem("hc_ai_key", key.trim());
+}
+
+function buildDataContext(geoFilter) {
+  const geos = Object.entries(D).map(([g,d]) => ({g, s:geoSc(d), d}));
+  const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr||0), 0);
+  const platScore = geos.filter(g => !NO(g.s)).reduce((s,g) => s + g.s, 0) / Math.max(1, geos.filter(g => !NO(g.s)).length);
+
+  let ctx = `iGaming платформа SapphireBet, ${META.month}. 10 GEO-рынков.\n`;
+  ctx += `Platform NGR: $${totalNGR}, score: ${platScore.toFixed(0)}pt.\n`;
+
+  if (PLAT_TREND.length >= 2) {
+    ctx += `NGR тренд (8мес): ${PLAT_TREND.map((v,i) => `${TL[i]||i}:$${v}`).join(", ")}.\n`;
+  }
+
+  const geosToShow = geoFilter ? geos.filter(g => g.g === geoFilter) : geos;
+  geosToShow.forEach(({g, s, d}) => {
+    const fl = FLAGS[g];
+    ctx += `\n${g}: score=${NO(s)?"null":Math.round(s)}, NGR=$${d.ngr||0}`;
+    if (d.ngr_mom) ctx += `, MoM=${d.ngr_mom>0?"+":""}${d.ngr_mom}%`;
+    if (fl) ctx += ` [FLAG: ${fl.msg}]`;
+    const reds = ALL_METRICS.filter(k => { const sc = scr(k, d[k]); return sc !== null && sc < 40; });
+    if (reds.length) ctx += `. Красные: ${reds.map(k => `${DEF_TH[k].l}=${d[k]}${DEF_TH[k].u}`).join(", ")}`;
+    const hist = HISTORY[g];
+    if (hist) {
+      if (hist.unique_players) ctx += `. Players(8m): ${hist.unique_players.join(",")}`;
+      if (hist.margin_pct) ctx += `. Margin%(8m): ${hist.margin_pct.join(",")}`;
+    }
+    ctx += `.`;
+  });
+
+  const segKeys = Object.keys(SEGMENTS).sort();
+  if (segKeys.length >= 2 && !geoFilter) {
+    const cur = SEGMENTS[segKeys[segKeys.length-1]];
+    const prev = SEGMENTS[segKeys[segKeys.length-2]];
+    ctx += `\n\nСегменты ${segKeys[segKeys.length-2]}→${segKeys[segKeys.length-1]}:`;
+    Object.keys(cur).forEach(seg => {
+      const c = cur[seg], p = prev?.[seg];
+      ctx += `\n${seg}: ${c.players}p, NGR=$${c.ngr}${p ? ` (было $${p.ngr})` : ""}`;
+    });
+  }
+
+  return ctx;
+}
+
+async function callAI(prompt, systemMsg) {
+  const key = getAIKey();
+  if (!key) return null;
+  const body = {
+    model: "gpt-4o-mini",
+    messages: [
+      {role: "system", content: systemMsg},
+      {role: "user", content: prompt},
+    ],
+    max_tokens: 600,
+    temperature: 0.3,
+  };
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {"Content-Type": "application/json", "Authorization": `Bearer ${key}`},
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`API ${res.status}: ${err.substring(0, 100)}`);
+  }
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+const AI_SYSTEM = `Ты — аналитик iGaming платформы. Пиши кратко, по-русски. Формат: 3-5 пунктов, каждый начинается с эмодзи (🔴 проблема, 🟢 рост, 🟡 риск, 💡 рекомендация). Один пункт = одно предложение. Фокус на actionable insights для CEO: что делать, а не просто что случилось. Используй конкретные цифры из данных.`;
+
+async function runAIAnalysis(geoFilter) {
+  const cacheKey = geoFilter || "_platform";
+  const cached = aiCache[cacheKey];
+  if (cached && (Date.now() - cached.ts < 3600000)) {
+    return cached.text;
+  }
+
+  const ctx = buildDataContext(geoFilter);
+  const prompt = geoFilter
+    ? `Проанализируй GEO ${geoFilter}. Данные:\n${ctx}\n\nНапиши 3-5 ключевых выводов и рекомендаций для CEO.`
+    : `Проанализируй платформу целиком. Данные:\n${ctx}\n\nНапиши 4-5 ключевых выводов и рекомендаций для CEO. Фокус: главные риски, точки роста, что требует действий.`;
+
+  const text = await callAI(prompt, AI_SYSTEM);
+  if (text) {
+    aiCache[cacheKey] = {text, ts: Date.now()};
+    localStorage.setItem("hc_ai_cache", JSON.stringify(aiCache));
+  }
+  return text;
+}
+
+function aiInsightPlaceholder(geoFilter) {
+  const key = getAIKey();
+  const cacheKey = geoFilter || "_platform";
+  const cached = aiCache[cacheKey];
+
+  let h = `<div id="ai-section" style="margin:14px 0;background:#0c0c1a;border-radius:12px;border:1px solid #1e1e35;padding:12px">`;
+  h += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="mono" style="color:#7c83ff;font-size:10px;font-weight:600">🤖 AI-АНАЛИТИК</div>`;
+  h += `<div style="display:flex;gap:4px">`;
+  if (key) {
+    h += `<button class="btn-secondary" style="padding:3px 8px;font-size:9px" onclick="runAndShowAI('${geoFilter||""}')">🔄 Обновить</button>`;
+  }
+  h += `<button class="btn-secondary" style="padding:3px 8px;font-size:9px" onclick="openAISettings()">⚙</button>`;
+  h += `</div></div>`;
+
+  if (!key) {
+    h += `<div style="text-align:center;padding:12px"><div style="color:#444;font-size:11px;margin-bottom:8px">Введите OpenAI API ключ для AI-анализа</div><button class="btn-primary" style="max-width:200px;margin:0 auto;padding:8px;font-size:11px" onclick="openAISettings()">🔑 Настроить ключ</button></div>`;
+  } else if (cached && (Date.now() - cached.ts < 3600000)) {
+    h += `<div style="color:#999;font-size:11px;line-height:1.7;white-space:pre-line">${escHtml(cached.text)}</div>`;
+    h += `<div class="mono" style="color:#222;font-size:7px;margin-top:6px;text-align:right">${new Date(cached.ts).toLocaleTimeString()}</div>`;
+  } else {
+    h += `<div id="ai-loading" style="text-align:center;padding:8px"><div class="mono" style="color:#333;font-size:10px">Нажмите 🔄 для анализа</div></div>`;
+  }
+
+  h += `</div>`;
+  return h;
+}
+
+async function runAndShowAI(geoFilter) {
+  const section = document.getElementById("ai-section");
+  if (!section) return;
+  const key = getAIKey();
+  if (!key) { openAISettings(); return; }
+
+  const loadEl = section.querySelector("#ai-loading") || section.querySelector("div[style*='line-height']");
+  if (loadEl) loadEl.innerHTML = `<div class="mono" style="color:#7c83ff;font-size:10px">⏳ Анализирую...</div>`;
+
+  try {
+    const text = await runAIAnalysis(geoFilter || null);
+    if (text) {
+      render();
+      showToast("🤖 Анализ готов");
+    }
+  } catch(err) {
+    showToast("❌ AI: " + err.message);
+    if (loadEl) loadEl.innerHTML = `<div style="color:#ff8a80;font-size:10px">Ошибка: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function openAISettings() {
+  const key = getAIKey();
+  const overlay = document.createElement("div");
+  overlay.id = "ai-settings-overlay";
+  overlay.className = "overlay";
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `<div style="width:100%;max-width:400px"><div class="modal" style="max-height:auto"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">🤖 AI Настройки</span><button onclick="document.getElementById('ai-settings-overlay').remove()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div></div><div class="modal-body"><div style="margin-bottom:12px"><label style="color:#888;font-size:10px">OpenAI API Key</label><input id="ai-key-input" type="password" value="${escHtml(key)}" placeholder="sk-..." class="ed-input" style="margin-top:4px"></div><div style="color:#555;font-size:10px;line-height:1.5;margin-bottom:12px">Ключ хранится в localStorage вашего браузера. Данные отправляются напрямую в OpenAI API. Используется модель gpt-4o-mini. Результат кэшируется на 1 час.</div><button class="btn-primary" onclick="setAIKey(document.getElementById('ai-key-input').value);document.getElementById('ai-settings-overlay').remove();render();showToast('🔑 Ключ сохранён')">Сохранить</button><div style="margin-top:8px"><button class="btn-danger" style="width:100%" onclick="localStorage.removeItem('hc_ai_key');localStorage.removeItem('hc_ai_cache');aiCache={};document.getElementById('ai-settings-overlay').remove();render();showToast('Ключ удалён')">🗑 Удалить ключ и кэш</button></div></div></div></div>`;
+  document.body.appendChild(overlay);
+}
+
+// ═══ 7b. BLOCK RANKING TOGGLE ═══
 function toggleRanking(ck) {
   const el = document.getElementById("rank-" + ck);
   if (!el) return;
