@@ -115,6 +115,7 @@ function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DE
 
 // ═══ 3. DYNAMIC DATA ═══
 let D = {}, PREV = {}, TREND = {}, HISTORY = {}, PLAT_TREND = [], PLAT_HISTORY = {}, TL = [], FLAGS = {}, SEGMENTS = {};
+let FUNNEL = {}, RETENTION_TABLE = {}, WEEKLY = {};
 let META = { month: "", month_short: "", prev_month_short: "", version: "v30", updated: "" };
 let dataSource = "none";
 
@@ -142,6 +143,9 @@ function applyDataset(ds, source) {
     TL = ds.trend_labels || [];
     FLAGS = ds.flags || {};
     SEGMENTS = ds.segments || {};
+    FUNNEL = ds.funnel || {};
+    RETENTION_TABLE = ds.retention_table || {};
+    WEEKLY = ds.weekly || {};
     dataSource = source || "unknown";
     document.title = `Health Check · SapphireBet · ${META.month}`;
     return true;
@@ -155,7 +159,7 @@ function saveDataToLocal() {
 }
 
 function getDataset() {
-  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS };
+  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE, weekly: WEEKLY };
 }
 
 async function loadData() {
@@ -358,8 +362,11 @@ function execSummaryHTML(geos, ps) {
   const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr||0), 0);
   const prevNGR = PLAT_TREND.length >= 2 ? PLAT_TREND[PLAT_TREND.length-2] : null;
   const ngrDelta = prevNGR ? ((totalNGR - prevNGR) / Math.abs(prevNGR) * 100) : null;
-  const crit = geos.filter(g => !NO(g.s) && g.s < 40).length;
-  const green = geos.filter(g => !NO(g.s) && g.s >= 70).length;
+  const flagged = geos.filter(g => g.flag).length;
+  const scoreCrit = geos.filter(g => !NO(g.s) && g.s < 40 && !g.flag).length;
+  const crit = scoreCrit + flagged;
+  const green = geos.filter(g => !NO(g.s) && g.s >= 70 && !g.flag).length;
+  const yellow = geos.length - green - crit;
   const sorted = [...geos].filter(g => !NO(g.d.ngr)).sort((a,b) => (b.d.ngr||0) - (a.d.ngr||0));
   const top2 = sorted.slice(0,2);
   const top2pct = totalNGR > 0 ? ((top2[0]?.d.ngr||0) + (top2[1]?.d.ngr||0)) / totalNGR * 100 : 0;
@@ -368,9 +375,17 @@ function execSummaryHTML(geos, ps) {
   const ngrStr = ngrDelta !== null ? `${ngrDelta > 0 ? "+" : ""}${ngrDelta.toFixed(0)}%` : "";
   lines.push(`Платформа <span style="color:#ccc;font-weight:700">${fmtNGR(totalNGR)}</span> NGR${ngrStr ? ` (${ngrDelta>0?"📈":"📉"} ${ngrStr} MoM)` : ""}, score <span style="color:${cl(ps).tx};font-weight:700">${NO(ps)?"—":Math.round(ps)}pt</span>.`);
 
-  if (crit > 0 && green > 0) lines.push(`<span style="color:#00e676">${green} GEO в норме</span>, <span style="color:#ff1744">${crit} проблемных</span>.`);
-  else if (crit > 0) lines.push(`<span style="color:#ff1744">${crit} из ${geos.length} GEO в красной зоне.</span>`);
-  else lines.push(`<span style="color:#00e676">Все ${geos.length} GEO в норме.</span>`);
+  if (crit > 0) {
+    let parts = [];
+    if (green > 0) parts.push(`<span style="color:#00e676">${green} в норме</span>`);
+    if (yellow > 0) parts.push(`<span style="color:#ffc107">${yellow} внимание</span>`);
+    parts.push(`<span style="color:#ff1744">${crit} проблемных</span>${flagged?` (вкл. ${flagged} с флагом)`:""}`);
+    lines.push(parts.join(", ") + ".");
+  } else if (yellow > 0) {
+    lines.push(`<span style="color:#00e676">${green} в норме</span>, <span style="color:#ffc107">${yellow} требуют внимания</span>.`);
+  } else {
+    lines.push(`<span style="color:#00e676">Все ${geos.length} GEO в норме.</span>`);
+  }
 
   if (top2pct > 60) lines.push(`⚠️ Концентрация: ${top2[0]?.g.split(" ").pop()} + ${top2[1]?.g.split(" ").pop()} = <span style="color:#ffc107">${top2pct.toFixed(0)}%</span> NGR.`);
 
@@ -464,6 +479,94 @@ function historySparkHTML(geo) {
   return h;
 }
 
+// ═══ 5f. RETENTION TABLE ═══
+function retentionTableHTML() {
+  let RT = {};
+  try { RT = typeof RETENTION_TABLE !== "undefined" ? RETENTION_TABLE : {}; } catch(e) {}
+  if (!Object.keys(RT).length) {
+    RT = {};
+    Object.entries(D).forEach(([g, d]) => {
+      if (d.d30_retention || d.d90_retention || d.core_retention) {
+        RT[g] = { m1: d.d30_retention, m3: d.d90_retention, core: d.core_retention, active_mom: d.active_mom, bettor_ret: d.bettor_ret };
+      }
+    });
+  }
+  if (!Object.keys(RT).length) return "";
+
+  const geos = Object.entries(RT).sort((a,b) => (b[1].core||0) - (a[1].core||0));
+  const avgM1 = geos.reduce((s,[,r]) => s + (r.m1||0), 0) / geos.length;
+  const avgM3 = geos.reduce((s,[,r]) => s + (r.m3||0), 0) / geos.length;
+  const avgCore = geos.reduce((s,[,r]) => s + (r.core||0), 0) / geos.length;
+
+  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">🔄 RETENTION ПО GEO</div>`;
+  h += `<div style="display:flex;gap:4px;padding:0 4px;margin-bottom:4px"><span style="flex:1;font-size:8px;color:#444">GEO</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444">M1</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444">M3</span><span class="mono" style="width:44px;text-align:center;font-size:8px;color:#444">Core</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444">Bettor</span></div>`;
+
+  function retC(v, th_g, th_y) { if (NO(v)) return "#333"; if (v >= th_g) return "#00e676"; if (v >= th_y) return "#ffc107"; return "#ff1744"; }
+
+  geos.forEach(([g, r]) => {
+    h += `<div style="display:flex;gap:4px;padding:3px 4px;border-radius:4px;cursor:pointer;margin-bottom:1px" onclick="nav('${g}')" onmouseenter="this.style.background='#151520'" onmouseleave="this.style.background='transparent'"><span style="flex:1;font-size:10px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.split(" ").pop()}</span><span class="mono" style="width:40px;text-align:center;font-size:10px;font-weight:600;color:${retC(r.m1,25,15)}">${NO(r.m1)?"—":r.m1.toFixed(1)}</span><span class="mono" style="width:40px;text-align:center;font-size:10px;font-weight:600;color:${retC(r.m3,10,5)}">${NO(r.m3)?"—":r.m3.toFixed(1)}</span><span class="mono" style="width:44px;text-align:center;font-size:10px;font-weight:600;color:${retC(r.core,25,12)}">${NO(r.core)?"—":r.core.toFixed(1)}</span><span class="mono" style="width:40px;text-align:center;font-size:10px;font-weight:600;color:${retC(r.bettor_ret,40,25)}">${NO(r.bettor_ret)?"—":r.bettor_ret.toFixed(0)}</span></div>`;
+  });
+
+  h += `<div style="display:flex;gap:4px;padding:4px 4px 0;border-top:1px solid #1a1a2e;margin-top:4px"><span style="flex:1;font-size:9px;color:#666;font-weight:600">AVG</span><span class="mono" style="width:40px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgM1.toFixed(1)}</span><span class="mono" style="width:40px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgM3.toFixed(1)}</span><span class="mono" style="width:44px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgCore.toFixed(1)}</span><span class="mono" style="width:40px;text-align:center;font-size:9px;color:#555">—</span></div>`;
+  h += `</div>`;
+  return h;
+}
+
+// ═══ 5g. DEPOSIT CONVERSION FUNNEL ═══
+function funnelHTML() {
+  let F = {};
+  try { F = typeof FUNNEL !== "undefined" ? FUNNEL : {}; } catch(e) {}
+  if (!F.periods || !F.periods.length) return "";
+
+  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📥 ВОРОНКА КОНВЕРСИИ (платформа)</div>`;
+
+  const metrics = [
+    {key:"registration",label:"Регистрации",color:"#7c83ff"},
+    {key:"ftd",label:"FTD",color:"#00e676"},
+    {key:"reg2dep_pct",label:"Reg→Dep %",color:"#ffc107",isPct:true},
+    {key:"cr2_pct",label:"CR 2-й деп %",color:"#ff6b35",isPct:true},
+    {key:"cr3_pct",label:"CR 3-й деп %",color:"#e040fb",isPct:true},
+    {key:"cr4_pct",label:"CR 4-й деп %",color:"#00bcd4",isPct:true},
+    {key:"cr5_pct",label:"CR 5+ деп %",color:"#8bc34a",isPct:true},
+  ];
+
+  metrics.forEach(m => {
+    const data = F[m.key];
+    if (!data || !data.length) return;
+    const last = data[data.length-1];
+    const prev = data.length >= 2 ? data[data.length-2] : null;
+    const delta = prev ? last - prev : null;
+    const {svg} = buildSparkSVG(data, 24, 90);
+    const valStr = m.isPct ? last.toFixed(1)+"%" : fmt(last);
+    const deltaStr = delta !== null ? `${delta >= 0 ? "+" : ""}${m.isPct ? delta.toFixed(1)+"pp" : fmt(delta)}` : "";
+    const deltaC = delta !== null ? (delta >= 0 ? "#00e67688" : "#ff174488") : "";
+
+    h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px">${m.label}</span><div style="flex:1;min-width:0">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span>`:""}</div></div>`;
+  });
+
+  h += `<div class="mono" style="color:#222;font-size:7px;text-align:center;margin-top:4px">${F.periods.join(" → ")}</div>`;
+  h += `</div>`;
+  return h;
+}
+
+// ═══ 5h. WoW FRAMEWORK ═══
+function wowHTML() {
+  let W = {};
+  try { W = typeof WEEKLY !== "undefined" ? WEEKLY : {}; } catch(e) {}
+  if (!W.weeks || !W.weeks.length) return "";
+
+  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📅 WoW ТЕКУЩИЙ МЕСЯЦ · ${W.current_month || ""}</div>`;
+  W.weeks.forEach((w, i) => {
+    const prev = i > 0 ? W.weeks[i-1] : null;
+    const ngrDelta = prev ? ((w.ngr - prev.ngr) / Math.max(Math.abs(prev.ngr), 1) * 100) : null;
+    const deltaStr = ngrDelta !== null ? `${ngrDelta >= 0 ? "+" : ""}${ngrDelta.toFixed(0)}%` : "";
+    const deltaC = ngrDelta !== null ? (ngrDelta >= 0 ? "#00e676" : "#ff1744") : "#555";
+    h += `<div style="display:flex;align-items:center;gap:6px;padding:5px 6px;background:#111122;border-radius:6px;margin-bottom:3px"><span class="mono" style="color:#666;font-size:9px;min-width:50px">${w.label||`W${i+1}`}</span><div style="flex:1"><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,w.ngr/Math.max(...W.weeks.map(x=>x.ngr||1))*100))}%;background:${deltaC}88"></div></div></div><span class="mono" style="color:#ccc;font-size:10px;font-weight:600;min-width:50px;text-align:right">${fmtNGR(w.ngr)}</span><span class="mono" style="color:${deltaC};font-size:8px;min-width:36px;text-align:right">${deltaStr}</span></div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
 function platBlocksHTML(geos) {
   let html = `<div style="margin-top:18px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:10px;text-align:center">ПЛАТФОРМА · БЛОКИ (avg по GEO)</div><div style="display:flex;flex-direction:column;gap:4px">`;
   Object.entries(CATS).forEach(([ck, ct]) => {
@@ -524,20 +627,23 @@ function render() {
     html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${crit} crit · ${geos.length} geo`)}</div>`;
     html += execSummaryHTML(geos, ps);
     html += platPulseHTML();
-    html += ngrContribHTML(geos);
     html += platSparkHTML();
-    html += signalsHTML(geos);
-    html += aiInsightPlaceholder(null);
-    html += `<div class="line"></div>`;
-    html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => {
+    html += `<div class="grid-geo" style="margin-bottom:14px">${geos.map(({g,s,d,flag}) => {
       const mom = d.ngr_mom;
       const momArrow = !NO(mom) ? (mom > 5 ? "↑" : mom < -5 ? "↓" : "→") : "";
       const momC = !NO(mom) ? (mom > 5 ? "#00e676" : mom < -5 ? "#ff1744" : "#555") : "";
       const tier = (d.ngr||0) > 20000 ? "" : (d.ngr||0) > 5000 ? "" : "🌱";
-      const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}</span>`:""}`;
+      const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}${Math.abs(d.ngr_mom).toFixed(0)}%</span>`:""}`;
       return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag)}</div>`;
     }).join("")}</div>`;
+    html += `<div class="mono" style="color:#222;font-size:7px;text-align:center;margin-bottom:12px">стрелки = MoM (${META.prev_month_short || "пред"} → ${META.month_short || "тек"})</div>`;
+    html += signalsHTML(geos);
+    html += aiInsightPlaceholder(null);
+    html += ngrContribHTML(geos);
     html += platBlocksHTML(geos);
+    html += retentionTableHTML();
+    html += funnelHTML();
+    html += wowHTML();
     html += segmentsHTML();
   } else if (state.geo && !state.cat) {
     const g = state.geo, d = D[g], fl = FLAGS[g], prev = PREV[g] || {}, hist = HISTORY[g] || {};
@@ -1169,7 +1275,7 @@ function downloadJson() {
 async function resetToFile() {
   localStorage.removeItem("hc_data");
   dataSource = "none";
-  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {};
+  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {}; WEEKLY = {};
   try {
     const res = await fetch("data.json?" + Date.now());
     if (res.ok) {
