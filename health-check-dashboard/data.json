@@ -1440,5 +1440,148 @@
         "avg_ngr": 5.95
       }
     }
+  },
+  "funnel": {
+    "periods": [
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+      "Jan",
+      "Feb"
+    ],
+    "registration": [
+      260,
+      341,
+      362,
+      297,
+      425,
+      276
+    ],
+    "ftd": [
+      48,
+      68,
+      71,
+      101,
+      184,
+      120
+    ],
+    "reg2dep_pct": [
+      18.5,
+      19.9,
+      19.6,
+      34.0,
+      43.3,
+      43.5
+    ],
+    "cr2_pct": [
+      52.1,
+      41.2,
+      49.3,
+      56.4,
+      27.2,
+      45.0
+    ],
+    "cr3_pct": [
+      84.0,
+      82.1,
+      77.1,
+      73.7,
+      70.0,
+      75.9
+    ],
+    "cr4_pct": [
+      71.4,
+      73.9,
+      74.1,
+      71.4,
+      65.7,
+      90.2
+    ],
+    "cr5_pct": [
+      93.3,
+      82.4,
+      60.0,
+      73.3,
+      82.6,
+      81.1
+    ]
+  },
+  "retention_table": {
+    "🇧🇷 Brazil": {
+      "m1": 15.3,
+      "m3": 7.2,
+      "core": 14.7,
+      "active_mom": 35.9,
+      "bettor_ret": 37.7
+    },
+    "🇦🇷 Argentina": {
+      "m1": 13.1,
+      "m3": 4.1,
+      "core": 8.0,
+      "active_mom": 53.8,
+      "bettor_ret": 26.0
+    },
+    "🇨🇱 Chile": {
+      "m1": 13.1,
+      "m3": 3.7,
+      "core": 6.4,
+      "active_mom": 176.9,
+      "bettor_ret": 21.7
+    },
+    "🇲🇽 Mexico": {
+      "m1": 10.7,
+      "m3": 3.2,
+      "core": 7.8,
+      "active_mom": 9.9,
+      "bettor_ret": 46.8
+    },
+    "🇵🇪 Peru": {
+      "m1": 17.3,
+      "m3": 6.6,
+      "core": 14.9,
+      "active_mom": 31.8,
+      "bettor_ret": 38.7
+    },
+    "🇨🇴 Colombia": {
+      "m1": 22.6,
+      "m3": 5.3,
+      "core": 14.5,
+      "active_mom": 50.7,
+      "bettor_ret": 51.6
+    },
+    "🇮🇳 India": {
+      "m1": 26.5,
+      "m3": 7.2,
+      "core": 32.6,
+      "active_mom": 14.2,
+      "bettor_ret": 82.2
+    },
+    "🇧🇩 Bangladesh": {
+      "m1": 24.8,
+      "m3": 7.9,
+      "core": 5.8,
+      "active_mom": 2.8,
+      "bettor_ret": 35.4
+    },
+    "🇵🇱 Poland": {
+      "m1": 21.0,
+      "m3": 11.3,
+      "core": 24.7,
+      "active_mom": -23.4,
+      "bettor_ret": 73.5
+    },
+    "🇵🇹 Portugal": {
+      "m1": 15.5,
+      "m3": 4.1,
+      "core": 8.8,
+      "active_mom": 128.0,
+      "bettor_ret": 43.8
+    }
+  },
+  "weekly": {
+    "current_month": "2026-04",
+    "weeks": [],
+    "note": "Weekly data will appear here when April data is loaded"
   }
 }
