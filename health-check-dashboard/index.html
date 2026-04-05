@@ -88,7 +88,7 @@ const DEF_TH = {
   dep_approval:{g:80,y:60,u:"%",l:"Approval депозитов",d:"h"},wd_approval:{g:75,y:55,u:"%",l:"Approval выводов",d:"h"},avg_deposit:{g:25,y:12,u:"$",l:"Средний депозит",d:"h"},cashout_pct:{g:90,y:100,u:"%",l:"Cashout %",d:"l"},
   ngr:{g:30000,y:10000,u:"$",l:"NGR",d:"h"},ngr_mom:{g:5,y:-15,u:"%",l:"NGR MoM",d:"h"},ngr_target:{g:50,y:20,u:"%",l:"NGR vs $150K",d:"h"},arppu:{g:20,y:5,u:"$",l:"ARPPU",d:"h"},
   casino_share:{g:30,y:20,u:"%",l:"Доля Casino GGR",d:"h"},casino_margin:{g:5,y:2,u:"%",l:"Маржа Casino",d:"h"},casino_players:{g:1000,y:300,u:"",l:"Casino игроки",d:"h"},casino_ggr_mom:{g:0,y:-10,u:"%",l:"Casino GGR MoM",d:"h"},
-  sport_margin:{g:8,y:4,u:"%",l:"Маржа Sport",d:"h"},sport_players:{g:20,y:5,u:"",l:"Sport ставок/день",d:"h"},sport_ggr_mom:{g:0,y:-10,u:"%",l:"Sport GGR MoM",d:"h"},avg_bet:{g:15,y:5,u:"$",l:"Средняя ставка",d:"h"},
+  sport_margin:{g:8,y:4,u:"%",l:"Маржа Sport",d:"h"},sport_players:{g:100,y:20,u:"",l:"Sport ставок/день",d:"h"},sport_ggr_mom:{g:0,y:-10,u:"%",l:"Sport GGR MoM",d:"h"},avg_bet:{g:25,y:10,u:"$",l:"Средняя ставка",d:"h"},
   d30_retention:{g:25,y:15,u:"%",l:"Ret M1 (активация)",d:"h"},d90_retention:{g:10,y:5,u:"%",l:"Ret M3 (стабилиз.)",d:"h"},core_retention:{g:25,y:12,u:"%",l:"Удержание ядра (4+/6м)",d:"h"},active_mom:{g:10,y:0,u:"%",l:"Активные MoM",d:"h"},
   bettor_pct:{g:15,y:5,u:"%",l:"% бетторов",d:"h"},active_daily:{g:100,y:30,u:"",l:"Активных/день",d:"h"},bettor_ret:{g:40,y:25,u:"%",l:"Ret бетторов",d:"h"},whale_top20:{g:50,y:70,u:"%",l:"Top20 NGR%",d:"l"},
   frt_sec:{g:30,y:60,u:"с",l:"FRT (медиана)",d:"l"},csat:{g:70,y:55,u:"%",l:"CSAT",d:"h"},abandon_rate:{g:3,y:8,u:"%",l:"AR% пропущено",d:"l"},aht_min:{g:10,y:18,u:"м",l:"AHT (медиана)",d:"l"},
@@ -247,15 +247,15 @@ function buildSparkSVG(data, h, w) {
 function sparkHTML(geo) {
   const data = TREND[geo]; if (!data || !data.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(data, 48, 200);
-  const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#666":"#222"};font-size:7px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR тренд (${data.length} мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#888":"#444"};font-size:8px">${l}</span>`).join("");
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR тренд (${data.length} мес, закрытые)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 function platSparkHTML() {
   if (!PLAT_TREND.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 40, 200);
-  const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#666":"#222"};font-size:7px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#444;font-size:9px">NGR платформа (${PLAT_TREND.length} мес)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#888":"#444"};font-size:8px">${l}</span>`).join("");
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR платформа (${PLAT_TREND.length} мес, закрытые)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 // ═══ 5b. MINI KPI CARDS (Platform Pulse) ═══
@@ -352,6 +352,49 @@ function generateSignals(geos) {
     seen.add(key);
     return true;
   }).slice(0, 6);
+}
+
+function execSummaryHTML(geos, ps) {
+  const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr||0), 0);
+  const prevNGR = PLAT_TREND.length >= 2 ? PLAT_TREND[PLAT_TREND.length-2] : null;
+  const ngrDelta = prevNGR ? ((totalNGR - prevNGR) / Math.abs(prevNGR) * 100) : null;
+  const crit = geos.filter(g => !NO(g.s) && g.s < 40).length;
+  const green = geos.filter(g => !NO(g.s) && g.s >= 70).length;
+  const sorted = [...geos].filter(g => !NO(g.d.ngr)).sort((a,b) => (b.d.ngr||0) - (a.d.ngr||0));
+  const top2 = sorted.slice(0,2);
+  const top2pct = totalNGR > 0 ? ((top2[0]?.d.ngr||0) + (top2[1]?.d.ngr||0)) / totalNGR * 100 : 0;
+
+  let lines = [];
+  const ngrStr = ngrDelta !== null ? `${ngrDelta > 0 ? "+" : ""}${ngrDelta.toFixed(0)}%` : "";
+  lines.push(`Платформа <span style="color:#ccc;font-weight:700">${fmtNGR(totalNGR)}</span> NGR${ngrStr ? ` (${ngrDelta>0?"📈":"📉"} ${ngrStr} MoM)` : ""}, score <span style="color:${cl(ps).tx};font-weight:700">${NO(ps)?"—":Math.round(ps)}pt</span>.`);
+
+  if (crit > 0 && green > 0) lines.push(`<span style="color:#00e676">${green} GEO в норме</span>, <span style="color:#ff1744">${crit} проблемных</span>.`);
+  else if (crit > 0) lines.push(`<span style="color:#ff1744">${crit} из ${geos.length} GEO в красной зоне.</span>`);
+  else lines.push(`<span style="color:#00e676">Все ${geos.length} GEO в норме.</span>`);
+
+  if (top2pct > 60) lines.push(`⚠️ Концентрация: ${top2[0]?.g.split(" ").pop()} + ${top2[1]?.g.split(" ").pop()} = <span style="color:#ffc107">${top2pct.toFixed(0)}%</span> NGR.`);
+
+  return `<div style="background:#0c0c18;border-radius:10px;border:1px solid #1a1a2e;padding:10px 12px;margin-bottom:10px"><div style="color:#888;font-size:11px;line-height:1.6">${lines.join(" ")}</div></div>`;
+}
+
+function ngrContribHTML(geos) {
+  const sorted = [...geos].filter(g => g.d.ngr > 0).sort((a,b) => (b.d.ngr||0) - (a.d.ngr||0));
+  const total = sorted.reduce((s,g) => s + (g.d.ngr||0), 0);
+  if (!total) return "";
+  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#444;font-size:9px;margin-bottom:4px">NGR вклад по GEO</div><div style="display:flex;border-radius:6px;overflow:hidden;height:18px">`;
+  const colors = ["#7c83ff","#00e676","#ffc107","#ff6b35","#e040fb","#00bcd4","#8bc34a","#ff5722","#9c27b0","#607d8b"];
+  sorted.forEach((g, i) => {
+    const pct = (g.d.ngr / total * 100);
+    if (pct < 2) return;
+    h += `<div onclick="nav('${g.g}')" style="width:${pct}%;background:${colors[i%colors.length]};cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden" title="${g.g}: ${fmtNGR(g.d.ngr)} (${pct.toFixed(0)}%)"><span class="mono" style="color:#fff;font-size:7px;font-weight:600;text-shadow:0 0 3px #000">${pct>=8?g.g.split(" ").pop():""}</span></div>`;
+  });
+  h += `</div><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">`;
+  sorted.forEach((g, i) => {
+    const pct = (g.d.ngr / total * 100);
+    h += `<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;color:#555"><span style="width:6px;height:6px;border-radius:2px;background:${colors[i%colors.length]}"></span>${g.g.split(" ").pop()} ${pct.toFixed(0)}%</span>`;
+  });
+  h += `</div></div>`;
+  return h;
 }
 
 function signalsHTML(geos) {
@@ -474,15 +517,26 @@ function render() {
     ? `<span class="data-badge" style="background:#00e67622;color:#00e676">📄 json</span>`
     : `<span class="data-badge" style="background:#ff174422;color:#ff1744">⚠ нет</span>`;
 
-  let html = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${META.month||""} · ${META.version} ${srcBadge}</p></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
+  const updStr = META.updated ? `обновлено ${META.updated}` : "";
+  let html = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${META.month||""} · ${META.version} ${srcBadge}</p>${updStr?`<p class="mono" style="color:#1e1e30;font-size:8px;margin-top:1px">📅 данные: закрытый месяц · ${updStr}</p>`:""}</div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
 
   if (!state.geo) {
     html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${crit} crit · ${geos.length} geo`)}</div>`;
+    html += execSummaryHTML(geos, ps);
     html += platPulseHTML();
+    html += ngrContribHTML(geos);
     html += platSparkHTML();
     html += signalsHTML(geos);
+    html += aiInsightPlaceholder(null);
     html += `<div class="line"></div>`;
-    html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,fmtNGR(d.ngr),flag)}</div>`).join("")}</div>`;
+    html += `<div class="grid-geo">${geos.map(({g,s,d,flag}) => {
+      const mom = d.ngr_mom;
+      const momArrow = !NO(mom) ? (mom > 5 ? "↑" : mom < -5 ? "↓" : "→") : "";
+      const momC = !NO(mom) ? (mom > 5 ? "#00e676" : mom < -5 ? "#ff1744" : "#555") : "";
+      const tier = (d.ngr||0) > 20000 ? "" : (d.ngr||0) > 5000 ? "" : "🌱";
+      const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}</span>`:""}`;
+      return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag)}</div>`;
+    }).join("")}</div>`;
     html += platBlocksHTML(geos);
     html += segmentsHTML();
   } else if (state.geo && !state.cat) {
@@ -491,10 +545,12 @@ function render() {
     html += crumbHTML(g);
     html += navHTML(idx);
     if (fl) html += `<div class="alert"><span class="mono" style="color:#ff8a80;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span><span style="color:#55333e;font-size:9px;margin-left:6px">${fl.detail}</span></div>`;
-    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}</div>`;
+    const tierLabel = (d.ngr||0) > 20000 ? "🏆 Tier 1" : (d.ngr||0) > 5000 ? "📈 Tier 2" : "🌱 Tier 3";
+    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}<div class="mono" style="color:#333;font-size:8px;margin-top:2px">${tierLabel} · NGR ${fmtNGR(d.ngr)}</div></div>`;
     html += summaryHTML(d, prev, hist);
     html += sparkHTML(g);
     html += historySparkHTML(g);
+    html += aiInsightPlaceholder(g);
     html += `<div class="line"></div><div class="grid-cat">`;
     Object.entries(CATS).forEach(([ck, ct]) => { const cs = catSc(d, ck); html += `<div onclick="navCat('${ck}')" style="animation:fi .3s ease">${sphereHTML(cs,54,`${ct.i} ${ct.l}`,`${ct.w}% · ${cl(cs).lb}`)}</div>`; });
     html += `</div>`;
@@ -514,7 +570,166 @@ function render() {
   app.innerHTML = html;
 }
 
-// ═══ 7. BLOCK RANKING TOGGLE ═══
+// ═══ 7. AI ANALYST ═══
+let aiCache = {};
+try { aiCache = JSON.parse(localStorage.getItem("hc_ai_cache") || "{}"); } catch(e) {}
+
+function getAIKey() {
+  return localStorage.getItem("hc_ai_key") || "";
+}
+
+function setAIKey(key) {
+  localStorage.setItem("hc_ai_key", key.trim());
+}
+
+function buildDataContext(geoFilter) {
+  const geos = Object.entries(D).map(([g,d]) => ({g, s:geoSc(d), d}));
+  const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr||0), 0);
+  const platScore = geos.filter(g => !NO(g.s)).reduce((s,g) => s + g.s, 0) / Math.max(1, geos.filter(g => !NO(g.s)).length);
+
+  let ctx = `iGaming платформа SapphireBet, ${META.month}. 10 GEO-рынков.\n`;
+  ctx += `Platform NGR: $${totalNGR}, score: ${platScore.toFixed(0)}pt.\n`;
+
+  if (PLAT_TREND.length >= 2) {
+    ctx += `NGR тренд (8мес): ${PLAT_TREND.map((v,i) => `${TL[i]||i}:$${v}`).join(", ")}.\n`;
+  }
+
+  const geosToShow = geoFilter ? geos.filter(g => g.g === geoFilter) : geos;
+  geosToShow.forEach(({g, s, d}) => {
+    const fl = FLAGS[g];
+    ctx += `\n${g}: score=${NO(s)?"null":Math.round(s)}, NGR=$${d.ngr||0}`;
+    if (d.ngr_mom) ctx += `, MoM=${d.ngr_mom>0?"+":""}${d.ngr_mom}%`;
+    if (fl) ctx += ` [FLAG: ${fl.msg}]`;
+    const reds = ALL_METRICS.filter(k => { const sc = scr(k, d[k]); return sc !== null && sc < 40; });
+    if (reds.length) ctx += `. Красные: ${reds.map(k => `${DEF_TH[k].l}=${d[k]}${DEF_TH[k].u}`).join(", ")}`;
+    const hist = HISTORY[g];
+    if (hist) {
+      if (hist.unique_players) ctx += `. Players(8m): ${hist.unique_players.join(",")}`;
+      if (hist.margin_pct) ctx += `. Margin%(8m): ${hist.margin_pct.join(",")}`;
+    }
+    ctx += `.`;
+  });
+
+  const segKeys = Object.keys(SEGMENTS).sort();
+  if (segKeys.length >= 2 && !geoFilter) {
+    const cur = SEGMENTS[segKeys[segKeys.length-1]];
+    const prev = SEGMENTS[segKeys[segKeys.length-2]];
+    ctx += `\n\nСегменты ${segKeys[segKeys.length-2]}→${segKeys[segKeys.length-1]}:`;
+    Object.keys(cur).forEach(seg => {
+      const c = cur[seg], p = prev?.[seg];
+      ctx += `\n${seg}: ${c.players}p, NGR=$${c.ngr}${p ? ` (было $${p.ngr})` : ""}`;
+    });
+  }
+
+  return ctx;
+}
+
+async function callAI(prompt, systemMsg) {
+  const key = getAIKey();
+  if (!key) return null;
+  const body = {
+    model: "gpt-4o-mini",
+    messages: [
+      {role: "system", content: systemMsg},
+      {role: "user", content: prompt},
+    ],
+    max_tokens: 600,
+    temperature: 0.3,
+  };
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {"Content-Type": "application/json", "Authorization": `Bearer ${key}`},
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`API ${res.status}: ${err.substring(0, 100)}`);
+  }
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+const AI_SYSTEM = `Ты — аналитик iGaming платформы. Пиши кратко, по-русски. Формат: 3-5 пунктов, каждый начинается с эмодзи (🔴 проблема, 🟢 рост, 🟡 риск, 💡 рекомендация). Один пункт = одно предложение. Фокус на actionable insights для CEO: что делать, а не просто что случилось. Используй конкретные цифры из данных.`;
+
+async function runAIAnalysis(geoFilter) {
+  const cacheKey = geoFilter || "_platform";
+  const cached = aiCache[cacheKey];
+  if (cached && (Date.now() - cached.ts < 3600000)) {
+    return cached.text;
+  }
+
+  const ctx = buildDataContext(geoFilter);
+  const prompt = geoFilter
+    ? `Проанализируй GEO ${geoFilter}. Данные:\n${ctx}\n\nНапиши 3-5 ключевых выводов и рекомендаций для CEO.`
+    : `Проанализируй платформу целиком. Данные:\n${ctx}\n\nНапиши 4-5 ключевых выводов и рекомендаций для CEO. Фокус: главные риски, точки роста, что требует действий.`;
+
+  const text = await callAI(prompt, AI_SYSTEM);
+  if (text) {
+    aiCache[cacheKey] = {text, ts: Date.now()};
+    localStorage.setItem("hc_ai_cache", JSON.stringify(aiCache));
+  }
+  return text;
+}
+
+function aiInsightPlaceholder(geoFilter) {
+  const key = getAIKey();
+  const cacheKey = geoFilter || "_platform";
+  const cached = aiCache[cacheKey];
+
+  let h = `<div id="ai-section" style="margin:14px 0;background:#0c0c1a;border-radius:12px;border:1px solid #1e1e35;padding:12px">`;
+  h += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="mono" style="color:#7c83ff;font-size:10px;font-weight:600">🤖 AI-АНАЛИТИК</div>`;
+  h += `<div style="display:flex;gap:4px">`;
+  if (key) {
+    h += `<button class="btn-secondary" style="padding:3px 8px;font-size:9px" onclick="runAndShowAI('${geoFilter||""}')">🔄 Обновить</button>`;
+  }
+  h += `<button class="btn-secondary" style="padding:3px 8px;font-size:9px" onclick="openAISettings()">⚙</button>`;
+  h += `</div></div>`;
+
+  if (!key) {
+    h += `<div style="text-align:center;padding:12px"><div style="color:#444;font-size:11px;margin-bottom:8px">Введите OpenAI API ключ для AI-анализа</div><button class="btn-primary" style="max-width:200px;margin:0 auto;padding:8px;font-size:11px" onclick="openAISettings()">🔑 Настроить ключ</button></div>`;
+  } else if (cached && (Date.now() - cached.ts < 3600000)) {
+    h += `<div style="color:#999;font-size:11px;line-height:1.7;white-space:pre-line">${escHtml(cached.text)}</div>`;
+    h += `<div class="mono" style="color:#222;font-size:7px;margin-top:6px;text-align:right">${new Date(cached.ts).toLocaleTimeString()}</div>`;
+  } else {
+    h += `<div id="ai-loading" style="text-align:center;padding:8px"><div class="mono" style="color:#333;font-size:10px">Нажмите 🔄 для анализа</div></div>`;
+  }
+
+  h += `</div>`;
+  return h;
+}
+
+async function runAndShowAI(geoFilter) {
+  const section = document.getElementById("ai-section");
+  if (!section) return;
+  const key = getAIKey();
+  if (!key) { openAISettings(); return; }
+
+  const loadEl = section.querySelector("#ai-loading") || section.querySelector("div[style*='line-height']");
+  if (loadEl) loadEl.innerHTML = `<div class="mono" style="color:#7c83ff;font-size:10px">⏳ Анализирую...</div>`;
+
+  try {
+    const text = await runAIAnalysis(geoFilter || null);
+    if (text) {
+      render();
+      showToast("🤖 Анализ готов");
+    }
+  } catch(err) {
+    showToast("❌ AI: " + err.message);
+    if (loadEl) loadEl.innerHTML = `<div style="color:#ff8a80;font-size:10px">Ошибка: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function openAISettings() {
+  const key = getAIKey();
+  const overlay = document.createElement("div");
+  overlay.id = "ai-settings-overlay";
+  overlay.className = "overlay";
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `<div style="width:100%;max-width:400px"><div class="modal" style="max-height:auto"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">🤖 AI Настройки</span><button onclick="document.getElementById('ai-settings-overlay').remove()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div></div><div class="modal-body"><div style="margin-bottom:12px"><label style="color:#888;font-size:10px">OpenAI API Key</label><input id="ai-key-input" type="password" value="${escHtml(key)}" placeholder="sk-..." class="ed-input" style="margin-top:4px"></div><div style="color:#555;font-size:10px;line-height:1.5;margin-bottom:12px">Ключ хранится в localStorage вашего браузера. Данные отправляются напрямую в OpenAI API. Используется модель gpt-4o-mini. Результат кэшируется на 1 час.</div><button class="btn-primary" onclick="setAIKey(document.getElementById('ai-key-input').value);document.getElementById('ai-settings-overlay').remove();render();showToast('🔑 Ключ сохранён')">Сохранить</button><div style="margin-top:8px"><button class="btn-danger" style="width:100%" onclick="localStorage.removeItem('hc_ai_key');localStorage.removeItem('hc_ai_cache');aiCache={};document.getElementById('ai-settings-overlay').remove();render();showToast('Ключ удалён')">🗑 Удалить ключ и кэш</button></div></div></div></div>`;
+  document.body.appendChild(overlay);
+}
+
+// ═══ 7b. BLOCK RANKING TOGGLE ═══
 function toggleRanking(ck) {
   const el = document.getElementById("rank-" + ck);
   if (!el) return;
@@ -969,21 +1184,79 @@ async function resetToFile() {
 }
 
 // ═══ 11. SETTINGS MODAL ═══
+let settingsView = "thresholds";
 function openSettings() {
+  settingsView = "thresholds";
   const overlay = document.createElement("div");
   overlay.id = "settings-overlay";
   overlay.className = "overlay";
   overlay.onclick = e => { if (e.target === overlay) closeSettings(); };
   function build() {
-    const metrics = CATS[settingsCat]?.m || [];
-    let h = `<div class="modal"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">⚙ Пороги</span><button onclick="closeSettings()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div class="tab-bar" style="margin-top:10px">`;
+    let h = `<div class="modal"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">⚙ Скоринг</span><button onclick="closeSettings()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div class="tab-bar" style="margin-top:10px"><button class="tab-btn" onclick="settingsView='formula';refreshSettings()" style="background:${settingsView==='formula'?'#1e1e35':'transparent'};color:${settingsView==='formula'?'#ccc':'#444'}">📐 Формула</button><button class="tab-btn" onclick="settingsView='thresholds';refreshSettings()" style="background:${settingsView==='thresholds'?'#1e1e35':'transparent'};color:${settingsView==='thresholds'?'#ccc':'#444'}">🎚 Пороги</button><button class="tab-btn" onclick="settingsView='weights';refreshSettings()" style="background:${settingsView==='weights'?'#1e1e35':'transparent'};color:${settingsView==='weights'?'#ccc':'#444'}">⚖ Веса</button></div></div><div class="modal-body">`;
+    if (settingsView === "formula") {
+      h += buildFormulaView();
+    } else if (settingsView === "weights") {
+      h += buildWeightsView();
+    } else {
+      h += buildThresholdsView();
+    }
+    h += `</div><div class="modal-foot"><button class="btn-primary" onclick="saveSettings()">Сохранить</button></div></div>`;
+    return h;
+  }
+  function buildFormulaView() {
+    let h = `<div style="color:#888;font-size:11px;line-height:1.6">`;
+    h += `<div style="color:#ccc;font-size:12px;font-weight:600;margin-bottom:8px">Как считается рейтинг GEO</div>`;
+    h += `<div style="background:#111122;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #1a1a2e">`;
+    h += `<div style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:6px">1. Метрика → Score (0-100)</div>`;
+    h += `<div style="color:#666;font-size:10px;margin-bottom:4px">Каждая метрика получает score от 0 до 100:</div>`;
+    h += `<div class="mono" style="color:#555;font-size:9px;padding:4px 8px;background:#0a0a14;border-radius:4px;margin-bottom:4px">если значение ≥ зелёный порог → 100<br>если значение ≤ жёлтый порог → 0-49 (линейно)<br>между порогами → 50-100 (линейно)</div>`;
+    h += `<div style="display:flex;gap:6px;margin-top:6px"><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#00e676"></span><span style="font-size:9px;color:#888">Score ≥ 70</span></span><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#ffc107"></span><span style="font-size:9px;color:#888">40-69</span></span><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#ff1744"></span><span style="font-size:9px;color:#888">&lt; 40</span></span></div>`;
+    h += `</div>`;
+    h += `<div style="background:#111122;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #1a1a2e">`;
+    h += `<div style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:6px">2. Блок = среднее метрик</div>`;
+    h += `<div style="color:#666;font-size:10px">Каждый блок = среднее score его метрик (null пропускаются)</div>`;
+    h += `</div>`;
+    h += `<div style="background:#111122;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #1a1a2e">`;
+    h += `<div style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:6px">3. GEO Score = взвешенная сумма блоков</div>`;
+    h += `<div class="mono" style="color:#555;font-size:9px;padding:4px 8px;background:#0a0a14;border-radius:4px">GEO = Σ(блок × вес) / Σ(веса активных блоков)</div>`;
+    h += `<div style="margin-top:6px">`;
+    Object.entries(CATS).forEach(([ck, ct]) => {
+      h += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><span style="font-size:12px">${ct.i}</span><span style="color:#888;font-size:10px;flex:1">${ct.l}</span><span class="mono" style="color:#7c83ff;font-size:10px;font-weight:600">${ct.w}%</span></div>`;
+    });
+    h += `</div></div>`;
+    h += `<div style="background:#111122;border-radius:8px;padding:10px;border:1px solid #1a1a2e">`;
+    h += `<div style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:6px">4. Платформа = среднее GEO score</div>`;
+    h += `<div style="color:#666;font-size:10px">Простое среднее по всем GEO (не взвешенное по NGR)</div>`;
+    h += `</div>`;
+    h += `<div style="margin-top:12px;padding:8px;background:#1a150822;border:1px solid #ffc10722;border-radius:8px"><div style="color:#ffc107;font-size:9px">💡 Пороги и веса настраиваются во вкладках «Пороги» и «Веса». Метрики null не участвуют в расчёте.</div></div>`;
+    h += `</div>`;
+    return h;
+  }
+  function buildWeightsView() {
+    let h = `<div style="color:#888;font-size:11px;margin-bottom:10px">Веса блоков (определяют важность каждого блока в итоговом score GEO):</div>`;
+    let totalW = 0;
+    Object.entries(CATS).forEach(([ck, ct]) => { totalW += ct.w; });
+    Object.entries(CATS).forEach(([ck, ct]) => {
+      const pct = (ct.w / totalW * 100).toFixed(0);
+      h += `<div style="padding:10px;background:#111122;border-radius:8px;margin-bottom:6px;border:1px solid #1a1a2e"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-size:14px">${ct.i}</span><span style="color:#bbb;font-size:12px;font-weight:600;flex:1">${ct.l}</span><span class="mono" style="color:#7c83ff;font-size:14px;font-weight:700">${ct.w}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${ct.w}%;background:#7c83ff"></div></div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">`;
+      ct.m.forEach(mk => {
+        const t = DEF_TH[mk];
+        h += `<span style="font-size:8px;color:#555;background:#0a0a14;padding:2px 5px;border-radius:3px">${t.l}</span>`;
+      });
+      h += `</div></div>`;
+    });
+    return h;
+  }
+  function buildThresholdsView() {
+    let h = `<div class="tab-bar" style="margin-bottom:8px">`;
     Object.entries(CATS).forEach(([ck, ct]) => { h += `<button class="tab-btn" onclick="settingsCat='${ck}';refreshSettings()" style="background:${settingsCat===ck?"#1e1e35":"transparent"};color:${settingsCat===ck?"#ccc":"#444"}">${ct.i} ${ct.w}%</button>`; });
-    h += `</div></div><div class="modal-body">`;
+    h += `</div>`;
+    const metrics = CATS[settingsCat]?.m || [];
     metrics.forEach(mk => {
       const t = DEF_TH[mk]; const cur = getTH(mk);
-      h += `<div style="padding:12px;background:#111122;border-radius:10px;margin-bottom:8px;border:1px solid #1a1a2e"><div style="color:#bbb;font-size:12px;font-weight:600;margin-bottom:8px">${t.l}</div><div style="display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#00e676"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"}</span></div><input type="number" value="${cur.g}" onchange="updateTH('${mk}','g',this.value)" class="ed-input" style="color:#00e676"></div><div style="color:#222;padding-top:14px">→</div><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#ffc107"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"}</span></div><input type="number" value="${cur.y}" onchange="updateTH('${mk}','y',this.value)" class="ed-input" style="color:#ffc107"></div></div></div>`;
+      const dirLabel = t.d === "h" ? "↑ больше = лучше" : "↓ меньше = лучше";
+      h += `<div style="padding:12px;background:#111122;border-radius:10px;margin-bottom:8px;border:1px solid #1a1a2e"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="color:#bbb;font-size:12px;font-weight:600">${t.l}</span><span class="mono" style="color:#333;font-size:8px">${dirLabel}</span></div><div style="display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#00e676"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"} зелёный</span></div><input type="number" value="${cur.g}" onchange="updateTH('${mk}','g',this.value)" class="ed-input" style="color:#00e676"></div><div style="color:#222;padding-top:14px">→</div><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#ffc107"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"} жёлтый</span></div><input type="number" value="${cur.y}" onchange="updateTH('${mk}','y',this.value)" class="ed-input" style="color:#ffc107"></div></div></div>`;
     });
-    h += `</div><div class="modal-foot"><button class="btn-primary" onclick="saveSettings()">Сохранить</button></div></div>`;
     return h;
   }
   window.refreshSettings = () => { const c = document.getElementById("stc"); if (c) c.innerHTML = build(); };
