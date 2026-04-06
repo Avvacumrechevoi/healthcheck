@@ -8,7 +8,8 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:linear-gradient(180deg,#08080f,#0c0c18 50%,#08080f);color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
-#app{max-width:520px;margin:0 auto;padding:env(safe-area-inset-top,12px) 12px env(safe-area-inset-bottom,12px)}
+#app{max-width:900px;margin:0 auto;padding:env(safe-area-inset-top,16px) 20px env(safe-area-inset-bottom,16px)}
+@media(max-width:600px){#app{max-width:520px;padding:env(safe-area-inset-top,12px) 12px env(safe-area-inset-bottom,12px)}}
 .mono{font-family:'JetBrains Mono',monospace}
 @keyframes pr{0%,100%{box-shadow:0 0 20px #ff174466}50%{box-shadow:0 0 35px #ff174488}}
 @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -626,7 +627,7 @@ function render() {
       const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}${Math.abs(d.ngr_mom).toFixed(0)}%</span>`:""}`;
       return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag)}</div>`;
     }).join("")}</div>`;
-    html += `<div class="mono" style="color:#222;font-size:7px;text-align:center;margin-bottom:12px">стрелки = MoM (${META.prev_month_short || "пред"} → ${META.month_short || "тек"})</div>`;
+    html += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-bottom:12px">Score = март 2026 · ↑↓ = изменение фев→мар (MoM)</div>`;
     html += signalsHTML(geos);
     html += ngrContribHTML(geos);
     html += platBlocksHTML(geos);
