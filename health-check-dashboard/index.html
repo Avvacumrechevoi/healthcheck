@@ -115,7 +115,7 @@ function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DE
 
 // ═══ 3. DYNAMIC DATA ═══
 let D = {}, PREV = {}, TREND = {}, HISTORY = {}, PLAT_TREND = [], PLAT_HISTORY = {}, TL = [], FLAGS = {}, SEGMENTS = {};
-let FUNNEL = {}, RETENTION_TABLE = {}, WEEKLY = {};
+let FUNNEL = {}, RETENTION_TABLE = {};
 let META = { month: "", month_short: "", prev_month_short: "", version: "v30", updated: "" };
 let dataSource = "none";
 
@@ -145,7 +145,6 @@ function applyDataset(ds, source) {
     SEGMENTS = ds.segments || {};
     FUNNEL = ds.funnel || {};
     RETENTION_TABLE = ds.retention_table || {};
-    WEEKLY = ds.weekly || {};
     dataSource = source || "unknown";
     document.title = `Health Check · SapphireBet · ${META.month}`;
     return true;
@@ -159,7 +158,7 @@ function saveDataToLocal() {
 }
 
 function getDataset() {
-  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE, weekly: WEEKLY };
+  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE };
 }
 
 async function loadData() {
@@ -210,7 +209,8 @@ function sphereHTML(s, sz, label, sub, flag) {
   const shadow = `0 0 ${sz/3}px ${flag?"#ff174466":c.gw+"55"},inset 0 -${sz/6}px ${sz/4}px ${flag?"#ff174422":c.gw+"22"}`;
   const txt = flag ? "⛔" : NO(s) ? "?" : Math.round(s);
   const subTxt = flag ? "ПС отключены" : sub || "";
-  return `<div class="sphere" style="max-width:${sz*1.8}px"><div class="sphere-orb" style="width:${sz}px;height:${sz}px;background:${bg};box-shadow:${shadow};${anim}"><span class="mono" style="color:#fff;font-weight:700;font-size:${flag?sz/3.5:sz/3.2}px;text-shadow:0 0 8px ${c.gw}88">${txt}</span></div><span class="sphere-label" style="font-size:${Math.max(10,sz/7.5)}px;color:${flag?"#ff8a80":"#bbb"}">${label}</span>${subTxt ? `<span class="sphere-sub mono" style="color:${c.tx}">${subTxt}</span>` : ""}</div>`;
+  const orbTitle = flag ? "ПС отключены" : "Health Score 0-100. Взвешенная оценка по 8 блокам. 🟢≥70 🟡≥40 🔴<40";
+  return `<div class="sphere" style="max-width:${sz*1.8}px"><div class="sphere-orb" style="width:${sz}px;height:${sz}px;background:${bg};box-shadow:${shadow};${anim}"><span class="mono" title="${orbTitle}" style="color:#fff;font-weight:700;font-size:${flag?sz/3.5:sz/3.2}px;text-shadow:0 0 8px ${c.gw}88">${txt}</span></div><span class="sphere-label" style="font-size:${Math.max(10,sz/7.5)}px;color:${flag?"#ff8a80":"#bbb"}">${label}</span>${subTxt ? `<span class="sphere-sub mono" style="color:${c.tx}">${subTxt}</span>` : ""}</div>`;
 }
 
 function metricHTML(mk, val, prev) {
@@ -220,7 +220,8 @@ function metricHTML(mk, val, prev) {
   const arrow = hasPrev ? (delta > 0 ? "↑" : delta < 0 ? "↓" : "→") : "";
   const arrowC = hasPrev ? (t.d === "h" ? (delta > 0 ? "#00e67688" : "#ff174488") : (delta < 0 ? "#00e67688" : "#ff174488")) : "";
   const prevLabel = META.prev_month_short || "prev";
-  return `<div class="metric-row" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} ${prevLabel} ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:#282840;font-size:8px;flex-shrink:0;width:36px;text-align:right">${t.d==="h"?"≥":"≤"}${fmt(t.g)}</span></div>`;
+  const tooltip = `${t.l}: ${NO(val) ? 'нет данных' : val + (t.u||'')}. Score: ${NO(s) ? 'N/A' : Math.round(s)+'/100'}. ${t.d==='h' ? 'Больше = лучше' : 'Меньше = лучше'}. Зелёный: ${t.d==='h'?'≥':'≤'}${t.g}, Жёлтый: ${t.d==='h'?'≥':'≤'}${t.y}`;
+  return `<div class="metric-row" title="${tooltip}" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} ${prevLabel} ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:#282840;font-size:8px;flex-shrink:0;width:36px;text-align:right">${t.d==="h"?"≥":"≤"}${fmt(t.g)}</span></div>`;
 }
 
 function summaryHTML(d, prev, hist) {
@@ -252,14 +253,14 @@ function sparkHTML(geo) {
   const data = TREND[geo]; if (!data || !data.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(data, 48, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#888":"#444"};font-size:8px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR тренд (${data.length} мес, закрытые)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR · 8 мес (Q4'25 → Q1'26)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 function platSparkHTML() {
   if (!PLAT_TREND.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 40, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#888":"#444"};font-size:8px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR платформа (${PLAT_TREND.length} мес, закрытые)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR платформа · Q4'25 + Q1'26</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 // ═══ 5b. MINI KPI CARDS (Platform Pulse) ═══
@@ -283,9 +284,16 @@ function platPulseHTML() {
     const deltaC = delta !== null ? (delta >= 0 ? "#00e676" : "#ff1744") : "#555";
     const miniSpark = hasData ? buildSparkSVG(data, 24, 80).svg : "";
     const valStr = item.label === "Players" ? fmt(totalPlayers) : (cur !== null ? item.fmt(cur) : "—");
-    h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#ccc;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} MoM</div>`:""}</div>`;
+    h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#ccc;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} фев→мар</div>`:""}</div>`;
   });
   h += `</div>`;
+  if (PLAT_TREND.length >= 8) {
+    const q4ngr = (PLAT_TREND[2]||0) + (PLAT_TREND[3]||0) + (PLAT_TREND[4]||0);
+    const q1ngr = (PLAT_TREND[5]||0) + (PLAT_TREND[6]||0) + (PLAT_TREND[7]||0);
+    const qoq = q4ngr !== 0 ? ((q1ngr - q4ngr) / Math.abs(q4ngr) * 100).toFixed(0) : "—";
+    const qoqC = typeof qoq === "string" ? "#555" : (parseFloat(qoq) >= 0 ? "#00e676" : "#ff1744");
+    h += `<div style="background:#0e0e1c;border-radius:8px;padding:7px 10px;border:1px solid #1a1a2e;margin-bottom:10px;text-align:center"><span class="mono" style="color:#888;font-size:10px">Q1'26: <span style="color:#ccc;font-weight:700">${fmtNGR(q1ngr)}</span> | Q4'25: <span style="color:#aaa">${fmtNGR(q4ngr)}</span> | QoQ: <span style="color:${qoqC};font-weight:700">${qoq === "—" ? "—" : (parseFloat(qoq)>=0?"+":"")+qoq+"%"}</span></span></div>`;
+  }
   return h;
 }
 
@@ -417,7 +425,7 @@ function signalsHTML(geos) {
   if (!signals.length) return "";
   const bgMap = {critical:"#1a081022",warning:"#1a150822",growth:"#081a0c22"};
   const borderMap = {critical:"#ff174422",warning:"#ffc10722",growth:"#00e67622"};
-  let h = `<div style="margin-bottom:14px;background:#0c0c18;border-radius:12px;border:1px solid #1a1a2e;padding:10px"><div class="mono" style="color:#888;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">🚨 СИГНАЛЫ</div>`;
+  let h = `<div style="margin-bottom:14px;background:#0c0c18;border-radius:12px;border:1px solid #1a1a2e;padding:10px"><div class="mono" style="color:#888;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center" title="Автоматически сгенерированные сигналы на основе данных за март 2026">🚨 СИГНАЛЫ</div>`;
   signals.forEach(s => {
     const onclick = s.geo ? `onclick="nav('${s.geo}')"` : "";
     h += `<div class="signal-item" ${onclick} style="background:${bgMap[s.type]||"#12121e"};border:1px solid ${borderMap[s.type]||"#1a1a2e"};${s.geo?"cursor:pointer":"cursor:default"}"><span class="signal-icon">${s.icon}</span><span class="signal-text" style="color:${s.type==="growth"?"#00e676cc":s.type==="warning"?"#ffc107cc":"#ff8a80"}">${s.text}</span></div>`;
@@ -464,7 +472,7 @@ function historySparkHTML(geo) {
   ];
   const available = metrics.filter(m => hist[m.key] && hist[m.key].length >= 2);
   if (!available.length) return "";
-  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#444;font-size:9px;font-weight:600;margin-bottom:6px;text-align:center">📈 ТРЕНДЫ МЕТРИК</div>`;
+  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#444;font-size:9px;font-weight:600;margin-bottom:6px;text-align:center">📈 ТРЕНДЫ (Aug'25 → Mar'26)</div>`;
   available.forEach(m => {
     const data = hist[m.key];
     const {svg, lastV, lastC} = buildSparkSVG(data, 28, 100);
@@ -473,7 +481,8 @@ function historySparkHTML(geo) {
     const delta = prev !== 0 ? ((cur - prev) / Math.max(Math.abs(prev), 1) * 100) : 0;
     const deltaStr = (delta >= 0 ? "+" : "") + delta.toFixed(0) + "%";
     const deltaC = delta >= 0 ? "#00e67688" : "#ff174488";
-    h += `<div class="hist-spark-row"><span style="color:#888;font-size:10px;min-width:62px">${m.label}</span><div style="flex:1;min-width:0">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${m.fmt(cur)}</span><span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span></div></div>`;
+    const tlLabels = TL.length ? `<div style="display:flex;justify-content:space-between;padding:0 2px">${TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?'#666':'#333'};font-size:6px">${l}</span>`).join("")}</div>` : "";
+    h += `<div class="hist-spark-row"><span style="color:#888;font-size:10px;min-width:62px">${m.label}</span><div style="flex:1;min-width:0">${svg}${tlLabels}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${m.fmt(cur)}</span><span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span></div></div>`;
   });
   h += `</div>`;
   return h;
@@ -499,7 +508,7 @@ function retentionTableHTML() {
   const avgCore = geos.reduce((s,[,r]) => s + (r.core||0), 0) / geos.length;
 
   let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">🔄 RETENTION ПО GEO</div>`;
-  h += `<div style="display:flex;gap:4px;padding:0 4px;margin-bottom:4px"><span style="flex:1;font-size:8px;color:#444">GEO</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444">M1</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444">M3</span><span class="mono" style="width:44px;text-align:center;font-size:8px;color:#444">Core</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444">Bettor</span></div>`;
+  h += `<div style="display:flex;gap:4px;padding:0 4px;margin-bottom:4px"><span style="flex:1;font-size:8px;color:#444">GEO</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444" title="Retention Month 1: % игроков вернувшихся через 30 дней. Зелёный ≥25%, Жёлтый ≥15%">M1</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444" title="Retention Month 3: % игроков вернувшихся через 90 дней. Зелёный ≥10%, Жёлтый ≥5%">M3</span><span class="mono" style="width:44px;text-align:center;font-size:8px;color:#444" title="Core Retention: % ядра (4+ из 6 мес). Зелёный ≥25%, Жёлтый ≥12%">Core</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444" title="Bettor Retention: % бетторов вернувшихся. Зелёный ≥40%, Жёлтый ≥25%">Bettor</span></div>`;
 
   function retC(v, th_g, th_y) { if (NO(v)) return "#333"; if (v >= th_g) return "#00e676"; if (v >= th_y) return "#ffc107"; return "#ff1744"; }
 
@@ -523,8 +532,8 @@ function funnelHTML() {
   const metrics = [
     {key:"registration",label:"Регистрации",color:"#7c83ff"},
     {key:"ftd",label:"FTD",color:"#00e676"},
-    {key:"reg2dep_pct",label:"Reg→Dep %",color:"#ffc107",isPct:true},
-    {key:"cr2_pct",label:"CR 2-й деп %",color:"#ff6b35",isPct:true},
+    {key:"reg2dep_pct",label:"Reg→Dep %",color:"#ffc107",isPct:true,tip:"Конверсия регистрации в первый депозит. Хорошо: >30%, плохо: <15%"},
+    {key:"cr2_pct",label:"CR 2-й деп %",color:"#ff6b35",isPct:true,tip:"Конверсия в повторный депозит. Хорошо: >50%, плохо: <30%"},
     {key:"cr3_pct",label:"CR 3-й деп %",color:"#e040fb",isPct:true},
     {key:"cr4_pct",label:"CR 4-й деп %",color:"#00bcd4",isPct:true},
     {key:"cr5_pct",label:"CR 5+ деп %",color:"#8bc34a",isPct:true},
@@ -541,28 +550,10 @@ function funnelHTML() {
     const deltaStr = delta !== null ? `${delta >= 0 ? "+" : ""}${m.isPct ? delta.toFixed(1)+"pp" : fmt(delta)}` : "";
     const deltaC = delta !== null ? (delta >= 0 ? "#00e67688" : "#ff174488") : "";
 
-    h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px">${m.label}</span><div style="flex:1;min-width:0">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span>`:""}</div></div>`;
+    h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="flex:1;min-width:0">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span>`:""}</div></div>`;
   });
 
-  h += `<div class="mono" style="color:#222;font-size:7px;text-align:center;margin-top:4px">${F.periods.join(" → ")}</div>`;
-  h += `</div>`;
-  return h;
-}
-
-// ═══ 5h. WoW FRAMEWORK ═══
-function wowHTML() {
-  let W = {};
-  try { W = typeof WEEKLY !== "undefined" ? WEEKLY : {}; } catch(e) {}
-  if (!W.weeks || !W.weeks.length) return "";
-
-  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📅 WoW ТЕКУЩИЙ МЕСЯЦ · ${W.current_month || ""}</div>`;
-  W.weeks.forEach((w, i) => {
-    const prev = i > 0 ? W.weeks[i-1] : null;
-    const ngrDelta = prev ? ((w.ngr - prev.ngr) / Math.max(Math.abs(prev.ngr), 1) * 100) : null;
-    const deltaStr = ngrDelta !== null ? `${ngrDelta >= 0 ? "+" : ""}${ngrDelta.toFixed(0)}%` : "";
-    const deltaC = ngrDelta !== null ? (ngrDelta >= 0 ? "#00e676" : "#ff1744") : "#555";
-    h += `<div style="display:flex;align-items:center;gap:6px;padding:5px 6px;background:#111122;border-radius:6px;margin-bottom:3px"><span class="mono" style="color:#666;font-size:9px;min-width:50px">${w.label||`W${i+1}`}</span><div style="flex:1"><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,w.ngr/Math.max(...W.weeks.map(x=>x.ngr||1))*100))}%;background:${deltaC}88"></div></div></div><span class="mono" style="color:#ccc;font-size:10px;font-weight:600;min-width:50px;text-align:right">${fmtNGR(w.ngr)}</span><span class="mono" style="color:${deltaC};font-size:8px;min-width:36px;text-align:right">${deltaStr}</span></div>`;
-  });
+  h += `<div class="mono" style="color:#222;font-size:7px;text-align:center;margin-top:4px">Q4'25 (Sep–Dec) + Q1'26 (Jan–Mar)</div>`;
   h += `</div>`;
   return h;
 }
@@ -612,7 +603,6 @@ function render() {
   const geos = Object.entries(D).map(([g,d]) => ({g, s:geoSc(d), d, flag:!!FLAGS[g]})).sort((a,b) => (a.s??-1) - (b.s??-1));
   const valid = geos.filter(g => !NO(g.s));
   const ps = valid.length ? valid.reduce((a,g) => a+g.s, 0)/valid.length : null;
-  const crit = geos.filter(g => !NO(g.s) && g.s < 40).length;
 
   const srcBadge = dataSource === "localStorage"
     ? `<span class="data-badge" style="background:#7c83ff22;color:#7c83ff">✎ local</span>`
@@ -621,10 +611,10 @@ function render() {
     : `<span class="data-badge" style="background:#ff174422;color:#ff1744">⚠ нет</span>`;
 
   const updStr = META.updated ? `обновлено ${META.updated}` : "";
-  let html = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${META.month||""} · ${META.version} ${srcBadge}</p>${updStr?`<p class="mono" style="color:#1e1e30;font-size:8px;margin-top:1px">📅 данные: закрытый месяц · ${updStr}</p>`:""}</div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
+  let html = `<div class="header"><div><h1>HEALTH CHECK · Q1 2026</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">Итоги Q1 (Янв–Мар 2026) · данные до 31 марта · ${META.version} ${srcBadge}</p>${updStr?`<p class="mono" style="color:#1e1e30;font-size:8px;margin-top:1px">📅 ${updStr}</p>`:""}</div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
 
   if (!state.geo) {
-    html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${crit} crit · ${geos.length} geo`)}</div>`;
+    html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`Q1 2026 · ${geos.length} GEO`)}</div>`;
     html += execSummaryHTML(geos, ps);
     html += platPulseHTML();
     html += platSparkHTML();
@@ -638,12 +628,10 @@ function render() {
     }).join("")}</div>`;
     html += `<div class="mono" style="color:#222;font-size:7px;text-align:center;margin-bottom:12px">стрелки = MoM (${META.prev_month_short || "пред"} → ${META.month_short || "тек"})</div>`;
     html += signalsHTML(geos);
-    html += aiInsightPlaceholder(null);
     html += ngrContribHTML(geos);
     html += platBlocksHTML(geos);
     html += retentionTableHTML();
     html += funnelHTML();
-    html += wowHTML();
     html += segmentsHTML();
   } else if (state.geo && !state.cat) {
     const g = state.geo, d = D[g], fl = FLAGS[g], prev = PREV[g] || {}, hist = HISTORY[g] || {};
@@ -656,7 +644,6 @@ function render() {
     html += summaryHTML(d, prev, hist);
     html += sparkHTML(g);
     html += historySparkHTML(g);
-    html += aiInsightPlaceholder(g);
     html += `<div class="line"></div><div class="grid-cat">`;
     Object.entries(CATS).forEach(([ck, ct]) => { const cs = catSc(d, ck); html += `<div onclick="navCat('${ck}')" style="animation:fi .3s ease">${sphereHTML(cs,54,`${ct.i} ${ct.l}`,`${ct.w}% · ${cl(cs).lb}`)}</div>`; });
     html += `</div>`;
@@ -676,166 +663,7 @@ function render() {
   app.innerHTML = html;
 }
 
-// ═══ 7. AI ANALYST ═══
-let aiCache = {};
-try { aiCache = JSON.parse(localStorage.getItem("hc_ai_cache") || "{}"); } catch(e) {}
-
-function getAIKey() {
-  return localStorage.getItem("hc_ai_key") || "";
-}
-
-function setAIKey(key) {
-  localStorage.setItem("hc_ai_key", key.trim());
-}
-
-function buildDataContext(geoFilter) {
-  const geos = Object.entries(D).map(([g,d]) => ({g, s:geoSc(d), d}));
-  const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr||0), 0);
-  const platScore = geos.filter(g => !NO(g.s)).reduce((s,g) => s + g.s, 0) / Math.max(1, geos.filter(g => !NO(g.s)).length);
-
-  let ctx = `iGaming платформа SapphireBet, ${META.month}. 10 GEO-рынков.\n`;
-  ctx += `Platform NGR: $${totalNGR}, score: ${platScore.toFixed(0)}pt.\n`;
-
-  if (PLAT_TREND.length >= 2) {
-    ctx += `NGR тренд (8мес): ${PLAT_TREND.map((v,i) => `${TL[i]||i}:$${v}`).join(", ")}.\n`;
-  }
-
-  const geosToShow = geoFilter ? geos.filter(g => g.g === geoFilter) : geos;
-  geosToShow.forEach(({g, s, d}) => {
-    const fl = FLAGS[g];
-    ctx += `\n${g}: score=${NO(s)?"null":Math.round(s)}, NGR=$${d.ngr||0}`;
-    if (d.ngr_mom) ctx += `, MoM=${d.ngr_mom>0?"+":""}${d.ngr_mom}%`;
-    if (fl) ctx += ` [FLAG: ${fl.msg}]`;
-    const reds = ALL_METRICS.filter(k => { const sc = scr(k, d[k]); return sc !== null && sc < 40; });
-    if (reds.length) ctx += `. Красные: ${reds.map(k => `${DEF_TH[k].l}=${d[k]}${DEF_TH[k].u}`).join(", ")}`;
-    const hist = HISTORY[g];
-    if (hist) {
-      if (hist.unique_players) ctx += `. Players(8m): ${hist.unique_players.join(",")}`;
-      if (hist.margin_pct) ctx += `. Margin%(8m): ${hist.margin_pct.join(",")}`;
-    }
-    ctx += `.`;
-  });
-
-  const segKeys = Object.keys(SEGMENTS).sort();
-  if (segKeys.length >= 2 && !geoFilter) {
-    const cur = SEGMENTS[segKeys[segKeys.length-1]];
-    const prev = SEGMENTS[segKeys[segKeys.length-2]];
-    ctx += `\n\nСегменты ${segKeys[segKeys.length-2]}→${segKeys[segKeys.length-1]}:`;
-    Object.keys(cur).forEach(seg => {
-      const c = cur[seg], p = prev?.[seg];
-      ctx += `\n${seg}: ${c.players}p, NGR=$${c.ngr}${p ? ` (было $${p.ngr})` : ""}`;
-    });
-  }
-
-  return ctx;
-}
-
-async function callAI(prompt, systemMsg) {
-  const key = getAIKey();
-  if (!key) return null;
-  const body = {
-    model: "gpt-4o-mini",
-    messages: [
-      {role: "system", content: systemMsg},
-      {role: "user", content: prompt},
-    ],
-    max_tokens: 600,
-    temperature: 0.3,
-  };
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {"Content-Type": "application/json", "Authorization": `Bearer ${key}`},
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`API ${res.status}: ${err.substring(0, 100)}`);
-  }
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content || "";
-}
-
-const AI_SYSTEM = `Ты — аналитик iGaming платформы. Пиши кратко, по-русски. Формат: 3-5 пунктов, каждый начинается с эмодзи (🔴 проблема, 🟢 рост, 🟡 риск, 💡 рекомендация). Один пункт = одно предложение. Фокус на actionable insights для CEO: что делать, а не просто что случилось. Используй конкретные цифры из данных.`;
-
-async function runAIAnalysis(geoFilter) {
-  const cacheKey = geoFilter || "_platform";
-  const cached = aiCache[cacheKey];
-  if (cached && (Date.now() - cached.ts < 3600000)) {
-    return cached.text;
-  }
-
-  const ctx = buildDataContext(geoFilter);
-  const prompt = geoFilter
-    ? `Проанализируй GEO ${geoFilter}. Данные:\n${ctx}\n\nНапиши 3-5 ключевых выводов и рекомендаций для CEO.`
-    : `Проанализируй платформу целиком. Данные:\n${ctx}\n\nНапиши 4-5 ключевых выводов и рекомендаций для CEO. Фокус: главные риски, точки роста, что требует действий.`;
-
-  const text = await callAI(prompt, AI_SYSTEM);
-  if (text) {
-    aiCache[cacheKey] = {text, ts: Date.now()};
-    localStorage.setItem("hc_ai_cache", JSON.stringify(aiCache));
-  }
-  return text;
-}
-
-function aiInsightPlaceholder(geoFilter) {
-  const key = getAIKey();
-  const cacheKey = geoFilter || "_platform";
-  const cached = aiCache[cacheKey];
-
-  let h = `<div id="ai-section" style="margin:14px 0;background:#0c0c1a;border-radius:12px;border:1px solid #1e1e35;padding:12px">`;
-  h += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="mono" style="color:#7c83ff;font-size:10px;font-weight:600">🤖 AI-АНАЛИТИК</div>`;
-  h += `<div style="display:flex;gap:4px">`;
-  if (key) {
-    h += `<button class="btn-secondary" style="padding:3px 8px;font-size:9px" onclick="runAndShowAI('${geoFilter||""}')">🔄 Обновить</button>`;
-  }
-  h += `<button class="btn-secondary" style="padding:3px 8px;font-size:9px" onclick="openAISettings()">⚙</button>`;
-  h += `</div></div>`;
-
-  if (!key) {
-    h += `<div style="text-align:center;padding:12px"><div style="color:#444;font-size:11px;margin-bottom:8px">Введите OpenAI API ключ для AI-анализа</div><button class="btn-primary" style="max-width:200px;margin:0 auto;padding:8px;font-size:11px" onclick="openAISettings()">🔑 Настроить ключ</button></div>`;
-  } else if (cached && (Date.now() - cached.ts < 3600000)) {
-    h += `<div style="color:#999;font-size:11px;line-height:1.7;white-space:pre-line">${escHtml(cached.text)}</div>`;
-    h += `<div class="mono" style="color:#222;font-size:7px;margin-top:6px;text-align:right">${new Date(cached.ts).toLocaleTimeString()}</div>`;
-  } else {
-    h += `<div id="ai-loading" style="text-align:center;padding:8px"><div class="mono" style="color:#333;font-size:10px">Нажмите 🔄 для анализа</div></div>`;
-  }
-
-  h += `</div>`;
-  return h;
-}
-
-async function runAndShowAI(geoFilter) {
-  const section = document.getElementById("ai-section");
-  if (!section) return;
-  const key = getAIKey();
-  if (!key) { openAISettings(); return; }
-
-  const loadEl = section.querySelector("#ai-loading") || section.querySelector("div[style*='line-height']");
-  if (loadEl) loadEl.innerHTML = `<div class="mono" style="color:#7c83ff;font-size:10px">⏳ Анализирую...</div>`;
-
-  try {
-    const text = await runAIAnalysis(geoFilter || null);
-    if (text) {
-      render();
-      showToast("🤖 Анализ готов");
-    }
-  } catch(err) {
-    showToast("❌ AI: " + err.message);
-    if (loadEl) loadEl.innerHTML = `<div style="color:#ff8a80;font-size:10px">Ошибка: ${escHtml(err.message)}</div>`;
-  }
-}
-
-function openAISettings() {
-  const key = getAIKey();
-  const overlay = document.createElement("div");
-  overlay.id = "ai-settings-overlay";
-  overlay.className = "overlay";
-  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-  overlay.innerHTML = `<div style="width:100%;max-width:400px"><div class="modal" style="max-height:auto"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">🤖 AI Настройки</span><button onclick="document.getElementById('ai-settings-overlay').remove()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div></div><div class="modal-body"><div style="margin-bottom:12px"><label style="color:#888;font-size:10px">OpenAI API Key</label><input id="ai-key-input" type="password" value="${escHtml(key)}" placeholder="sk-..." class="ed-input" style="margin-top:4px"></div><div style="color:#555;font-size:10px;line-height:1.5;margin-bottom:12px">Ключ хранится в localStorage вашего браузера. Данные отправляются напрямую в OpenAI API. Используется модель gpt-4o-mini. Результат кэшируется на 1 час.</div><button class="btn-primary" onclick="setAIKey(document.getElementById('ai-key-input').value);document.getElementById('ai-settings-overlay').remove();render();showToast('🔑 Ключ сохранён')">Сохранить</button><div style="margin-top:8px"><button class="btn-danger" style="width:100%" onclick="localStorage.removeItem('hc_ai_key');localStorage.removeItem('hc_ai_cache');aiCache={};document.getElementById('ai-settings-overlay').remove();render();showToast('Ключ удалён')">🗑 Удалить ключ и кэш</button></div></div></div></div>`;
-  document.body.appendChild(overlay);
-}
-
-// ═══ 7b. BLOCK RANKING TOGGLE ═══
+// ═══ 7. BLOCK RANKING TOGGLE ═══
 function toggleRanking(ck) {
   const el = document.getElementById("rank-" + ck);
   if (!el) return;
@@ -1275,7 +1103,7 @@ function downloadJson() {
 async function resetToFile() {
   localStorage.removeItem("hc_data");
   dataSource = "none";
-  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {}; WEEKLY = {};
+  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {};
   try {
     const res = await fetch("data.json?" + Date.now());
     if (res.ok) {

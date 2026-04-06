@@ -1578,10 +1578,5 @@
       "active_mom": 128.0,
       "bettor_ret": 43.8
     }
-  },
-  "weekly": {
-    "current_month": "2026-04",
-    "weeks": [],
-    "note": "Weekly data will appear here when April data is loaded"
   }
 }
