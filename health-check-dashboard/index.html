@@ -554,7 +554,7 @@ function funnelHTML() {
     h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="flex:1;min-width:0">${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${F.periods.map((l,i) => `<span class="mono" style="color:${i===F.periods.length-1?'#666':'#333'};font-size:6px">${l}</span>`).join("")}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span>`:""}</div></div>`;
   });
 
-  h += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-top:6px">Q4'25 (Sep–Dec) → Q1'26 (Jan–Feb) · значения за закрытые месяцы</div>`;
+  h += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-top:6px">Sep'25 → Feb'26 · данные из Total-отчёта (март: CR2-5 нет в источнике)</div>`;
   h += `</div>`;
   return h;
 }
