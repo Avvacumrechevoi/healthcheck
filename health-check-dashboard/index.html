@@ -535,9 +535,8 @@ function funnelHTML() {
     {key:"ftd",label:"FTD",color:"#00e676"},
     {key:"reg2dep_pct",label:"Reg→Dep %",color:"#ffc107",isPct:true,tip:"Конверсия регистрации в первый депозит. Хорошо: >30%, плохо: <15%"},
     {key:"cr2_pct",label:"CR 2-й деп %",color:"#ff6b35",isPct:true,tip:"Конверсия в повторный депозит. Хорошо: >50%, плохо: <30%"},
-    {key:"cr3_pct",label:"CR 3-й деп %",color:"#e040fb",isPct:true},
-    {key:"cr4_pct",label:"CR 4-й деп %",color:"#00bcd4",isPct:true},
-    {key:"cr5_pct",label:"CR 5+ деп %",color:"#8bc34a",isPct:true},
+    {key:"cr3_pct",label:"CR 3+ деп %",color:"#e040fb",isPct:true,tip:"% игроков с 3+ депозитами. Хорошо: >35%, плохо: <20%"},
+    {key:"cr5_pct",label:"CR 5+ деп %",color:"#8bc34a",isPct:true,tip:"% игроков с 5+ депозитами (лояльное ядро). Хорошо: >25%, плохо: <15%"},
   ];
 
   metrics.forEach(m => {
@@ -554,7 +553,7 @@ function funnelHTML() {
     h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="flex:1;min-width:0">${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${F.periods.map((l,i) => `<span class="mono" style="color:${i===F.periods.length-1?'#666':'#333'};font-size:6px">${l}</span>`).join("")}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span>`:""}</div></div>`;
   });
 
-  h += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-top:6px">Sep'25 → Feb'26 · данные из Total-отчёта (март: CR2-5 нет в источнике)</div>`;
+  h += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-top:6px">Q1 2026 (Янв–Мар) · источник: маркетинговый отчёт</div>`;
   h += `</div>`;
   return h;
 }
