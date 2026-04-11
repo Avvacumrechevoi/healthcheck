@@ -221,15 +221,15 @@ function scr(k, v) {
 }
 function catSc(d, ck) { const s = CATS[ck].m.map(m => scr(m, d[m])).filter(x => x !== null); return s.length ? s.reduce((a,b) => a+b, 0)/s.length : null; }
 function geoSc(d) { let tw=0, ts=0; Object.entries(CATS).forEach(([k,c]) => { const s = catSc(d,k); if (s !== null) { tw += c.w; ts += s*c.w; } }); return tw ? ts/tw : null; }
-function cl(s) { if (NO(s)) return {bg:"#1a1a2e",gw:"#555",tx:"#555",lb:"—"}; if (s>=70) return {bg:"#0f5132",gw:"#00e676",tx:"#00e676",lb:"Норма"}; if (s>=40) return {bg:"#664d03",gw:"#ffc107",tx:"#ffc107",lb:"Внимание"}; return {bg:"#6b1523",gw:"#ff1744",tx:"#ff1744",lb:"Проблема"}; }
+function cl(s) { if (NO(s)) return {bg:"#1a1a2e",gw:"#555",tx:"#555",lb:"—"}; const r=Math.round(s); if (r>=70) return {bg:"#0f5132",gw:"#00e676",tx:"#00e676",lb:"Норма"}; if (r>=40) return {bg:"#664d03",gw:"#ffc107",tx:"#ffc107",lb:"Внимание"}; return {bg:"#6b1523",gw:"#ff1744",tx:"#ff1744",lb:"Проблема"}; }
 function fmt(v) { if (NO(v)) return "—"; if (typeof v !== "number") return v; if (v<0 && Math.abs(v)>=1000) return "-"+(Math.abs(v)/1000).toFixed(1)+"K"; if (Math.abs(v)>=10000) return (v/1000).toFixed(0)+"K"; if (Math.abs(v)>=1000) return (v/1000).toFixed(1)+"K"; return Number.isInteger(v) ? String(v) : v.toFixed(1); }
 function fmtNGR(v) { if (NO(v)) return "—"; if (v<0) return "-$"+(Math.abs(v)/1000).toFixed(1)+"K"; return "$"+(v/1000).toFixed(v>=100000?0:1)+"K"; }
 
 // ═══ 5. UI BUILDERS ═══
 function sphereHTML(s, sz, label, sub, flag, grayFirst) {
   const c = flag ? {bg:"#4a0010",gw:"#ff1744",tx:"#ff1744"} : cl(s);
-  // Gray-first: mute green spheres on overview
-  const muted = grayFirst && !flag && !NO(s) && s >= 70;
+  // Gray-first: mute green spheres on overview (use rounded to match display)
+  const muted = grayFirst && !flag && !NO(s) && Math.round(s) >= 70;
   const mc = muted ? {bg:"#1a1a2e",gw:"#4a5568",tx:"#6b7280"} : c;
   const anim = ((s !== null && s < 40) || flag) ? "animation:pr 2s infinite;" : "";
   const bg = flag ? "radial-gradient(circle at 35% 35%,#ff174444,#3a0010 70%)" : `radial-gradient(circle at 35% 35%,${mc.gw}44,${mc.bg} 70%)`;
@@ -575,8 +575,8 @@ function historySparkHTML(geo) {
     const delta = prev !== 0 ? ((cur - prev) / Math.max(Math.abs(prev), 1) * 100) : 0;
     const deltaStr = (delta >= 0 ? "+" : "") + delta.toFixed(0) + "%";
     const deltaC = delta >= 0 ? "#00e67688" : "#ff174488";
-    const tlLabels = TL.length ? `<div style="display:flex;justify-content:space-between;padding:0 2px">${TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?'#666':'#333'};font-size:6px">${l}</span>`).join("")}</div>` : "";
-    h += `<div class="hist-spark-row"><span style="color:#888;font-size:10px;min-width:62px">${m.label}</span><div style="flex:1;min-width:0">${svg}${tlLabels}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${m.fmt(cur)}</span><span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span></div></div>`;
+    const tlLabels = TL.length ? `<div style="display:flex;justify-content:space-between;padding:0 2px">${TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?'#888':'#444'};font-size:8px">${l}</span>`).join("")}</div>` : "";
+    h += `<div class="hist-spark-row"><span style="color:#888;font-size:10px;min-width:62px">${m.label}</span><div style="flex:1;min-width:0;max-height:36px;overflow:hidden">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:12px;font-weight:600">${m.fmt(cur)}</span><span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span></div></div>`;
   });
   h += `</div>`;
   return h;
@@ -643,7 +643,7 @@ function funnelHTML() {
     const deltaStr = delta !== null ? `${delta >= 0 ? "+" : ""}${m.isPct ? delta.toFixed(1)+"pp" : fmt(delta)}` : "";
     const deltaC = delta !== null ? (delta >= 0 ? "#00e67688" : "#ff174488") : "";
 
-    h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="flex:1;min-width:0">${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${F.periods.map((l,i) => `<span class="mono" style="color:${i===F.periods.length-1?'#666':'#333'};font-size:6px">${l}</span>`).join("")}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span>`:""}</div></div>`;
+    h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="flex:1;min-width:0;max-height:32px;overflow:hidden">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:55px"><span class="mono" style="color:#ccc;font-size:12px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span>`:""}</div></div>`;
   });
 
   h += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-top:6px">${metaPeriodLabel()} · источник: маркетинговый отчёт</div>`;
@@ -689,7 +689,7 @@ function rebuildGeoList() { geoList = Object.keys(D); }
 function render() {
   const app = document.getElementById("app");
   if (!Object.keys(D).length) {
-    app.innerHTML = `<div class="header"><div><h1>HEALTH CHECK</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${META.version}</p></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button></div></div><div style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:16px">📊</div><div style="color:#666;font-size:14px;margin-bottom:8px">Нет данных</div><div style="color:#444;font-size:12px;margin-bottom:20px">Загрузите data.json или введите данные вручную</div><button class="btn-primary" onclick="openDataEditor()" style="max-width:260px;margin:0 auto">📝 Открыть редактор данных</button></div>`;
+    app.innerHTML = `<div class="header"><div><h1>HEALTH CHECK</h1></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div><div style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:16px">📊</div><div style="color:#666;font-size:14px;margin-bottom:8px">Нет данных</div><div style="color:#444;font-size:12px;margin-bottom:20px">Загрузите data.json</div></div>`;
     return;
   }
 
@@ -697,14 +697,22 @@ function render() {
   const valid = geos.filter(g => !NO(g.s));
   const ps = valid.length ? valid.reduce((a,g) => a+g.s, 0)/valid.length : null;
 
-  const srcBadge = dataSource === "localStorage"
-    ? `<span class="data-badge" style="background:#7c83ff22;color:#7c83ff">✎ local</span>`
-    : dataSource === "data.json"
-    ? `<span class="data-badge" style="background:#00e67622;color:#00e676">📄 json</span>`
-    : `<span class="data-badge" style="background:#ff174422;color:#ff1744">⚠ нет</span>`;
-
   const updStr = META.updated ? `обновлено ${META.updated}` : "";
-  let html = `<div class="header"><div><h1>HEALTH CHECK · ${metaPeriodLabel()}</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${metaMonth()} · ${META.version} ${srcBadge}</p>${updStr?`<p class="mono" style="color:#1e1e30;font-size:8px;margin-top:1px">📅 ${updStr}</p>`:""}</div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
+  let html = `<div class="header"><div><h1>HEALTH CHECK</h1></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
+
+  // Month selector
+  const periods = META.periods || [];
+  if (periods.length) {
+    const monthNames = {1:"Янв",2:"Фев",3:"Мар",4:"Апр",5:"Май",6:"Июн",7:"Июл",8:"Авг",9:"Сен",10:"Окт",11:"Ноя",12:"Дек"};
+    html += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:12px;overflow-x:auto;padding:2px 0">`;
+    periods.forEach((p, i) => {
+      const [yr, mo] = p.split("-");
+      const label = `${monthNames[parseInt(mo)]} '${yr.slice(2)}`;
+      const isLast = i === periods.length - 1;
+      html += `<span class="mono" style="padding:4px 8px;border-radius:6px;font-size:10px;font-weight:${isLast?700:400};cursor:${isLast?"default":"not-allowed"};white-space:nowrap;background:${isLast?"#7c83ff22":"transparent"};color:${isLast?"#7c83ff":"#333"};border:1px solid ${isLast?"#7c83ff33":"transparent"}">${label}</span>`;
+    });
+    html += `</div>`;
+  }
 
   if (!state.geo) {
     html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${metaPeriodLabel()} · ${geos.length} GEO`)}</div>`;
@@ -719,7 +727,7 @@ function render() {
       const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}${Math.abs(d.ngr_mom).toFixed(0)}%</span>`:""}`;
       return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag,true)}</div>`;
     }).join("")}</div>`;
-    html += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-bottom:12px">Score = ${metaMonth()} · ↑↓ = ${metaPrev()}→${metaCur()} (MoM)</div>`;
+    html += `<div class="mono" style="color:#333;font-size:8px;text-align:center;margin-bottom:12px">↑↓ = MoM</div>`;
     html += signalsHTML(geos);
     html += ngrContribHTML(geos);
     html += heatmapHTML(geos);
@@ -727,6 +735,7 @@ function render() {
     html += retentionTableHTML();
     html += funnelHTML();
     html += segmentsHTML();
+    html += `<div style="margin-top:20px;padding:12px;text-align:center;border-top:1px solid #1a1a2e"><button onclick="copyTelegramReport()" style="background:#111122;border:1px solid #252540;border-radius:8px;padding:8px 16px;color:#555;font-size:11px;cursor:pointer;font-family:inherit">📋 Копировать отчёт для Telegram</button><div class="mono" style="color:#1e1e30;font-size:8px;margin-top:8px">${META.version} · ${META.updated||""}</div></div>`;
   } else if (state.geo && !state.cat) {
     const g = state.geo, d = D[g], fl = FLAGS[g], prev = PREV[g] || {}, hist = HISTORY[g] || {};
     const gs = geoSc(d); const idx = geoList.indexOf(g);
