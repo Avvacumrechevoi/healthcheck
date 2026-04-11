@@ -10,6 +10,7 @@
 body{background:linear-gradient(180deg,#08080f,#0c0c18 50%,#08080f);color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
 #app{max-width:900px;margin:0 auto;padding:env(safe-area-inset-top,16px) 20px env(safe-area-inset-bottom,16px)}
 @media(max-width:600px){#app{max-width:520px;padding:env(safe-area-inset-top,12px) 12px env(safe-area-inset-bottom,12px)}}
+@media(max-width:480px){.grid-geo{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}.hm-full{display:none}.mobile-expand{display:block!important}}
 .mono{font-family:'JetBrains Mono',monospace}
 @keyframes pr{0%,100%{box-shadow:0 0 20px #ff174466}50%{box-shadow:0 0 35px #ff174488}}
 @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -78,7 +79,7 @@ h1{font-size:17px;font-weight:700;background:linear-gradient(90deg,#7c83ff,#00e6
 <div id="app"><div style="text-align:center;padding:80px 20px"><div class="mono" style="color:#333;font-size:12px">loading...</div></div></div>
 <script>
 /*
- * HEALTH CHECK DASHBOARD · SapphireBet · v30
+ * HEALTH CHECK DASHBOARD · SapphireBet · v31
  * Signal-driven CEO dashboard for iGaming platform.
  * Data priority: localStorage (edited) → data.json (file) → fallback empty.
  */
@@ -117,8 +118,30 @@ function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DE
 // ═══ 3. DYNAMIC DATA ═══
 let D = {}, PREV = {}, TREND = {}, HISTORY = {}, PLAT_TREND = [], PLAT_HISTORY = {}, TL = [], FLAGS = {}, SEGMENTS = {};
 let FUNNEL = {}, RETENTION_TABLE = {};
-let META = { month: "", month_short: "", prev_month_short: "", version: "v30", updated: "" };
+let META = { month: "", month_short: "", prev_month_short: "", version: "v31", updated: "" };
 let dataSource = "none";
+
+// Dynamic date helpers
+function metaMonth() { return META.month || "—"; }
+function metaPrev() { return META.prev_month_short || "prev"; }
+function metaCur() { return META.month_short || "cur"; }
+function metaPeriodLabel() {
+  const p = META.periods;
+  if (!p || !p.length) return metaMonth();
+  if (p.length >= 3) {
+    const months = p.map(s => parseInt(s.split("-")[1]));
+    const year = p[p.length-1].split("-")[0];
+    const q = Math.ceil(months[months.length-1] / 3);
+    const allSameQ = months.every(m => Math.ceil(m/3) === q);
+    if (allSameQ && months.length === 3) return `Q${q} ${year.slice(2)}`;
+  }
+  return metaMonth();
+}
+function metaTrendLabel() {
+  const tl = TL;
+  if (!tl || tl.length < 2) return "";
+  return `${tl[0]}'→${tl[tl.length-1]}'`;
+}
 
 function hasLocalData() {
   try { return !!localStorage.getItem("hc_data"); } catch(e) { return false; }
@@ -203,15 +226,18 @@ function fmt(v) { if (NO(v)) return "—"; if (typeof v !== "number") return v; 
 function fmtNGR(v) { if (NO(v)) return "—"; if (v<0) return "-$"+(Math.abs(v)/1000).toFixed(1)+"K"; return "$"+(v/1000).toFixed(v>=100000?0:1)+"K"; }
 
 // ═══ 5. UI BUILDERS ═══
-function sphereHTML(s, sz, label, sub, flag) {
+function sphereHTML(s, sz, label, sub, flag, grayFirst) {
   const c = flag ? {bg:"#4a0010",gw:"#ff1744",tx:"#ff1744"} : cl(s);
+  // Gray-first: mute green spheres on overview
+  const muted = grayFirst && !flag && !NO(s) && s >= 70;
+  const mc = muted ? {bg:"#1a1a2e",gw:"#4a5568",tx:"#6b7280"} : c;
   const anim = ((s !== null && s < 40) || flag) ? "animation:pr 2s infinite;" : "";
-  const bg = flag ? "radial-gradient(circle at 35% 35%,#ff174444,#3a0010 70%)" : `radial-gradient(circle at 35% 35%,${c.gw}44,${c.bg} 70%)`;
-  const shadow = `0 0 ${sz/3}px ${flag?"#ff174466":c.gw+"55"},inset 0 -${sz/6}px ${sz/4}px ${flag?"#ff174422":c.gw+"22"}`;
+  const bg = flag ? "radial-gradient(circle at 35% 35%,#ff174444,#3a0010 70%)" : `radial-gradient(circle at 35% 35%,${mc.gw}44,${mc.bg} 70%)`;
+  const shadow = `0 0 ${sz/3}px ${flag?"#ff174466":mc.gw+"55"},inset 0 -${sz/6}px ${sz/4}px ${flag?"#ff174422":mc.gw+"22"}`;
   const txt = flag ? "⛔" : NO(s) ? "?" : Math.round(s);
   const subTxt = flag ? "ПС отключены" : sub || "";
   const orbTitle = flag ? "ПС отключены" : "Health Score 0-100. Взвешенная оценка по 8 блокам. 🟢≥70 🟡≥40 🔴<40";
-  return `<div class="sphere" style="max-width:${sz*1.8}px"><div class="sphere-orb" style="width:${sz}px;height:${sz}px;background:${bg};box-shadow:${shadow};${anim}"><span class="mono" title="${orbTitle}" style="color:#fff;font-weight:700;font-size:${flag?sz/3.5:sz/3.2}px;text-shadow:0 0 8px ${c.gw}88">${txt}</span></div><span class="sphere-label" style="font-size:${Math.max(10,sz/7.5)}px;color:${flag?"#ff8a80":"#bbb"}">${label}</span>${subTxt ? `<span class="sphere-sub mono" style="color:${c.tx}">${subTxt}</span>` : ""}</div>`;
+  return `<div class="sphere" style="max-width:${sz*1.8}px"><div class="sphere-orb" style="width:${sz}px;height:${sz}px;background:${bg};box-shadow:${shadow};${anim}"><span class="mono" title="${orbTitle}" style="color:#fff;font-weight:700;font-size:${flag?sz/3.5:sz/3.2}px;text-shadow:0 0 8px ${mc.gw}88">${txt}</span></div><span class="sphere-label" style="font-size:${Math.max(10,sz/7.5)}px;color:${flag?"#ff8a80":muted?"#666":"#bbb"}">${label}</span>${subTxt ? `<span class="sphere-sub mono" style="color:${mc.tx}">${subTxt}</span>` : ""}</div>`;
 }
 
 function metricHTML(mk, val, prev) {
@@ -222,7 +248,7 @@ function metricHTML(mk, val, prev) {
   const arrowC = hasPrev ? (t.d === "h" ? (delta > 0 ? "#00e67688" : "#ff174488") : (delta < 0 ? "#00e67688" : "#ff174488")) : "";
   const prevLabel = META.prev_month_short || "prev";
   const tooltip = `${t.l}: ${NO(val) ? 'нет данных' : val + (t.u||'')}. Score: ${NO(s) ? 'N/A' : Math.round(s)+'/100'}. ${t.d==='h' ? 'Больше = лучше' : 'Меньше = лучше'}. Зелёный: ${t.d==='h'?'≥':'≤'}${t.g}, Жёлтый: ${t.d==='h'?'≥':'≤'}${t.y}`;
-  return `<div class="metric-row" title="${tooltip}" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} ${prevLabel} ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:#282840;font-size:8px;flex-shrink:0;width:36px;text-align:right">${t.d==="h"?"≥":"≤"}${fmt(t.g)}</span></div>`;
+  return `<div class="metric-row" title="${tooltip}" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} ${prevLabel} ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:${n?"#1a1a28":"#3a3a55"};font-size:8px;flex-shrink:0;min-width:36px;text-align:right">→${fmt(t.g)}${t.u}</span></div>`;
 }
 
 function summaryHTML(d, prev, hist) {
@@ -254,14 +280,14 @@ function sparkHTML(geo) {
   const data = TREND[geo]; if (!data || !data.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(data, 48, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#888":"#444"};font-size:8px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR · 8 мес (Q4'25 → Q1'26)</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR · ${TL.length}мес (${metaTrendLabel()})</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 function platSparkHTML() {
   if (!PLAT_TREND.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 40, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#888":"#444"};font-size:8px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR платформа · Q4'25 + Q1'26</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR платформа · ${metaTrendLabel()}</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 // ═══ 5b. MINI KPI CARDS (Platform Pulse) ═══
@@ -285,7 +311,7 @@ function platPulseHTML() {
     const deltaC = delta !== null ? (delta >= 0 ? "#00e676" : "#ff1744") : "#555";
     const miniSpark = hasData ? buildSparkSVG(data, 24, 80).svg : "";
     const valStr = item.label === "Players" ? fmt(totalPlayers) : (cur !== null ? item.fmt(cur) : "—");
-    h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#ccc;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} фев→мар</div>`:""}</div>`;
+    h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#ccc;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} ${metaPrev()}→${metaCur()}</div>`:""}</div>`;
   });
   h += `</div>`;
   if (PLAT_TREND.length >= 8) {
@@ -299,27 +325,53 @@ function platPulseHTML() {
 }
 
 // ═══ 5c. SIGNALS GENERATOR ═══
+const SIGNAL_ACTIONS = {
+  flag: "→ Связаться с платёжным провайдером",
+  score_low: "→ Приоритет: худший блок этого GEO",
+  ngr_drop: "→ Проверить платёжки, трафик, VIP-активность",
+  ngr_growth: "",
+  metric_zero: {
+    dep_approval:"→ Проверить платёжного провайдера",wd_approval:"→ Проверить процессинг выводов",
+    cashout_pct:"→ Аномальный cashout, проверить whale-активность",
+    d30_retention:"→ Проверить onboarding и D1-D7 бонусы",d90_retention:"→ Проверить retention-кампании",
+    core_retention:"→ Проверить reactivation pipeline",active_mom:"→ Проверить acquisition volume",
+    csat:"→ Аудит качества Support",frt_sec:"→ Проверить нагрузку Support",
+    sport_margin:"→ Проверить результаты матчей / VIP-ставки",
+    casino_margin:"→ Проверить RTP и whale-активность",
+    ngr_mom:"→ Декомпозиция: трафик vs ARPPU vs cashout",
+  },
+  support_bad: "→ Аудит SUP: FRT, CSAT, нагрузка агентов",
+  vip_shift: "→ Проверить whale-активность и транзитные аккаунты",
+};
+function getSignalAction(type, mk) {
+  if (type === "metric_zero" && SIGNAL_ACTIONS.metric_zero[mk]) return ` ${SIGNAL_ACTIONS.metric_zero[mk]}`;
+  if (SIGNAL_ACTIONS[type]) return ` ${SIGNAL_ACTIONS[type]}`;
+  return "";
+}
+
 function generateSignals(geos) {
   const signals = [];
   const platNgr = PLAT_TREND;
   if (platNgr.length >= 2) {
     const cur = platNgr[platNgr.length-1], prev = platNgr[platNgr.length-2];
     const pct = (cur - prev) / Math.max(Math.abs(prev), 1) * 100;
-    if (pct < -15) signals.push({type:"critical",icon:"🔴",text:`Platform NGR ${pct.toFixed(0)}% MoM (${fmtNGR(cur)} ← ${fmtNGR(prev)})`,geo:null,priority:100});
+    if (pct < -15) signals.push({type:"critical",icon:"🔴",text:`Platform NGR ${pct.toFixed(0)}% MoM (${fmtNGR(cur)} ← ${fmtNGR(prev)})${getSignalAction("ngr_drop")}`,geo:null,priority:100});
   }
 
   geos.forEach(({g,s,d,flag}) => {
     if (flag) {
       const fl = FLAGS[g];
-      signals.push({type:"critical",icon:"🔴",text:`${g}: ${fl?fl.msg:"ПС отключены"} — NGR ${fmtNGR(d.ngr)}`,geo:g,priority:95});
+      signals.push({type:"critical",icon:"🔴",text:`${g}: ${fl?fl.msg:"ПС отключены"} — NGR ${fmtNGR(d.ngr)}${getSignalAction("flag")}`,geo:g,priority:95});
     }
     if (!NO(s) && s < 40 && !flag) {
-      signals.push({type:"critical",icon:"🔴",text:`${g} Score ${Math.round(s)}pt — проблемная зона`,geo:g,priority:80});
+      const worstCat = Object.entries(CATS).map(([ck,ct])=>({ck,s:catSc(d,ck),l:ct.l,i:ct.i})).filter(x=>x.s!==null).sort((a,b)=>a.s-b.s)[0];
+      const worstHint = worstCat ? ` → Приоритет: ${worstCat.i} ${worstCat.l} (${Math.round(worstCat.s)}pt)` : getSignalAction("score_low");
+      signals.push({type:"critical",icon:"🔴",text:`${g} Score ${Math.round(s)}pt — проблемная зона${worstHint}`,geo:g,priority:80});
     }
     if (!NO(d.ngr_mom)) {
       if (d.ngr_mom < -30) {
         const curNgr = d.ngr, prevNgr = PREV[g]?.ngr;
-        signals.push({type:"critical",icon:"🔴",text:`${g} NGR ${d.ngr_mom>0?"+":""}${d.ngr_mom.toFixed(0)}% MoM (${fmtNGR(curNgr)}${prevNgr?" ← "+fmtNGR(prevNgr):""})`,geo:g,priority:85});
+        signals.push({type:"critical",icon:"🔴",text:`${g} NGR ${d.ngr_mom>0?"+":""}${d.ngr_mom.toFixed(0)}% MoM (${fmtNGR(curNgr)}${prevNgr?" ← "+fmtNGR(prevNgr):""})${getSignalAction("ngr_drop")}`,geo:g,priority:85});
       } else if (d.ngr_mom > 30) {
         signals.push({type:"growth",icon:"🟢",text:`${g} NGR +${d.ngr_mom.toFixed(0)}% MoM (${fmtNGR(d.ngr)})`,geo:g,priority:50});
       }
@@ -327,7 +379,7 @@ function generateSignals(geos) {
     ALL_METRICS.forEach(mk => {
       const sc = scr(mk, d[mk]);
       if (sc !== null && sc === 0) {
-        signals.push({type:"critical",icon:"🔴",text:`${g}: ${DEF_TH[mk].l} = ${fmt(d[mk])}${DEF_TH[mk].u} (score 0)`,geo:g,priority:70});
+        signals.push({type:"critical",icon:"🔴",text:`${g}: ${DEF_TH[mk].l} = ${fmt(d[mk])}${DEF_TH[mk].u} (score 0)${getSignalAction("metric_zero",mk)}`,geo:g,priority:70});
       }
     });
   });
@@ -339,7 +391,7 @@ function generateSignals(geos) {
   });
   if (worstSupport && worstCSAT < 55) {
     const wd = D[worstSupport];
-    signals.push({type:"warning",icon:"🟡",text:`${worstSupport} Support: FRT ${fmt(wd.frt_sec)}с, CSAT ${fmt(wd.csat)}% — worst`,geo:worstSupport,priority:60});
+    signals.push({type:"warning",icon:"🟡",text:`${worstSupport} Support: FRT ${fmt(wd.frt_sec)}с, CSAT ${fmt(wd.csat)}%${getSignalAction("support_bad")}`,geo:worstSupport,priority:60});
   }
 
   const segKeys = Object.keys(SEGMENTS).sort();
@@ -352,7 +404,7 @@ function generateSignals(geos) {
       if (Math.abs(delta) > 5000) {
         const ic = delta < 0 ? "🔴" : "🟢";
         const tp = delta < 0 ? "critical" : "growth";
-        signals.push({type:tp,icon:ic,text:`VIP++ NGR ${fmtNGR(cNgr)} (было ${fmtNGR(pNgr)}, Δ${delta>0?"+":""}${fmtNGR(delta)})`,geo:null,priority:75});
+        signals.push({type:tp,icon:ic,text:`VIP++ NGR ${fmtNGR(cNgr)} (было ${fmtNGR(pNgr)}, Δ${delta>0?"+":""}${fmtNGR(delta)})${delta<0?getSignalAction("vip_shift"):""}`,geo:null,priority:75});
       }
     }
   }
@@ -379,10 +431,14 @@ function execSummaryHTML(geos, ps) {
   const sorted = [...geos].filter(g => !NO(g.d.ngr)).sort((a,b) => (b.d.ngr||0) - (a.d.ngr||0));
   const top2 = sorted.slice(0,2);
   const top2pct = totalNGR > 0 ? ((top2[0]?.d.ngr||0) + (top2[1]?.d.ngr||0)) / totalNGR * 100 : 0;
+  const totalAU = Object.values(D).reduce((s,d) => s + (d.au||0), 0);
+  const totalFTD = Object.values(D).reduce((s,d) => s + (d.ftd_count||0), 0);
+  const ph = PLAT_HISTORY;
+  const marginPct = ph.margin_pct && ph.margin_pct.length ? ph.margin_pct[ph.margin_pct.length-1] : null;
 
   let lines = [];
   const ngrStr = ngrDelta !== null ? `${ngrDelta > 0 ? "+" : ""}${ngrDelta.toFixed(0)}%` : "";
-  lines.push(`Платформа <span style="color:#ccc;font-weight:700">${fmtNGR(totalNGR)}</span> NGR${ngrStr ? ` (${ngrDelta>0?"📈":"📉"} ${ngrStr} MoM)` : ""}, score <span style="color:${cl(ps).tx};font-weight:700">${NO(ps)?"—":Math.round(ps)}pt</span>.`);
+  lines.push(`Платформа <span style="color:#ccc;font-weight:700">${fmtNGR(totalNGR)}</span> NGR${ngrStr ? ` (${ngrDelta>0?"📈":"📉"} ${ngrStr} MoM)` : ""}${!NO(marginPct)?`, маржа <span style="color:${marginPct<15?"#ff1744":marginPct<25?"#ffc107":"#00e676"};font-weight:600">${marginPct.toFixed(0)}%</span>`:""}, score <span style="color:${cl(ps).tx};font-weight:700">${NO(ps)?"—":Math.round(ps)}pt</span>. AU ${fmt(totalAU)}, FTD ${fmt(totalFTD)}.`);
 
   if (crit > 0) {
     let parts = [];
@@ -395,6 +451,13 @@ function execSummaryHTML(geos, ps) {
   } else {
     lines.push(`<span style="color:#00e676">Все ${geos.length} GEO в норме.</span>`);
   }
+
+  // Diagnostic: worst category across platform
+  const worstCat = Object.entries(CATS).map(([ck,ct]) => {
+    const vals = geos.map(g => catSc(g.d, ck)).filter(x => x !== null);
+    return {ck, l:ct.l, i:ct.i, s: vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null};
+  }).filter(x => x.s !== null).sort((a,b) => a.s - b.s)[0];
+  if (worstCat && worstCat.s < 50) lines.push(`Слабый блок: ${worstCat.i} ${worstCat.l} <span style="color:${cl(worstCat.s).tx}">${Math.round(worstCat.s)}pt</span>.`);
 
   if (top2pct > 60) lines.push(`⚠️ Концентрация: ${top2[0]?.g.split(" ").pop()} + ${top2[1]?.g.split(" ").pop()} = <span style="color:#ffc107">${top2pct.toFixed(0)}%</span> NGR.`);
 
@@ -421,12 +484,37 @@ function ngrContribHTML(geos) {
   return h;
 }
 
+// ═══ 5h. HEATMAP MATRIX GEO × CATEGORY ═══
+function heatmapHTML(geos) {
+  const catKeys = Object.keys(CATS);
+  let h = `<div style="margin-bottom:14px;background:#0c0c18;border-radius:12px;border:1px solid #1a1a2e;padding:10px;overflow-x:auto"><div class="mono" style="color:#555;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📋 МАТРИЦА GEO × БЛОКИ</div>`;
+  h += `<table style="width:100%;border-collapse:collapse;font-size:9px"><thead><tr><th style="text-align:left;padding:3px 4px;color:#444;font-weight:600;min-width:60px">GEO</th>`;
+  catKeys.forEach(ck => { h += `<th style="text-align:center;padding:3px 2px;color:#444;font-weight:500;min-width:28px" title="${CATS[ck].l} (${CATS[ck].w}%)">${CATS[ck].i}</th>`; });
+  h += `<th style="text-align:center;padding:3px 4px;color:#555;font-weight:600;min-width:30px">Σ</th></tr></thead><tbody>`;
+  const sortedGeos = [...geos].sort((a,b) => (b.s??-1) - (a.s??-1));
+  sortedGeos.forEach(({g,s,d,flag}) => {
+    h += `<tr onclick="nav('${g}')" style="cursor:pointer" onmouseenter="this.style.background='#151520'" onmouseleave="this.style.background='transparent'">`;
+    h += `<td style="padding:3px 4px;color:#888;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px">${flag?"⛔ ":""}${g.split(" ").pop()}</td>`;
+    catKeys.forEach(ck => {
+      const cs = catSc(d, ck);
+      const cc = cl(cs);
+      const cellBg = NO(cs) ? "transparent" : `${cc.gw}${cs>=70?"18":cs>=40?"22":"33"}`;
+      h += `<td style="text-align:center;padding:3px 2px"><span class="mono" style="color:${NO(cs)?"#222":cc.tx};font-size:9px;font-weight:600;background:${cellBg};padding:1px 3px;border-radius:3px;display:inline-block;min-width:22px">${NO(cs)?"·":Math.round(cs)}</span></td>`;
+    });
+    const gc = cl(s);
+    h += `<td style="text-align:center;padding:3px 4px"><span class="mono" style="color:${NO(s)?"#333":gc.tx};font-size:10px;font-weight:700">${NO(s)?"—":Math.round(s)}</span></td>`;
+    h += `</tr>`;
+  });
+  h += `</tbody></table></div>`;
+  return h;
+}
+
 function signalsHTML(geos) {
   const signals = generateSignals(geos);
   if (!signals.length) return "";
   const bgMap = {critical:"#1a081022",warning:"#1a150822",growth:"#081a0c22"};
   const borderMap = {critical:"#ff174422",warning:"#ffc10722",growth:"#00e67622"};
-  let h = `<div style="margin-bottom:14px;background:#0c0c18;border-radius:12px;border:1px solid #1a1a2e;padding:10px"><div class="mono" style="color:#888;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center" title="Автоматически сгенерированные сигналы на основе данных за март 2026">🚨 СИГНАЛЫ</div>`;
+  let h = `<div style="margin-bottom:14px;background:#0c0c18;border-radius:12px;border:1px solid #1a1a2e;padding:10px"><div class="mono" style="color:#888;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center" title="Автоматически сгенерированные сигналы на основе данных">🚨 СИГНАЛЫ</div>`;
   signals.forEach(s => {
     const onclick = s.geo ? `onclick="nav('${s.geo}')"` : "";
     h += `<div class="signal-item" ${onclick} style="background:${bgMap[s.type]||"#12121e"};border:1px solid ${borderMap[s.type]||"#1a1a2e"};${s.geo?"cursor:pointer":"cursor:default"}"><span class="signal-icon">${s.icon}</span><span class="signal-text" style="color:${s.type==="growth"?"#00e676cc":s.type==="warning"?"#ffc107cc":"#ff8a80"}">${s.text}</span></div>`;
@@ -473,7 +561,7 @@ function historySparkHTML(geo) {
   ];
   const available = metrics.filter(m => hist[m.key] && hist[m.key].length >= 2);
   if (!available.length) return "";
-  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#444;font-size:9px;font-weight:600;margin-bottom:6px;text-align:center">📈 ТРЕНДЫ (Aug'25 → Mar'26)</div>`;
+  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#444;font-size:9px;font-weight:600;margin-bottom:6px;text-align:center">📈 ТРЕНДЫ (${metaTrendLabel()})</div>`;
   available.forEach(m => {
     const data = hist[m.key];
     const {svg, lastV, lastC} = buildSparkSVG(data, 28, 100);
@@ -553,7 +641,7 @@ function funnelHTML() {
     h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="flex:1;min-width:0">${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${F.periods.map((l,i) => `<span class="mono" style="color:${i===F.periods.length-1?'#666':'#333'};font-size:6px">${l}</span>`).join("")}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:11px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:8px">${deltaStr}</span>`:""}</div></div>`;
   });
 
-  h += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-top:6px">Q1 2026 (Янв–Мар) · источник: маркетинговый отчёт</div>`;
+  h += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-top:6px">${metaPeriodLabel()} · источник: маркетинговый отчёт</div>`;
   h += `</div>`;
   return h;
 }
@@ -611,10 +699,10 @@ function render() {
     : `<span class="data-badge" style="background:#ff174422;color:#ff1744">⚠ нет</span>`;
 
   const updStr = META.updated ? `обновлено ${META.updated}` : "";
-  let html = `<div class="header"><div><h1>HEALTH CHECK · Q1 2026</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">Итоги Q1 (Янв–Мар 2026) · данные до 31 марта · ${META.version} ${srcBadge}</p>${updStr?`<p class="mono" style="color:#1e1e30;font-size:8px;margin-top:1px">📅 ${updStr}</p>`:""}</div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
+  let html = `<div class="header"><div><h1>HEALTH CHECK · ${metaPeriodLabel()}</h1><p class="mono" style="color:#2a2a40;font-size:9px;margin-top:2px">${metaMonth()} · ${META.version} ${srcBadge}</p>${updStr?`<p class="mono" style="color:#1e1e30;font-size:8px;margin-top:1px">📅 ${updStr}</p>`:""}</div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="copyTelegramReport()" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg></button><button class="hdr-btn" onclick="openDataEditor()" title="Данные"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div>`;
 
   if (!state.geo) {
-    html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`Q1 2026 · ${geos.length} GEO`)}</div>`;
+    html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${metaPeriodLabel()} · ${geos.length} GEO`)}</div>`;
     html += execSummaryHTML(geos, ps);
     html += platPulseHTML();
     html += platSparkHTML();
@@ -624,11 +712,12 @@ function render() {
       const momC = !NO(mom) ? (mom > 5 ? "#00e676" : mom < -5 ? "#ff1744" : "#555") : "";
       const tier = (d.ngr||0) > 20000 ? "" : (d.ngr||0) > 5000 ? "" : "🌱";
       const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}${Math.abs(d.ngr_mom).toFixed(0)}%</span>`:""}`;
-      return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag)}</div>`;
+      return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag,true)}</div>`;
     }).join("")}</div>`;
-    html += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-bottom:12px">Score = март 2026 · ↑↓ = изменение фев→мар (MoM)</div>`;
+    html += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-bottom:12px">Score = ${metaMonth()} · ↑↓ = ${metaPrev()}→${metaCur()} (MoM)</div>`;
     html += signalsHTML(geos);
     html += ngrContribHTML(geos);
+    html += heatmapHTML(geos);
     html += platBlocksHTML(geos);
     html += retentionTableHTML();
     html += funnelHTML();
@@ -658,7 +747,22 @@ function render() {
     html += navHTML(idx);
     if (fl && state.cat === "payments") html += `<div class="alert"><span class="mono" style="color:#ff8a80;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span></div>`;
     html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(cs,68,`${ct.i} ${ct.l}`,`${ct.w}% веса · ${g.split(" ").pop()}`)}</div><div class="line"></div>`;
-    html += `<div style="display:flex;flex-direction:column;gap:5px">${ct.m.map(mk => metricHTML(mk, d[mk], prev[mk])).join("")}</div>`;
+    html += `<div style="display:flex;flex-direction:column;gap:5px">${ct.m.map(mk => {
+      let row = metricHTML(mk, d[mk], prev[mk]);
+      // Cross-GEO mini-ranking for this metric
+      const ranked = Object.entries(D).map(([rg,rd]) => ({g:rg,v:rd[mk],s:scr(mk,rd[mk])})).filter(x=>!NO(x.s)).sort((a,b)=>b.s-a.s);
+      if (ranked.length > 1) {
+        const t = getTH(mk);
+        row += `<div style="padding:2px 12px 6px 18px;display:flex;flex-wrap:wrap;gap:2px">`;
+        ranked.forEach((r,i) => {
+          const rc = cl(r.s);
+          const isMe = r.g === g;
+          row += `<span class="mono" style="font-size:8px;padding:1px 4px;border-radius:3px;background:${isMe?rc.gw+"33":"#0e0e1c"};color:${isMe?rc.tx:"#444"};${isMe?"font-weight:700":""}">${r.g.split(" ").pop()} ${fmt(r.v)}${t.u}</span>`;
+        });
+        row += `</div>`;
+      }
+      return row;
+    }).join("")}</div>`;
   }
   app.innerHTML = html;
 }
@@ -671,42 +775,76 @@ function toggleRanking(ck) {
 }
 
 // ═══ 8. TELEGRAM REPORT ═══
+function textSparkline(data) {
+  if (!data || data.length < 2) return "";
+  const chars = "▁▂▃▄▅▆▇█";
+  const mn = Math.min(...data), mx = Math.max(...data), range = mx - mn || 1;
+  return data.map(v => chars[Math.min(7, Math.floor((v - mn) / range * 7.99))]).join("");
+}
+
 function copyTelegramReport() {
   const geos = Object.entries(D).map(([g,d]) => ({g, s:geoSc(d), d, flag:!!FLAGS[g]})).sort((a,b) => (b.s??-1) - (a.s??-1));
   const valid = geos.filter(g => !NO(g.s));
   const ps = valid.length ? valid.reduce((a,g) => a+g.s, 0)/valid.length : null;
   const totalNGR = Object.values(D).reduce((s,d) => s + (d.ngr || 0), 0);
+  const totalAU = Object.values(D).reduce((s,d) => s + (d.au||0), 0);
+  const totalFTD = Object.values(D).reduce((s,d) => s + (d.ftd_count||0), 0);
+  const ph = PLAT_HISTORY;
+  const marginPct = ph.margin_pct && ph.margin_pct.length ? ph.margin_pct[ph.margin_pct.length-1] : null;
+  const prevNGR = PLAT_TREND.length >= 2 ? PLAT_TREND[PLAT_TREND.length-2] : null;
+  const ngrMoM = prevNGR ? ((totalNGR - prevNGR) / Math.abs(prevNGR) * 100) : null;
 
-  let txt = `📊 HEALTH CHECK · ${META.month}\n`;
-  txt += `Платформа: ${Math.round(ps)}pt · NGR: ${fmtNGR(totalNGR)}\n\n`;
-  txt += `🏆 Рейтинг GEO:\n`;
-  geos.forEach((g, i) => {
-    const icon = g.flag ? "⛔" : g.s >= 70 ? "🟢" : g.s >= 40 ? "🟡" : "🔴";
-    txt += `${icon} ${g.g} — ${Math.round(g.s)}pt · ${fmtNGR(g.d.ngr)}`;
-    if (g.d.ngr_mom) txt += ` (${g.d.ngr_mom > 0 ? "+" : ""}${g.d.ngr_mom.toFixed(0)}% MoM)`;
-    txt += `\n`;
-  });
-  const reds = geos.filter(g => !NO(g.s) && g.s < 40);
-  if (reds.length) {
-    txt += `\n🚨 Проблемные GEO:\n`;
-    reds.forEach(g => {
-      const fl = FLAGS[g.g];
-      const worst = ALL_METRICS.map(k => ({k, s:scr(k, g.d[k])})).filter(m => !NO(m.s) && m.s < 25).slice(0,3).map(m => DEF_TH[m.k].l);
-      txt += `• ${fl?fl.icon+" ":""}${g.g}: ${worst.join(", ")}\n`;
-    });
+  let txt = `📊 HEALTH CHECK · ${metaMonth()}\n\n`;
+
+  // Platform pulse
+  txt += `💰 NGR ${fmtNGR(totalNGR)}`;
+  if (ngrMoM !== null) txt += ` (${ngrMoM>0?"📈":"📉"} ${ngrMoM>0?"+":""}${ngrMoM.toFixed(0)}% MoM)`;
+  if (!NO(marginPct)) txt += ` · Margin ${marginPct.toFixed(0)}%`;
+  txt += `\n`;
+  txt += `👥 AU ${fmt(totalAU)} · FTD ${fmt(totalFTD)} · Score ${NO(ps)?"—":Math.round(ps)}pt\n`;
+  if (PLAT_TREND.length >= 2) txt += `📈 NGR ${textSparkline(PLAT_TREND)}\n`;
+
+  // QoQ
+  if (PLAT_TREND.length >= 8) {
+    const q4 = (PLAT_TREND[2]||0) + (PLAT_TREND[3]||0) + (PLAT_TREND[4]||0);
+    const q1 = (PLAT_TREND[5]||0) + (PLAT_TREND[6]||0) + (PLAT_TREND[7]||0);
+    const qoq = q4 ? ((q1-q4)/Math.abs(q4)*100).toFixed(0) : "—";
+    txt += `📦 Q1: ${fmtNGR(q1)} · Q4: ${fmtNGR(q4)} · QoQ: ${qoq==="—"?"—":(parseFloat(qoq)>=0?"+":"")+qoq+"%"}\n`;
   }
-  txt += `\n📦 Блоки платформы:\n`;
+
+  // TOP-3 problems (from signals)
+  const signals = generateSignals(geos);
+  const topProblems = signals.filter(s => s.type === "critical").slice(0, 3);
+  if (topProblems.length) {
+    txt += `\n🚨 TOP-${topProblems.length} ПРОБЛЕМ:\n`;
+    topProblems.forEach((s,i) => { txt += `${i+1}. ${s.text}\n`; });
+  }
+
+  // GEO ranking
+  txt += `\n🏆 РЕЙТИНГ GEO:\n`;
+  geos.forEach(g => {
+    const icon = g.flag ? "⛔" : g.s >= 70 ? "🟢" : g.s >= 40 ? "🟡" : "🔴";
+    const trendData = TREND[g.g];
+    const spark = trendData ? ` ${textSparkline(trendData)}` : "";
+    txt += `${icon} ${g.g} — ${Math.round(g.s)}pt · ${fmtNGR(g.d.ngr)}`;
+    if (g.d.ngr_mom) txt += ` (${g.d.ngr_mom > 0 ? "+" : ""}${g.d.ngr_mom.toFixed(0)}%)`;
+    txt += `${spark}\n`;
+  });
+
+  // Platform blocks
+  txt += `\n📦 Блоки:\n`;
   Object.entries(CATS).forEach(([ck, ct]) => {
     const vals = geos.map(g => catSc(g.d, ck)).filter(x => x !== null);
     const s = vals.length ? vals.reduce((a,b) => a+b, 0)/vals.length : null;
     const icon = NO(s) ? "⬜" : s >= 70 ? "🟢" : s >= 40 ? "🟡" : "🔴";
-    txt += `${ct.i} ${ct.l}: ${icon} ${NO(s)?"—":Math.round(s)}pt (${ct.w}%)\n`;
+    txt += `${ct.i} ${ct.l}: ${icon} ${NO(s)?"—":Math.round(s)}pt\n`;
   });
 
-  const signals = generateSignals(geos);
-  if (signals.length) {
-    txt += `\n🚨 Сигналы:\n`;
-    signals.forEach(s => { txt += `${s.icon} ${s.text}\n`; });
+  // Growth signals
+  const growths = signals.filter(s => s.type === "growth");
+  if (growths.length) {
+    txt += `\n✅ Рост:\n`;
+    growths.forEach(s => { txt += `${s.icon} ${s.text}\n`; });
   }
 
   navigator.clipboard.writeText(txt).then(() => { showToast("📋 Скопировано для Telegram"); }).catch(() => { prompt("Скопируйте текст:", txt); });

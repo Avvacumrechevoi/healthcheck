@@ -1,6 +1,33 @@
 # Changelog
 
-## v28 (2026-04-04) — Current
+## v31 (2026-04-12) — Current
+### Added
+- **Heatmap matrix**: 10×8 GEO × Category table on main screen — cross-GEO comparison at a glance
+- **Signal actions**: every alert now includes prescriptive action ("→ Проверить платёжки")
+- **Cross-GEO metric ranking**: category drill-down shows mini-ranking of all GEOs per metric
+- **Gray-first design**: green (score ≥70) spheres are muted gray; only problems are colorful
+- **Extended Telegram report**: platform pulse (NGR, Margin, AU, FTD), QoQ, TOP-3 problems, unicode sparklines ▁▂▃▅▇
+- **Dynamic dates**: all hardcoded "Q1 2026", "фев→мар", "март 2026" replaced with META-driven labels
+- **Target visibility**: each metric row shows green threshold as "→25%" target
+- **NLG exec summary**: margin%, AU, FTD, worst category diagnostic, concentration warning
+- **Mobile CSS**: compact grid on <480px screens
+- **Expanded prev data**: all 32 metrics per GEO stored in prev for full trend arrows
+
+### Changed
+- Version bumped to v31
+- Telegram report restructured: pulse → problems → ranking → blocks → growth
+- Sphere function accepts grayFirst parameter for muted healthy states
+
+## v30 (2026-04-08)
+### Added
+- Segments section (VIP++, VIP+, Core, etc.) with MoM comparison
+- Retention table with M1/M3/Core/Bettor columns
+- Deposit conversion funnel (Reg→Dep→CR2→CR3→CR5)
+- Per-GEO history sparklines (players, ARPPU, margin, cashout)
+- Platform pulse mini-KPIs (NGR, Deposits, Margin, Players)
+- QoQ comparison card
+
+## v28 (2026-04-04)
 ### Added
 - **Dynamic data**: extracted all data from index.html into `data.json`
 - **Data editor**: built-in UI with 3 tabs (JSON / Per GEO / Meta)
