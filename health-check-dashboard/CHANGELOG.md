@@ -11,7 +11,7 @@
 - **Target visibility**: each metric row shows green threshold as "→25%" target
 - **NLG exec summary**: margin%, AU, FTD, worst category diagnostic, concentration warning
 - **Mobile CSS**: compact grid on <480px screens
-- **Expanded prev data**: all 32 metrics per GEO stored in prev for full trend arrows
+- **Expanded prev data**: prev now correctly retains February values; arrows work for ngr, arppu, cashout, margin, players
 
 ### Changed
 - Version bumped to v31

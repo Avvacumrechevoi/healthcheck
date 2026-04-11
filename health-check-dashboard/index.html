@@ -319,7 +319,12 @@ function platPulseHTML() {
     const q1ngr = (PLAT_TREND[5]||0) + (PLAT_TREND[6]||0) + (PLAT_TREND[7]||0);
     const qoq = q4ngr !== 0 ? ((q1ngr - q4ngr) / Math.abs(q4ngr) * 100).toFixed(0) : "—";
     const qoqC = typeof qoq === "string" ? "#555" : (parseFloat(qoq) >= 0 ? "#00e676" : "#ff1744");
-    h += `<div style="background:#0e0e1c;border-radius:8px;padding:7px 10px;border:1px solid #1a1a2e;margin-bottom:10px;text-align:center"><span class="mono" style="color:#888;font-size:10px">Q1'26: <span style="color:#ccc;font-weight:700">${fmtNGR(q1ngr)}</span> | Q4'25: <span style="color:#aaa">${fmtNGR(q4ngr)}</span> | QoQ: <span style="color:${qoqC};font-weight:700">${qoq === "—" ? "—" : (parseFloat(qoq)>=0?"+":"")+qoq+"%"}</span></span></div>`;
+    // Dynamic quarter labels from periods
+    const p = META.periods || [];
+    const curQ = p.length >= 8 ? p[7] : "", prevQ = p.length >= 5 ? p[4] : "";
+    const curQLabel = curQ ? `Q${Math.ceil(parseInt(curQ.split("-")[1])/3)}'${curQ.split("-")[0].slice(2)}` : "cur";
+    const prevQLabel = prevQ ? `Q${Math.ceil(parseInt(prevQ.split("-")[1])/3)}'${prevQ.split("-")[0].slice(2)}` : "prev";
+    h += `<div style="background:#0e0e1c;border-radius:8px;padding:7px 10px;border:1px solid #1a1a2e;margin-bottom:10px;text-align:center"><span class="mono" style="color:#888;font-size:10px">${curQLabel}: <span style="color:#ccc;font-weight:700">${fmtNGR(q1ngr)}</span> | ${prevQLabel}: <span style="color:#aaa">${fmtNGR(q4ngr)}</span> | QoQ: <span style="color:${qoqC};font-weight:700">${qoq === "—" ? "—" : (parseFloat(qoq)>=0?"+":"")+qoq+"%"}</span></span></div>`;
   }
   return h;
 }
@@ -809,7 +814,10 @@ function copyTelegramReport() {
     const q4 = (PLAT_TREND[2]||0) + (PLAT_TREND[3]||0) + (PLAT_TREND[4]||0);
     const q1 = (PLAT_TREND[5]||0) + (PLAT_TREND[6]||0) + (PLAT_TREND[7]||0);
     const qoq = q4 ? ((q1-q4)/Math.abs(q4)*100).toFixed(0) : "—";
-    txt += `📦 Q1: ${fmtNGR(q1)} · Q4: ${fmtNGR(q4)} · QoQ: ${qoq==="—"?"—":(parseFloat(qoq)>=0?"+":"")+qoq+"%"}\n`;
+    const p = META.periods || [];
+    const cQ = p.length >= 8 ? `Q${Math.ceil(parseInt(p[7].split("-")[1])/3)}` : "Cur";
+    const pQ = p.length >= 5 ? `Q${Math.ceil(parseInt(p[4].split("-")[1])/3)}` : "Prev";
+    txt += `📦 ${cQ}: ${fmtNGR(q1)} · ${pQ}: ${fmtNGR(q4)} · QoQ: ${qoq==="—"?"—":(parseFloat(qoq)>=0?"+":"")+qoq+"%"}\n`;
   }
 
   // TOP-3 problems (from signals)
