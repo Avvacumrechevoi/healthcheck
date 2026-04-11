@@ -638,12 +638,19 @@ function funnelHTML() {
     const last = data[data.length-1];
     const prev = data.length >= 2 ? data[data.length-2] : null;
     const delta = prev ? last - prev : null;
-    const {svg} = buildSparkSVG(data, 24, 90);
     const valStr = m.isPct ? last.toFixed(1)+"%" : fmt(last);
     const deltaStr = delta !== null ? `${delta >= 0 ? "+" : ""}${m.isPct ? delta.toFixed(1)+"pp" : fmt(delta)}` : "";
     const deltaC = delta !== null ? (delta >= 0 ? "#00e67688" : "#ff174488") : "";
 
-    h += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="color:${m.color};font-size:10px;min-width:80px" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="flex:1;min-width:0;max-height:32px;overflow:hidden">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:55px"><span class="mono" style="color:#ccc;font-size:12px;font-weight:600">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span>`:""}</div></div>`;
+    // Mini inline bar showing trend across periods
+    const mn = Math.min(...data), mx = Math.max(...data), range = mx - mn || 1;
+    let bars = data.map((v, i) => {
+      const pct = ((v - mn) / range * 60 + 40).toFixed(0);
+      const isLast = i === data.length - 1;
+      return `<div style="flex:1;background:${isLast?m.color+"66":m.color+"22"};height:${pct}%;border-radius:2px;min-width:4px" title="${F.periods[i]}: ${m.isPct?v.toFixed(1)+"%":fmt(v)}"></div>`;
+    }).join("");
+
+    h += `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a2e"><span style="color:${m.color};font-size:11px;min-width:90px;font-weight:500" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="display:flex;align-items:flex-end;gap:2px;height:20px;flex:1;max-width:120px">${bars}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:60px"><span class="mono" style="color:#ccc;font-size:13px;font-weight:700">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span>`:""}</div></div>`;
   });
 
   h += `<div class="mono" style="color:#555;font-size:8px;text-align:center;margin-top:6px">${metaPeriodLabel()} · источник: маркетинговый отчёт</div>`;

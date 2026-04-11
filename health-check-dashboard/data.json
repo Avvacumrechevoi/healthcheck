@@ -1325,154 +1325,96 @@
   },
   "segments": {
     "2026-02": {
-      "Вип++": {
-        "players": 13,
-        "deposits": 374296.7,
-        "withdrawals": 290792.08,
-        "ngr": 83504.62,
-        "margin_pct": 22.3,
-        "avg_ngr": 6423.43
-      },
-      "Вип+": {
-        "players": 9,
-        "deposits": 20631.01,
-        "withdrawals": 17663.24,
-        "ngr": 2967.77,
-        "margin_pct": 14.4,
-        "avg_ngr": 329.75
+      "Превип": {
+        "players": 19,
+        "ngr": null,
+        "deposits": 125227
       },
       "Вип": {
-        "players": 88,
-        "deposits": 297344.86,
-        "withdrawals": 192183.17,
-        "ngr": 105161.69,
-        "margin_pct": 35.4,
-        "avg_ngr": 1208.76
+        "players": 12,
+        "ngr": null,
+        "deposits": 303020
       },
-      "Превип": {
-        "players": 99,
-        "deposits": 136218.32,
-        "withdrawals": 119244.71,
-        "ngr": 16973.61,
-        "margin_pct": 12.5,
-        "avg_ngr": 174.99
+      "Вип+": {
+        "players": 3,
+        "ngr": null,
+        "deposits": 192111
       },
-      "Ростущие": {
-        "players": 120,
-        "deposits": 122251.55,
-        "withdrawals": 102599.96,
-        "ngr": 19651.59,
-        "margin_pct": 16.1,
-        "avg_ngr": 167.96
-      },
-      "Стандарт": {
-        "players": 624,
-        "deposits": 156994.32,
-        "withdrawals": 117612.55,
-        "ngr": 39381.77,
-        "margin_pct": 25.1,
-        "avg_ngr": 65.2
-      },
-      "Новенькие": {
-        "players": 2703,
-        "deposits": 52270.21,
-        "withdrawals": 33873.41,
-        "ngr": 18396.8,
-        "margin_pct": 35.2,
-        "avg_ngr": 7.06
+      "Вип++": {
+        "players": 0,
+        "ngr": null,
+        "deposits": 0
       }
     },
     "2026-03": {
-      "Вип++": {
-        "players": 13,
-        "deposits": 290307.21,
-        "withdrawals": 293370.24,
-        "ngr": -3063.03,
-        "margin_pct": -1.1,
-        "avg_ngr": -235.62
-      },
-      "Вип+": {
-        "players": 12,
-        "deposits": 39032.78,
-        "withdrawals": 29586.55,
-        "ngr": 9446.23,
-        "margin_pct": 24.2,
-        "avg_ngr": 787.19
+      "Превип": {
+        "players": 9,
+        "ngr": null,
+        "deposits": 59920
       },
       "Вип": {
-        "players": 85,
-        "deposits": 274537.72,
-        "withdrawals": 241746.86,
-        "ngr": 32790.86,
-        "margin_pct": 11.9,
-        "avg_ngr": 385.77
+        "players": 12,
+        "ngr": null,
+        "deposits": 243592
       },
-      "Превип": {
-        "players": 86,
-        "deposits": 123903.3,
-        "withdrawals": 118227.09,
-        "ngr": 5676.21,
-        "margin_pct": 4.6,
-        "avg_ngr": 66.0
+      "Вип+": {
+        "players": 2,
+        "ngr": null,
+        "deposits": 119235
       },
-      "Ростущие": {
-        "players": 117,
-        "deposits": 131770.15,
-        "withdrawals": 95215.23,
-        "ngr": 36554.92,
-        "margin_pct": 27.7,
-        "avg_ngr": 312.44
-      },
-      "Стандарт": {
-        "players": 617,
-        "deposits": 203501.09,
-        "withdrawals": 149421.61,
-        "ngr": 54079.48,
-        "margin_pct": 26.6,
-        "avg_ngr": 87.65
-      },
-      "Новенькие": {
-        "players": 4108,
-        "deposits": 76484.27,
-        "withdrawals": 52056.09,
-        "ngr": 24428.18,
-        "margin_pct": 31.9,
-        "avg_ngr": 5.95
+      "Вип++": {
+        "players": 1,
+        "ngr": null,
+        "deposits": 106909
       }
     }
   },
   "funnel": {
     "periods": [
+      "Ноя",
+      "Дек",
       "Янв",
       "Фев",
       "Мар"
     ],
     "registration": [
+      5161,
+      4311,
       3717,
       3540,
-      5455
+      5428
     ],
     "ftd": [
+      4132,
+      3236,
       2513,
       2326,
       3848
     ],
     "reg2dep_pct": [
+      80.1,
+      75.1,
       67.6,
       65.7,
-      70.5
+      70.9
     ],
     "cr2_pct": [
+      40.4,
+      43.1,
       46.1,
       49.4,
       46.0
     ],
     "cr3_pct": [
+      26.7,
+      30.1,
       32.7,
       36.7,
       29.5
     ],
     "cr5_pct": [
+      16.0,
+      19.7,
       23.1,
       25.7,
       19.5
