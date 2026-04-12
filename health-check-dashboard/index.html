@@ -741,7 +741,7 @@ function funnelHTML() {
     h += `<div style="display:flex;align-items:center;gap:6px;cursor:${hasHist?"pointer":"default"}" ${hasHist?`onclick="document.getElementById('${s.id}').style.display=document.getElementById('${s.id}').style.display==='none'?'block':'none'"`:""}>`;
     h += `<span style="font-size:11px;color:#555;min-width:72px">${s.label}</span>`;
     h += `<div style="flex:1;position:relative;height:26px"><div style="height:100%;width:${barW}%;background:#6366f1;opacity:${op};border-radius:4px"></div>`;
-    h += `<span class="mono" style="position:absolute;left:${barW > 30 ? 2 : barW+1}%;top:5px;font-size:12px;font-weight:700;color:${barW > 30 ? "#fff" : "#333"}">${s.val}</span></div>`;
+    h += `<span class="mono" style="position:absolute;left:${2}%;top:5px;font-size:12px;font-weight:700;color:${"#fff"}">${s.val}</span></div>`;
     if (s.conv) h += `<span class="mono" style="font-size:9px;color:#999;min-width:50px;text-align:right">${s.conv}</span>`;
     else h += `<span style="min-width:50px"></span>`;
     if (hasHist) h += `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg>`;
