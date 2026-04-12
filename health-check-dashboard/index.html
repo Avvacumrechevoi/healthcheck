@@ -717,39 +717,40 @@ function funnelHTML() {
   try { F = typeof FUNNEL !== "undefined" ? FUNNEL : {}; } catch(e) {}
   if (!F.periods || !F.periods.length) return "";
 
-  let h = `<div style="margin-top:14px;background:#f8f9fc;border-radius:12px;border:1px solid #e0e2ea;padding:12px 10px"><div class="mono" style="color:#666;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📥 ВОРОНКА КОНВЕРСИИ (платформа)</div>`;
+  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:14px;text-align:center">📥 ВОРОНКА КОНВЕРСИИ</div>`;
 
   const metrics = [
-    {key:"registration",label:"Регистрации",color:"#7c83ff"},
-    {key:"ftd",label:"FTD",color:"#16a34a"},
-    {key:"reg2dep_pct",label:"Reg→Dep %",color:"#d97706",isPct:true,tip:"Конверсия регистрации в первый депозит. Хорошо: >30%, плохо: <15%"},
-    {key:"cr2_pct",label:"CR 2-й деп %",color:"#ff6b35",isPct:true,tip:"Конверсия в повторный депозит. Хорошо: >50%, плохо: <30%"},
-    {key:"cr3_pct",label:"CR 3+ деп %",color:"#e040fb",isPct:true,tip:"% игроков с 3+ депозитами. Хорошо: >35%, плохо: <20%"},
-    {key:"cr5_pct",label:"CR 5+ деп %",color:"#8bc34a",isPct:true,tip:"% игроков с 5+ депозитами (лояльное ядро). Хорошо: >25%, плохо: <15%"},
+    {key:"registration",label:"Регистрации",color:"#7c83ff",fmt:v=>fmt(v)},
+    {key:"ftd",label:"FTD",color:"#16a34a",fmt:v=>fmt(v)},
+    {key:"reg2dep_pct",label:"Reg→Dep",color:"#d97706",isPct:true,fmt:v=>v.toFixed(0)+"%"},
+    {key:"cr2_pct",label:"CR 2-й деп",color:"#ea580c",isPct:true,fmt:v=>v.toFixed(0)+"%"},
+    {key:"cr3_pct",label:"CR 3+ деп",color:"#9333ea",isPct:true,fmt:v=>v.toFixed(0)+"%"},
+    {key:"cr5_pct",label:"CR 5+ деп",color:"#16a34a",isPct:true,fmt:v=>v.toFixed(0)+"%"},
   ];
 
   metrics.forEach(m => {
     const data = F[m.key];
     if (!data || !data.length) return;
+    const mx = Math.max(...data);
     const last = data[data.length-1];
     const prev = data.length >= 2 ? data[data.length-2] : null;
     const delta = prev ? last - prev : null;
-    const valStr = m.isPct ? last.toFixed(1)+"%" : fmt(last);
     const deltaStr = delta !== null ? `${delta >= 0 ? "+" : ""}${m.isPct ? delta.toFixed(1)+"pp" : fmt(delta)}` : "";
-    const deltaC = delta !== null ? (delta >= 0 ? "#16a34a88" : "#dc262688") : "";
+    const deltaC = delta !== null ? (delta >= 0 ? "#16a34a" : "#dc2626") : "#999";
 
-    // Mini inline bar showing trend across periods
-    const mn = Math.min(...data), mx = Math.max(...data), range = mx - mn || 1;
-    let bars = data.map((v, i) => {
-      const pct = ((v - mn) / range * 60 + 40).toFixed(0);
+    h += `<div style="margin-bottom:16px"><div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px"><span style="color:${m.color};font-size:12px;font-weight:600">${m.label}</span><span class="mono" style="color:#222;font-size:16px;font-weight:700">${m.fmt(last)}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:10px">${deltaStr}</span>`:""}</div>`;
+    h += `<div style="display:flex;align-items:flex-end;gap:6px;height:44px">`;
+    data.forEach((v, i) => {
+      const pct = Math.max(8, v / mx * 100);
       const isLast = i === data.length - 1;
-      return `<div style="flex:1;background:${isLast?m.color+"66":m.color+"12"};height:${pct}%;border-radius:2px;min-width:4px" title="${F.periods[i]}: ${m.isPct?v.toFixed(1)+"%":fmt(v)}"></div>`;
-    }).join("");
-
-    h += `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #e0e2ea"><span style="color:${m.color};font-size:11px;min-width:90px;font-weight:500" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="display:flex;align-items:flex-end;gap:2px;height:20px;flex:1;max-width:120px">${bars}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:60px"><span class="mono" style="color:#222;font-size:13px;font-weight:700">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span>`:""}</div></div>`;
+      const barColor = isLast ? m.color : m.color + "44";
+      const period = F.periods[i] || "";
+      h += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><span class="mono" style="font-size:9px;color:${isLast?"#333":"#999"};font-weight:${isLast?600:400}">${m.fmt(v)}</span><div style="width:100%;height:${pct}%;background:${barColor};border-radius:3px 3px 0 0;min-height:3px"></div><span class="mono" style="font-size:9px;color:${isLast?"#555":"#bbb"}">${period}</span></div>`;
+    });
+    h += `</div></div>`;
   });
 
-  h += `<div class="mono" style="color:#777;font-size:9px;text-align:center;margin-top:6px">${metaPeriodLabel()} · источник: маркетинговый отчёт</div>`;
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:4px">источник: маркетинговый отчёт</div>`;
   h += `</div>`;
   return h;
 }
