@@ -1911,5 +1911,797 @@
       "m5": null,
       "m6": null
     }
-  ]
+  ],
+  "geo_cohorts": {
+    "🇧🇷 Brazil": [
+      {
+        "cohort": "Aug 25",
+        "size": 561,
+        "m1": 11.6,
+        "m2": 7.8,
+        "m3": 5.5,
+        "m4": 3.6,
+        "m5": 2.7,
+        "m6": 2.0
+      },
+      {
+        "cohort": "Sep 25",
+        "size": 426,
+        "m1": 12.7,
+        "m2": 5.2,
+        "m3": 4.2,
+        "m4": 3.5,
+        "m5": 3.1,
+        "m6": 2.8
+      },
+      {
+        "cohort": "Oct 25",
+        "size": 495,
+        "m1": 13.9,
+        "m2": 6.1,
+        "m3": 3.2,
+        "m4": 2.6,
+        "m5": 3.2,
+        "m6": null
+      },
+      {
+        "cohort": "Nov 25",
+        "size": 701,
+        "m1": 12.6,
+        "m2": 4.9,
+        "m3": 2.7,
+        "m4": 2.3,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 1219,
+        "m1": 7.9,
+        "m2": 3.7,
+        "m3": 2.6,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 896,
+        "m1": 12.5,
+        "m2": 7.1,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 613,
+        "m1": 21.5,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 928,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇦🇷 Argentina": [
+      {
+        "cohort": "Aug 25",
+        "size": 311,
+        "m1": 12.2,
+        "m2": 7.1,
+        "m3": 4.2,
+        "m4": 2.9,
+        "m5": 2.6,
+        "m6": 2.6
+      },
+      {
+        "cohort": "Sep 25",
+        "size": 623,
+        "m1": 16.4,
+        "m2": 7.5,
+        "m3": 6.1,
+        "m4": 4.0,
+        "m5": 3.0,
+        "m6": 3.4
+      },
+      {
+        "cohort": "Oct 25",
+        "size": 1346,
+        "m1": 14.0,
+        "m2": 5.9,
+        "m3": 4.5,
+        "m4": 5.3,
+        "m5": 4.3,
+        "m6": null
+      },
+      {
+        "cohort": "Nov 25",
+        "size": 1022,
+        "m1": 15.4,
+        "m2": 7.6,
+        "m3": 6.1,
+        "m4": 4.8,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 1557,
+        "m1": 14.7,
+        "m2": 8.8,
+        "m3": 5.2,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 1154,
+        "m1": 14.3,
+        "m2": 7.4,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 1052,
+        "m1": 15.8,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 1882,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇨🇱 Chile": [
+      {
+        "cohort": "Aug 25",
+        "size": 548,
+        "m1": 13.0,
+        "m2": 3.3,
+        "m3": 1.6,
+        "m4": 0.9,
+        "m5": 0.9,
+        "m6": 0.4
+      },
+      {
+        "cohort": "Sep 25",
+        "size": 936,
+        "m1": 6.0,
+        "m2": 3.3,
+        "m3": 1.4,
+        "m4": 1.2,
+        "m5": 0.9,
+        "m6": 1.1
+      },
+      {
+        "cohort": "Oct 25",
+        "size": 344,
+        "m1": 7.3,
+        "m2": 4.4,
+        "m3": 3.8,
+        "m4": 2.3,
+        "m5": 2.3,
+        "m6": null
+      },
+      {
+        "cohort": "Nov 25",
+        "size": 133,
+        "m1": 15.8,
+        "m2": 3.0,
+        "m3": 2.3,
+        "m4": 2.3,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 121,
+        "m1": 9.1,
+        "m2": 6.6,
+        "m3": 4.1,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 93,
+        "m1": 18.3,
+        "m2": 10.8,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 147,
+        "m1": 16.3,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 518,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇲🇽 Mexico": [
+      {
+        "cohort": "Aug 25",
+        "size": 385,
+        "m1": 10.4,
+        "m2": 4.4,
+        "m3": 2.3,
+        "m4": 2.3,
+        "m5": 1.8,
+        "m6": 2.1
+      },
+      {
+        "cohort": "Sep 25",
+        "size": 386,
+        "m1": 10.1,
+        "m2": 4.7,
+        "m3": 4.1,
+        "m4": 2.8,
+        "m5": 2.3,
+        "m6": 1.6
+      },
+      {
+        "cohort": "Oct 25",
+        "size": 342,
+        "m1": 7.0,
+        "m2": 2.6,
+        "m3": 0.9,
+        "m4": 2.3,
+        "m5": 1.5,
+        "m6": null
+      },
+      {
+        "cohort": "Nov 25",
+        "size": 450,
+        "m1": 6.2,
+        "m2": 2.7,
+        "m3": 2.0,
+        "m4": 2.0,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 394,
+        "m1": 3.3,
+        "m2": 1.8,
+        "m3": 1.3,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 206,
+        "m1": 13.6,
+        "m2": 4.9,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 326,
+        "m1": 9.8,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 370,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇵🇪 Peru": [
+      {
+        "cohort": "Feb 25",
+        "size": 1241,
+        "m1": 17.9,
+        "m2": 7.9,
+        "m3": 5.7,
+        "m4": 2.7,
+        "m5": 0.9,
+        "m6": 0.9
+      },
+      {
+        "cohort": "Mar 25",
+        "size": 819,
+        "m1": 18.6,
+        "m2": 8.3,
+        "m3": 3.8,
+        "m4": 1.5,
+        "m5": 2.6,
+        "m6": 1.2
+      },
+      {
+        "cohort": "Apr 25",
+        "size": 629,
+        "m1": 19.2,
+        "m2": 6.8,
+        "m3": 1.7,
+        "m4": 1.9,
+        "m5": 0.8,
+        "m6": 0.6
+      },
+      {
+        "cohort": "May 25",
+        "size": 713,
+        "m1": 10.5,
+        "m2": 1.8,
+        "m3": 0.7,
+        "m4": 0.6,
+        "m5": 0.7,
+        "m6": 0.3
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 46,
+        "m1": 26.1,
+        "m2": 19.6,
+        "m3": 13.0,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 31,
+        "m1": 32.3,
+        "m2": 12.9,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 74,
+        "m1": 27.0,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 96,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇨🇴 Colombia": [
+      {
+        "cohort": "Oct 25",
+        "size": 593,
+        "m1": 8.1,
+        "m2": 1.9,
+        "m3": 0.8,
+        "m4": 0.2,
+        "m5": 0.2,
+        "m6": null
+      },
+      {
+        "cohort": "Nov 25",
+        "size": 1866,
+        "m1": 3.9,
+        "m2": 1.6,
+        "m3": 0.6,
+        "m4": 0.5,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 82,
+        "m1": 19.5,
+        "m2": 8.5,
+        "m3": 8.5,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 49,
+        "m1": 30.6,
+        "m2": 20.4,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 38,
+        "m1": 26.3,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 72,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇮🇳 India": [
+      {
+        "cohort": "Jun 25",
+        "size": 143,
+        "m1": 16.8,
+        "m2": 7.0,
+        "m3": 4.9,
+        "m4": 4.2,
+        "m5": 1.4,
+        "m6": 3.5
+      },
+      {
+        "cohort": "Jul 25",
+        "size": 163,
+        "m1": 14.1,
+        "m2": 1.2,
+        "m3": 0.6,
+        "m4": 0.6,
+        "m5": 1.2,
+        "m6": 1.8
+      },
+      {
+        "cohort": "Aug 25",
+        "size": 126,
+        "m1": 13.5,
+        "m2": 3.2,
+        "m3": 1.6,
+        "m4": 2.4,
+        "m5": 0.8,
+        "m6": 1.6
+      },
+      {
+        "cohort": "Sep 25",
+        "size": 61,
+        "m1": 36.1,
+        "m2": 19.7,
+        "m3": 11.5,
+        "m4": 6.6,
+        "m5": 8.2,
+        "m6": 6.6
+      },
+      {
+        "cohort": "Oct 25",
+        "size": 188,
+        "m1": 25.0,
+        "m2": 3.7,
+        "m3": 4.3,
+        "m4": 3.2,
+        "m5": 3.7,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 27,
+        "m1": 33.3,
+        "m2": 11.1,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 34,
+        "m1": 50.0,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 46,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇧🇩 Bangladesh": [
+      {
+        "cohort": "Aug 25",
+        "size": 54,
+        "m1": 24.1,
+        "m2": 5.6,
+        "m3": 9.3,
+        "m4": 7.4,
+        "m5": 3.7,
+        "m6": 5.6
+      },
+      {
+        "cohort": "Sep 25",
+        "size": 148,
+        "m1": 13.5,
+        "m2": 7.4,
+        "m3": 2.7,
+        "m4": 2.0,
+        "m5": 0.7,
+        "m6": 0.7
+      },
+      {
+        "cohort": "Oct 25",
+        "size": 115,
+        "m1": 30.4,
+        "m2": 9.6,
+        "m3": 3.5,
+        "m4": 0.9,
+        "m5": 1.7,
+        "m6": null
+      },
+      {
+        "cohort": "Nov 25",
+        "size": 196,
+        "m1": 14.3,
+        "m2": 7.7,
+        "m3": 4.6,
+        "m4": 3.6,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 309,
+        "m1": 19.7,
+        "m2": 10.0,
+        "m3": 8.1,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 259,
+        "m1": 18.1,
+        "m2": 13.1,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 293,
+        "m1": 21.5,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 259,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇵🇱 Poland": [
+      {
+        "cohort": "Aug 25",
+        "size": 29,
+        "m1": 10.3,
+        "m2": 10.3,
+        "m3": 3.4,
+        "m4": 3.4,
+        "m5": 3.4,
+        "m6": 3.4
+      },
+      {
+        "cohort": "Sep 25",
+        "size": 112,
+        "m1": 5.4,
+        "m2": 4.5,
+        "m3": 2.7,
+        "m4": 2.7,
+        "m5": 2.7,
+        "m6": 2.7
+      },
+      {
+        "cohort": "Oct 25",
+        "size": 173,
+        "m1": 4.0,
+        "m2": 3.5,
+        "m3": 2.3,
+        "m4": 2.9,
+        "m5": 2.3,
+        "m6": null
+      },
+      {
+        "cohort": "Nov 25",
+        "size": 193,
+        "m1": 2.1,
+        "m2": 1.6,
+        "m3": 2.6,
+        "m4": 0.5,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 24,
+        "m1": 33.3,
+        "m2": 33.3,
+        "m3": 16.7,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 20,
+        "m1": 30.0,
+        "m2": 15.0,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 136,
+        "m1": 4.4,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 94,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ],
+    "🇵🇹 Portugal": [
+      {
+        "cohort": "Apr 25",
+        "size": 27,
+        "m1": 22.2,
+        "m2": 14.8,
+        "m3": 3.7,
+        "m4": 3.7,
+        "m5": 3.7,
+        "m6": 3.7
+      },
+      {
+        "cohort": "Jun 25",
+        "size": 96,
+        "m1": 10.4,
+        "m2": 4.2,
+        "m3": 2.1,
+        "m4": 1.0,
+        "m5": 1.0,
+        "m6": 1.0
+      },
+      {
+        "cohort": "Jul 25",
+        "size": 236,
+        "m1": 9.7,
+        "m2": 2.5,
+        "m3": 0.8,
+        "m4": 0.4,
+        "m5": 0.4,
+        "m6": 0.4
+      },
+      {
+        "cohort": "Dec 25",
+        "size": 59,
+        "m1": 16.9,
+        "m2": 8.5,
+        "m3": 3.4,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Jan 26",
+        "size": 20,
+        "m1": 15.0,
+        "m2": 5.0,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Feb 26",
+        "size": 14,
+        "m1": 35.7,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      },
+      {
+        "cohort": "Mar 26",
+        "size": 45,
+        "m1": null,
+        "m2": null,
+        "m3": null,
+        "m4": null,
+        "m5": null,
+        "m6": null
+      }
+    ]
+  }
 }

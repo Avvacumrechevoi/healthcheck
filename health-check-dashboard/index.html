@@ -117,7 +117,7 @@ function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DE
 
 // ═══ 3. DYNAMIC DATA ═══
 let D = {}, PREV = {}, TREND = {}, HISTORY = {}, PLAT_TREND = [], PLAT_HISTORY = {}, TL = [], FLAGS = {}, SEGMENTS = {};
-let FUNNEL = {}, RETENTION_TABLE = {}, PLATFORM_COHORTS = [];
+let FUNNEL = {}, RETENTION_TABLE = {}, PLATFORM_COHORTS = [], GEO_COHORTS = {};
 let META = { month: "", month_short: "", prev_month_short: "", version: "v31", updated: "" };
 let dataSource = "none";
 
@@ -170,6 +170,7 @@ function applyDataset(ds, source) {
     FUNNEL = ds.funnel || {};
     RETENTION_TABLE = ds.retention_table || {};
     PLATFORM_COHORTS = ds.platform_cohorts || [];
+    GEO_COHORTS = ds.geo_cohorts || {};
     dataSource = source || "unknown";
     document.title = `Health Check · SapphireBet · ${META.month}`;
     return true;
@@ -183,7 +184,7 @@ function saveDataToLocal() {
 }
 
 function getDataset() {
-  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE, platform_cohorts: PLATFORM_COHORTS };
+  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE, platform_cohorts: PLATFORM_COHORTS, geo_cohorts: GEO_COHORTS };
 }
 
 async function loadData() {
@@ -578,91 +579,69 @@ function historySparkHTML(geo) {
 
 // ═══ 5f. RETENTION TABLE ═══
 function retentionTableHTML() {
-  let RT = {};
-  try { RT = typeof RETENTION_TABLE !== "undefined" ? RETENTION_TABLE : {}; } catch(e) {}
-  if (!Object.keys(RT).length) {
-    RT = {};
-    Object.entries(D).forEach(([g, d]) => {
-      if (d.d30_retention || d.d90_retention || d.core_retention) {
-        RT[g] = { m1: d.d30_retention, m3: d.d90_retention, core: d.core_retention, active_mom: d.active_mom, bettor_ret: d.bettor_ret };
-      }
-    });
-  }
-  if (!Object.keys(RT).length) return "";
-
-  const geos = Object.entries(RT).sort((a,b) => (b[1].core||0) - (a[1].core||0));
-  const avgM1 = geos.reduce((s,[,r]) => s + (r.m1||0), 0) / geos.length;
-  const avgM3 = geos.reduce((s,[,r]) => s + (r.m3||0), 0) / geos.length;
-  const avgCore = geos.reduce((s,[,r]) => s + (r.core||0), 0) / geos.length;
-
-  // Use new format with latest cohort data and trends
-  const hasNew = geos.some(([,r]) => r.latest_m1 !== undefined);
+  const GC = GEO_COHORTS;
+  if (!GC || !Object.keys(GC).length) return "";
   
-  if (hasNew) {
-    // New retention table with M1 trend
-    const sortedG = geos.sort((a,b) => (b[1].latest_m1||0) - (a[1].latest_m1||0));
-    let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:10px;text-align:center">🔄 RETENTION ПО GEO</div>`;
-    h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>`;
-    h += `<th style="text-align:left;padding:6px 4px;font-size:12px;color:#555;font-weight:600;border-bottom:2px solid #e0e2ea">GEO</th>`;
-    h += `<th style="text-align:center;padding:6px 2px;font-size:10px;color:#777;border-bottom:2px solid #e0e2ea">M1 тренд</th>`;
-    h += `<th style="text-align:center;padding:6px 4px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M1</th>`;
-    h += `<th style="text-align:center;padding:6px 2px;font-size:10px;color:#999;border-bottom:2px solid #e0e2ea">цель</th>`;
-    h += `<th style="text-align:center;padding:6px 4px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M3</th>`;
-    h += `<th style="text-align:center;padding:6px 4px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M6</th>`;
+  function retCell(v) {
+    if (NO(v)) return `<td style="text-align:center;padding:2px 3px;color:#ddd;font-size:10px">·</td>`;
+    const c = v >= 20 ? "#0a8a4a" : v >= 10 ? "#16a34a" : v >= 5 ? "#b45309" : "#dc2626";
+    return `<td style="text-align:center;padding:2px 3px"><span class="mono" style="color:${c};font-size:10px;font-weight:600">${v.toFixed(1)}</span></td>`;
+  }
+  
+  // Sort GEOs by NGR (biggest first)
+  const geoOrder = Object.keys(GC).sort((a,b) => ((D[b]||{}).ngr||0) - ((D[a]||{}).ngr||0));
+  
+  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:10px;text-align:center">🔄 RETENTION ПО GEO (когорты)</div>`;
+  
+  geoOrder.forEach(geo => {
+    const cohorts = GC[geo];
+    if (!cohorts || !cohorts.length) return;
+    
+    // Latest M1 for summary
+    const m1c = cohorts.filter(c => c.m1 !== null);
+    const latestM1 = m1c.length ? m1c[m1c.length-1] : null;
+    const latestLabel = latestM1 ? `M1 ${latestM1.m1.toFixed(1)}% (${latestM1.cohort})` : "";
+    const totalPlayers = cohorts.reduce((s,c) => s + (c.size||0), 0);
+    
+    const geoShort = geo.split(" ").pop();
+    const geoId = geoShort.replace(/[^a-zA-Z]/g,"");
+    
+    h += `<div style="margin-bottom:6px">`;
+    h += `<div onclick="document.getElementById('ret-${geoId}').style.display=document.getElementById('ret-${geoId}').style.display==='none'?'block':'none'" style="display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer;border-radius:6px;border-bottom:1px solid #f0f1f5" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
+    h += `<span style="font-size:13px;color:#222;font-weight:500;flex:1">${geo}</span>`;
+    h += `<span class="mono" style="color:#888;font-size:10px">${totalPlayers.toLocaleString()} игроков</span>`;
+    if (latestM1) h += `<span class="mono" style="color:${latestM1.m1>=15?"#0a8a4a":latestM1.m1>=8?"#b45309":"#dc2626"};font-size:12px;font-weight:700">${latestM1.m1.toFixed(1)}%</span>`;
+    h += `<span style="color:#bbb;font-size:10px">▾</span>`;
+    h += `</div>`;
+    
+    // Expandable cohort table (hidden by default)
+    h += `<div id="ret-${geoId}" style="display:none;padding:4px 0 8px 0">`;
+    h += `<table style="width:100%;border-collapse:collapse"><thead><tr>`;
+    h += `<th style="text-align:left;padding:2px 4px;font-size:9px;color:#999">Когорта</th>`;
+    h += `<th style="text-align:center;padding:2px 3px;font-size:9px;color:#999">N</th>`;
+    ['M1','M2','M3','M4','M5','M6'].forEach(m => {
+      h += `<th style="text-align:center;padding:2px 3px;font-size:9px;color:#555;font-weight:600">${m}</th>`;
+    });
     h += `</tr></thead><tbody>`;
-
-    function retC3(v, target) { if (NO(v)||!target) return "#888"; const ratio = v/target; if (ratio >= 0.8) return "#0a8a4a"; if (ratio >= 0.5) return "#b45309"; return "#dc2626"; }
-
-    sortedG.forEach(([g, r]) => {
-      const m1 = r.latest_m1, m3 = r.latest_m3, m6 = r.latest_m6;
-      const tM1 = r.target_m1, tM3 = r.target_m3, tM6 = r.target_m6;
-      const trend = r.m1_trend || [];
-      
-      // Mini bar trend
-      let trendBars = "";
-      if (trend.length >= 2) {
-        const tmx = Math.max(...trend, 1);
-        trendBars = `<div style="display:flex;align-items:flex-end;gap:1px;height:18px;min-width:40px">`;
-        trend.forEach((v,i) => {
-          const pct = Math.max(10, v/tmx*100);
-          const isLast = i === trend.length-1;
-          const c = v >= (tM1||20) ? "#0a8a4a" : v >= (tM1||20)*0.5 ? "#b45309" : "#dc2626";
-          trendBars += `<div style="width:5px;height:${pct}%;background:${isLast?c:c+"55"};border-radius:1px" title="${r.m1_labels?.[i]||''}: ${v.toFixed(1)}%"></div>`;
-        });
-        trendBars += `</div>`;
-      }
-      
-      const cohortLabel = r.latest_m1_cohort ? `<div style="font-size:8px;color:#999">${r.latest_m1_cohort}</div>` : "";
-      
-      h += `<tr onclick="nav('${g}')" style="cursor:pointer;border-bottom:1px solid #f0f1f5" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
-      h += `<td style="padding:6px 4px;font-size:13px;color:#222;font-weight:500">${g.split(" ").pop()}</td>`;
-      h += `<td style="text-align:center;padding:4px 2px">${trendBars}</td>`;
-      h += `<td style="text-align:center;padding:4px"><span class="mono" style="color:${retC3(m1,tM1)};font-size:14px;font-weight:700">${NO(m1)?"—":m1.toFixed(1)}</span>${cohortLabel}</td>`;
-      h += `<td style="text-align:center;padding:4px"><span class="mono" style="color:#bbb;font-size:10px">${tM1||"—"}</span></td>`;
-      h += `<td style="text-align:center;padding:4px"><span class="mono" style="color:${retC3(m3,tM3)};font-size:13px;font-weight:600">${NO(m3)?"—":m3.toFixed(1)}</span></td>`;
-      h += `<td style="text-align:center;padding:4px"><span class="mono" style="color:${retC3(m6,tM6)};font-size:13px;font-weight:600">${NO(m6)?"—":m6.toFixed(1)}</span></td>`;
+    
+    cohorts.forEach((c, i) => {
+      const isRecent = i >= cohorts.length - 3;
+      h += `<tr style="border-bottom:1px solid #f8f8fa">`;
+      h += `<td style="padding:2px 4px;font-size:10px;color:${isRecent?"#333":"#777"};font-weight:${isRecent?500:400};white-space:nowrap">${c.cohort}</td>`;
+      h += `<td style="text-align:center;padding:2px 3px;font-size:9px;color:#aaa">${c.size}</td>`;
+      h += retCell(c.m1);
+      h += retCell(c.m2);
+      h += retCell(c.m3);
+      h += retCell(c.m4);
+      h += retCell(c.m5);
+      h += retCell(c.m6);
       h += `</tr>`;
     });
-
-    const aM1 = sortedG.filter(([,r])=>r.latest_m1).reduce((s,[,r])=>s+r.latest_m1,0) / Math.max(sortedG.filter(([,r])=>r.latest_m1).length,1);
-    const aM3 = sortedG.filter(([,r])=>r.latest_m3).reduce((s,[,r])=>s+r.latest_m3,0) / Math.max(sortedG.filter(([,r])=>r.latest_m3).length,1);
-    const aM6 = sortedG.filter(([,r])=>r.latest_m6).reduce((s,[,r])=>s+r.latest_m6,0) / Math.max(sortedG.filter(([,r])=>r.latest_m6).length,1);
-    h += `</tbody><tfoot><tr style="border-top:2px solid #e0e2ea">`;
-    h += `<td style="padding:6px 4px;font-size:12px;color:#555;font-weight:600">AVG</td><td></td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${aM1.toFixed(1)}</span></td><td></td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${aM3.toFixed(1)}</span></td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${aM6.toFixed(1)}</span></td>`;
-    h += `</tr></tfoot></table></div>`;
-    h += `<div class="mono" style="color:#999;font-size:9px;text-align:center;margin-top:8px">M1 = последняя когорта с данными · M3/M6 = последняя доступная когорта · источник: MGM.io</div>`;
-    h += `</div>`;
-    return h;
-  }
-
-  // Fallback: old format
-  const avgM1f = geos.reduce((s,[,r]) => s + (r.m1||0), 0) / geos.length;
-  const avgM3f = geos.reduce((s,[,r]) => s + (r.m3||0), 0) / geos.length;
-  const avgCoref = geos.reduce((s,[,r]) => s + (r.core||0), 0) / geos.length;
-  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:12px"><div class="mono" style="color:#555;font-size:10px;text-align:center;margin-bottom:6px">🔄 RETENTION</div>`;
+    
+    h += `</tbody></table></div></div>`;
+  });
+  
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:6px">Клик на GEO → раскрыть когорты · источник: MGM.io</div>`;
   h += `</div>`;
   return h;
 }
@@ -1365,7 +1344,7 @@ function downloadJson() {
 async function resetToFile() {
   localStorage.removeItem("hc_data");
   dataSource = "none";
-  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {}; PLATFORM_COHORTS = [];
+  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {}; PLATFORM_COHORTS = []; GEO_COHORTS = {};
   try {
     const res = await fetch("data.json?" + Date.now());
     if (res.ok) {
