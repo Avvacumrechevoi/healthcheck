@@ -630,16 +630,19 @@ function retentionTableHTML() {
     
     if (!latest) return;
     
-    const m1Color = latest.m1 >= 20 ? "#0a8a4a" : latest.m1 >= 10 ? "#16a34a" : latest.m1 >= 5 ? "#b45309" : "#dc2626";
+    const smallSample = latest.size < 100;
+    const m1Color = smallSample ? "#999" : (latest.m1 >= 20 ? "#0a8a4a" : latest.m1 >= 10 ? "#16a34a" : latest.m1 >= 5 ? "#b45309" : "#dc2626");
     const delta = prev ? (latest.m1 - prev.m1) : null;
     const deltaStr = delta !== null ? `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}` : "";
     const deltaColor = delta !== null ? (delta >= 0 ? "#0a8a4a" : "#dc2626") : "#999";
+    const sizeColor = smallSample ? "#dc2626" : "#666";
+    const sizeNote = smallSample ? ` ⚠` : "";
     
-    h += `<tr onclick="document.getElementById('ret-${geoId}').style.display=document.getElementById('ret-${geoId}').style.display==='none'?'block':'none'" style="cursor:pointer;border-bottom:1px solid #f0f1f5" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
+    h += `<tr onclick="document.getElementById('ret-${geoId}').style.display=document.getElementById('ret-${geoId}').style.display==='none'?'block':'none'" style="cursor:pointer;border-bottom:1px solid #f0f1f5;${smallSample?"opacity:0.6":""}" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''" ${smallSample?`title="Малая выборка (n=${latest.size}): данные ненадёжны"`:""}>`;
     h += `<td style="padding:7px 6px;font-size:13px;color:#222;font-weight:500">${geo}</td>`;
-    h += `<td style="text-align:center;padding:7px 4px;font-size:12px;color:#666">${latest.size.toLocaleString()}</td>`;
+    h += `<td style="text-align:center;padding:7px 4px;font-size:12px;color:${sizeColor}">${latest.size.toLocaleString()}${sizeNote}</td>`;
     h += `<td style="text-align:center;padding:7px 4px"><span class="mono" style="color:${m1Color};font-size:15px;font-weight:700">${latest.m1.toFixed(1)}%</span></td>`;
-    h += `<td style="text-align:center;padding:7px 4px"><span class="mono" style="color:#bbb;font-size:11px">${prev ? prev.m1.toFixed(1)+"%" : "—"}</span>${deltaStr ? `<span class="mono" style="color:${deltaColor};font-size:9px;margin-left:2px">${deltaStr}</span>` : ""}</td>`;
+    h += `<td style="text-align:center;padding:7px 4px"><span class="mono" style="color:#bbb;font-size:11px">${prev ? prev.m1.toFixed(1)+"%" : "—"}</span>${deltaStr ? `<span class="mono" style="color:${smallSample?"#999":deltaColor};font-size:9px;margin-left:2px">${deltaStr}</span>` : ""}</td>`;
     h += `<td style="text-align:center;padding:4px"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg></td>`;
     h += `</tr>`;
     
@@ -662,7 +665,7 @@ function retentionTableHTML() {
   });
   
   h += `</tbody></table>`;
-  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:8px">⌄ раскрыть когортную таблицу GEO · источник: MGM.io</div>`;
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:8px">⚠ = малая выборка (&lt;100 чел.), данные ненадёжны · ⌄ раскрыть когорты · MGM.io</div>`;
   h += `</div>`;
   return h;
 }
