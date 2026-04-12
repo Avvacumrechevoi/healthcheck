@@ -720,12 +720,12 @@ function funnelHTML() {
   let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:14px;text-align:center">📥 ВОРОНКА КОНВЕРСИИ</div>`;
 
   const metrics = [
-    {key:"registration",label:"Регистрации",color:"#7c83ff",fmt:v=>fmt(v)},
-    {key:"ftd",label:"FTD",color:"#16a34a",fmt:v=>fmt(v)},
-    {key:"reg2dep_pct",label:"Reg→Dep",color:"#d97706",isPct:true,fmt:v=>v.toFixed(0)+"%"},
-    {key:"cr2_pct",label:"CR 2-й деп",color:"#ea580c",isPct:true,fmt:v=>v.toFixed(0)+"%"},
-    {key:"cr3_pct",label:"CR 3+ деп",color:"#9333ea",isPct:true,fmt:v=>v.toFixed(0)+"%"},
-    {key:"cr5_pct",label:"CR 5+ деп",color:"#16a34a",isPct:true,fmt:v=>v.toFixed(0)+"%"},
+    {key:"registration",label:"Регистрации",color:"#6366f1",fmt:v=>fmt(v)},
+    {key:"ftd",label:"FTD",color:"#6366f1",fmt:v=>fmt(v)},
+    {key:"reg2dep_pct",label:"Reg→Dep",color:"#6366f1",isPct:true,fmt:v=>v.toFixed(0)+"%"},
+    {key:"cr2_pct",label:"CR 2-й деп",color:"#6366f1",isPct:true,fmt:v=>v.toFixed(0)+"%"},
+    {key:"cr3_pct",label:"CR 3+ деп",color:"#6366f1",isPct:true,fmt:v=>v.toFixed(0)+"%"},
+    {key:"cr5_pct",label:"CR 5+ деп",color:"#6366f1",isPct:true,fmt:v=>v.toFixed(0)+"%"},
   ];
 
   metrics.forEach(m => {
@@ -738,7 +738,7 @@ function funnelHTML() {
     const deltaStr = delta !== null ? `${delta >= 0 ? "+" : ""}${m.isPct ? delta.toFixed(1)+"pp" : fmt(delta)}` : "";
     const deltaC = delta !== null ? (delta >= 0 ? "#16a34a" : "#dc2626") : "#999";
 
-    h += `<div style="margin-bottom:16px"><div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px"><span style="color:${m.color};font-size:12px;font-weight:600">${m.label}</span><span class="mono" style="color:#222;font-size:16px;font-weight:700">${m.fmt(last)}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:10px">${deltaStr}</span>`:""}</div>`;
+    h += `<div style="margin-bottom:16px"><div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px"><span style="color:#333;font-size:12px;font-weight:600">${m.label}</span><span class="mono" style="color:#222;font-size:16px;font-weight:700">${m.fmt(last)}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:10px">${deltaStr}</span>`:""}</div>`;
     h += `<div style="display:flex;align-items:flex-end;gap:6px;height:44px">`;
     data.forEach((v, i) => {
       const pct = Math.max(8, v / mx * 100);
