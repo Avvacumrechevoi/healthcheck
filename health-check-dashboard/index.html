@@ -688,10 +688,10 @@ function blockInfoHTML(ck) {
   if (!ct) return "";
   const lines = ct.m.map(mk => {
     const t = getTH(mk);
-    const dir = t.d === "h" ? "↑ больше лучше" : "↓ меньше лучше";
-    return `<div style="display:flex;gap:4px;padding:1px 0"><span style="color:#16a34a">🟢</span><span style="flex:1">${t.l}</span><span class="mono" style="color:#888">${t.d==="h"?"≥":"≤"}${t.g}${t.u||""}</span></div><div style="display:flex;gap:4px;padding:1px 0"><span style="color:#d97706">🟡</span><span style="flex:1"></span><span class="mono" style="color:#888">${t.d==="h"?"≥":"≤"}${t.y}${t.u||""}</span></div>`;
+    const dir = t.d === "h" ? "↑" : "↓";
+    return `<div style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:1px solid #f8f8fa"><span style="flex:1;color:#333;font-size:11px">${t.l} <span style="color:#bbb">${dir}</span></span><span class="mono" style="color:#16a34a;font-size:10px">${t.d==="h"?"≥":"≤"}${t.g}${t.u||""}</span><span style="color:#ddd;font-size:9px">|</span><span class="mono" style="color:#d97706;font-size:10px">${t.d==="h"?"≥":"≤"}${t.y}${t.u||""}</span></div>`;
   }).join("");
-  return `<div class="info-tip" onclick="event.stopPropagation()" tabindex="0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#bbb" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 5v.5"/></svg><div class="info-pop"><div style="font-weight:600;color:#333;margin-bottom:6px">${ct.i} ${ct.l} <span style="color:#999;font-weight:400">(${ct.w}% веса)</span></div><div style="color:#777;margin-bottom:6px">Score = среднее по ${ct.m.length} метрикам. Каждая метрика → 0-100 баллов.</div><div style="border-top:1px solid #f0f1f5;padding-top:4px">${lines}</div></div></div>`;
+  return `<div class="info-tip" onclick="event.stopPropagation()" tabindex="0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#bbb" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 5v.5"/></svg><div class="info-pop"><div style="font-weight:600;color:#333;margin-bottom:6px">${ct.i} ${ct.l} <span style="color:#999;font-weight:400">(${ct.w}% веса)</span></div><div style="color:#777;margin-bottom:6px">Score = среднее по ${ct.m.length} метрикам (0-100).<div style="margin-top:3px;font-size:10px"><span style="color:#16a34a">норма</span> | <span style="color:#d97706">внимание</span> | ниже = <span style="color:#dc2626">проблема</span></div></div><div style="border-top:1px solid #f0f1f5;padding-top:4px">${lines}</div></div></div>`;
 }
 
 // ═══ 5h. GEO METRIC BLOCKS (same 8 as platform) ═══
