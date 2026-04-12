@@ -718,7 +718,6 @@ function funnelHTML() {
   if (!F.periods || !F.periods.length) return "";
   const p = F.periods;
   const li = p.length - 1;
-
   const reg = F.registration?.[li], ftd = F.ftd?.[li];
   const r2d = F.reg2dep_pct?.[li], cr2 = F.cr2_pct?.[li];
   const cr3 = F.cr3_pct?.[li], cr5 = F.cr5_pct?.[li];
@@ -726,58 +725,49 @@ function funnelHTML() {
 
   let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:14px;text-align:center">📥 ВОРОНКА · ${p[li]}</div>`;
 
-  // Funnel stages with tooltips and step conversion
   const stages = [
-    {label:"Регистрации", w:100, val:fmt(reg), tip:"Всего новых регистраций за месяц"},
-    {label:"FTD", w:ftd/reg*100, val:fmt(ftd), step:`${(ftd/reg*100).toFixed(0)}% от рег.`, tip:"First Time Depositors — сделали первый депозит. Конверсия из регистрации."},
-    {label:"2+ деп", w:cr2||0, val:`${(cr2||0).toFixed(0)}%`, step:`${(cr2||0).toFixed(0)}% от FTD`, tip:"% FTD-игроков, сделавших 2+ депозита. Показывает возврат после первого опыта. Хорошо: >50%"},
-    {label:"3+ деп", w:cr3||0, val:`${(cr3||0).toFixed(0)}%`, step:`${(cr3||0).toFixed(0)}% от FTD`, tip:"% FTD-игроков с 3+ депозитами. Формирование привычки. Хорошо: >35%"},
-    {label:"5+ деп", w:cr5||0, val:`${(cr5||0).toFixed(0)}%`, step:`${(cr5||0).toFixed(0)}% от FTD`, tip:"% FTD-игроков с 5+ депозитами — лояльное ядро. Хорошо: >25%"},
+    {id:"fn-reg",label:"Регистрации",val:fmt(reg),w:100,sub:"Новые пользователи на платформе",data:F.registration,fmtFn:v=>fmt(v)},
+    {id:"fn-ftd",label:"FTD",val:fmt(ftd),w:ftd/reg*100,sub:`${(ftd/reg*100).toFixed(0)}% от регистраций сделали первый депозит`,data:F.ftd,fmtFn:v=>fmt(v),conv:`${(ftd/reg*100).toFixed(0)}% рег.`},
+    {id:"fn-cr2",label:"2+ деп",val:`${(cr2||0).toFixed(0)}%`,w:cr2||0,sub:"% от FTD, кто сделал повторный (2-й) депозит",data:F.cr2_pct,fmtFn:v=>v.toFixed(0)+"%",conv:"от FTD"},
+    {id:"fn-cr3",label:"3+ деп",val:`${(cr3||0).toFixed(0)}%`,w:cr3||0,sub:"% от FTD с 3+ депозитами — формирование привычки",data:F.cr3_pct,fmtFn:v=>v.toFixed(0)+"%",conv:"от FTD"},
+    {id:"fn-cr5",label:"5+ деп",val:`${(cr5||0).toFixed(0)}%`,w:cr5||0,sub:"% от FTD с 5+ депозитами — лояльное ядро",data:F.cr5_pct,fmtFn:v=>v.toFixed(0)+"%",conv:"от FTD"},
   ];
 
   stages.forEach((s, i) => {
-    const barW = Math.max(6, s.w);
+    const barW = Math.max(8, s.w);
     const op = 1 - i * 0.12;
-    const stepConv = i > 0 && stages[i-1].w > 0 ? (s.w / stages[i-1].w * 100).toFixed(0) : null;
-    h += `<div style="margin-bottom:2px" title="${s.tip}">`;
-    if (i > 0) h += `<div style="padding-left:78px;margin-bottom:1px"><span class="mono" style="font-size:8px;color:#999">↓ ${s.step}</span></div>`;
-    h += `<div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:#555;min-width:70px;cursor:help">${s.label}</span><div style="flex:1;position:relative;height:26px"><div style="height:100%;width:${barW}%;background:#6366f1;opacity:${op};border-radius:4px;display:flex;align-items:center;justify-content:${barW>30?"center":"flex-end"};padding:0 8px"><span class="mono" style="color:${barW>30?"#fff":"#333"};font-size:12px;font-weight:700;${barW<=30?"margin-left:4px":""}">${s.val}</span></div></div></div></div>`;
+    const hasHist = s.data && s.data.length > 1;
+    h += `<div style="margin-bottom:6px" title="${s.sub}">`;
+    h += `<div style="display:flex;align-items:center;gap:6px;cursor:${hasHist?"pointer":"default"}" ${hasHist?`onclick="document.getElementById('${s.id}').style.display=document.getElementById('${s.id}').style.display==='none'?'block':'none'"`:""}>`;
+    h += `<span style="font-size:11px;color:#555;min-width:72px">${s.label}</span>`;
+    h += `<div style="flex:1;position:relative;height:26px"><div style="height:100%;width:${barW}%;background:#6366f1;opacity:${op};border-radius:4px"></div>`;
+    h += `<span class="mono" style="position:absolute;left:${barW > 30 ? 2 : barW+1}%;top:5px;font-size:12px;font-weight:700;color:${barW > 30 ? "#fff" : "#333"}">${s.val}</span></div>`;
+    if (s.conv) h += `<span class="mono" style="font-size:9px;color:#999;min-width:50px;text-align:right">${s.conv}</span>`;
+    else h += `<span style="min-width:50px"></span>`;
+    if (hasHist) h += `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg>`;
+    h += `</div>`;
+    // Expandable history
+    if (hasHist) {
+      h += `<div id="${s.id}" style="display:none;padding:4px 0 2px 78px"><div style="display:flex;gap:4px;align-items:flex-end;height:32px">`;
+      const mx = Math.max(...s.data);
+      s.data.forEach((v, j) => {
+        const bh = Math.max(4, v/mx*100);
+        const isLast = j === li;
+        const prev = j > 0 ? s.data[j-1] : null;
+        const delta = prev ? v - prev : null;
+        const dC = delta !== null ? (delta >= 0 ? "#16a34a" : "#dc2626") : "#999";
+        h += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px">`;
+        h += `<span class="mono" style="font-size:9px;color:${isLast?"#333":"#999"};font-weight:${isLast?600:400}">${s.fmtFn(v)}</span>`;
+        h += `<div style="width:100%;height:${bh}%;background:${isLast?"#6366f1":"#6366f133"};border-radius:2px 2px 0 0;min-height:3px"></div>`;
+        h += `<span class="mono" style="font-size:8px;color:${isLast?"#555":"#bbb"}">${p[j]}</span>`;
+        h += `</div>`;
+      });
+      h += `</div></div>`;
+    }
+    h += `</div>`;
   });
 
-  // Expandable monthly trend table
-  h += `<div style="margin-top:12px"><div onclick="document.getElementById('funnel-detail').style.display=document.getElementById('funnel-detail').style.display==='none'?'block':'none'" style="display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:6px;border-top:1px solid #e0e2ea"><span style="color:#999;font-size:10px">Динамика по месяцам</span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg></div>`;
-  
-  h += `<div id="funnel-detail" style="display:none;padding-top:6px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr><th style="text-align:left;padding:3px 4px;color:#999;font-weight:500"></th>`;
-  p.forEach((period, i) => {
-    h += `<th style="text-align:center;padding:3px 4px;color:${i===li?"#333":"#999"};font-weight:${i===li?700:400}">${period}</th>`;
-  });
-  h += `</tr></thead><tbody>`;
-
-  const rows = [
-    {label:"Рег.", data:F.registration, fmt:v=>fmt(v)},
-    {label:"FTD", data:F.ftd, fmt:v=>fmt(v)},
-    {label:"Reg→Dep", data:F.reg2dep_pct, fmt:v=>v.toFixed(0)+"%"},
-    {label:"CR2+", data:F.cr2_pct, fmt:v=>v.toFixed(0)+"%"},
-    {label:"CR3+", data:F.cr3_pct, fmt:v=>v.toFixed(0)+"%"},
-    {label:"CR5+", data:F.cr5_pct, fmt:v=>v.toFixed(0)+"%"},
-  ];
-
-  rows.forEach(r => {
-    if (!r.data) return;
-    h += `<tr style="border-bottom:1px solid #f4f5f8"><td style="padding:3px 4px;color:#666">${r.label}</td>`;
-    r.data.forEach((v, i) => {
-      const isLast = i === li;
-      const prev = i > 0 ? r.data[i-1] : null;
-      const delta = prev !== null ? v - prev : null;
-      const up = delta !== null && delta > 0;
-      const dn = delta !== null && delta < 0;
-      h += `<td style="text-align:center;padding:3px 4px"><span class="mono" style="color:${isLast?"#222":"#999"};font-weight:${isLast?600:400}">${r.fmt(v)}</span>${isLast && delta !== null ? `<span class="mono" style="color:${up?"#16a34a":"#dc2626"};font-size:8px;margin-left:1px">${up?"+":""}${typeof v==="number"&&v<100?delta.toFixed(1):fmt(delta)}</span>` : ""}</td>`;
-    });
-    h += `</tr>`;
-  });
-
-  h += `</tbody></table></div></div>`;
-  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:6px">маркетинговый отчёт · % от FTD кроме Reg→Dep</div></div>`;
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:8px">подсказка при наведении · ⌄ раскрыть историю · маркетинговый отчёт</div></div>`;
   return h;
 }
 
