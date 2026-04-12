@@ -952,10 +952,10 @@ function render() {
     html += platSparkHTML();
     // 5. Margin dynamics
     html += marginHeatmapHTML();
-    // 6. Heatmap matrix
-    html += heatmapHTML(geos);
-    // 6. Platform blocks
+    // 6. Platform blocks (summary)
     html += platBlocksHTML(geos);
+    // 7. Heatmap matrix (detail per GEO)
+    html += heatmapHTML(geos);
     // 7. Platform retention (cohort table)
     html += platformRetentionHTML();
     // 8. Retention by GEO
