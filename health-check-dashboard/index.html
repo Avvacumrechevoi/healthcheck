@@ -970,25 +970,67 @@ function render() {
     html += crumbHTML(g);
     html += navHTML(idx);
     if (fl) html += `<div class="alert"><span class="mono" style="color:#ef4444;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span><span style="color:#55333e;font-size:9px;margin-left:6px">${fl.detail}</span></div>`;
-    const tierLabel = (d.ngr||0) > 20000 ? "🏆 Tier 1" : (d.ngr||0) > 5000 ? "📈 Tier 2" : "🌱 Tier 3";
-    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}<div class="mono" style="color:#888;font-size:8px;margin-top:2px">${tierLabel} · NGR ${fmtNGR(d.ngr)}</div></div>`;
-    html += summaryHTML(d, prev, hist);
-    html += sparkHTML(g);
-    html += historySparkHTML(g);
-    html += `<div class="line"></div><div class="grid-cat">`;
+    
+    // 1. Score sphere
+    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}</div>`;
+    
+    // 2. NGR chart + key stats
+    const geoTrend = TREND[g];
+    if (geoTrend && geoTrend.length >= 2) {
+      const {svg: gSvg, lastV: gLastV, lastC: gLastC} = buildSparkSVG(geoTrend, 40, 240, v => "$"+(v/1000).toFixed(0)+"K");
+      const gLabels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#555":"#bbb"};font-size:9px">${l}</span>`).join("");
+      html += `<div style="background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px;margin-bottom:12px">`;
+      html += `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="color:#333;font-size:13px;font-weight:600">NGR</span><span class="mono" style="color:${gLastC};font-size:18px;font-weight:700">${fmtNGR(gLastV)}</span></div>`;
+      html += gSvg;
+      html += `<div style="display:flex;justify-content:space-between;padding:0 36px;margin-bottom:12px">${gLabels}</div>`;
+      // Key stats row
+      const margin = d.margin_pct;
+      const cashout = d.cashout_pct;
+      const au = d.au;
+      const arppu = d.arppu;
+      const prevMargin = prev?.margin_pct;
+      const prevCashout = prev?.cashout_pct;
+      function geoStat(label, cur, prev, fmtFn, inverted) {
+        const valStr = !NO(cur) ? fmtFn(cur) : "—";
+        const delta = (!NO(cur) && !NO(prev) && prev !== 0) ? ((cur - prev) / Math.abs(prev) * 100) : null;
+        const dStr = delta !== null ? `${delta >= 0 ? "+" : ""}${delta.toFixed(0)}%` : "";
+        const up = delta !== null ? delta >= 0 : null;
+        const dC = delta !== null ? ((inverted ? !up : up) ? "#16a34a" : "#dc2626") : "#999";
+        return `<div style="flex:1;text-align:center"><div style="font-size:10px;color:#999;margin-bottom:2px">${label}</div><div class="mono" style="font-size:13px;font-weight:700;color:#222">${valStr}</div>${dStr?`<div class="mono" style="font-size:9px;color:${dC}">${dStr}</div>`:""}</div>`;
+      }
+      html += `<div style="display:flex;gap:1px;border-top:1px solid #e0e2ea;padding-top:10px">`;
+      html += geoStat("Маржа", margin, prevMargin, v=>v.toFixed(1)+"%");
+      html += `<div style="width:1px;background:#e0e2ea"></div>`;
+      html += geoStat("Cashout", cashout, prevCashout, v=>v.toFixed(0)+"%", true);
+      html += `<div style="width:1px;background:#e0e2ea"></div>`;
+      html += geoStat("Игроки", au, prev?.au, v=>fmt(v));
+      html += `<div style="width:1px;background:#e0e2ea"></div>`;
+      html += geoStat("ARPPU", arppu, prev?.arppu, v=>"$"+v.toFixed(0));
+      html += `</div></div>`;
+    }
+    
+    // 3. Category spheres
+    html += `<div class="grid-cat" style="margin-bottom:14px">`;
     Object.entries(CATS).forEach(([ck, ct]) => { const cs = catSc(d, ck); html += `<div onclick="navCat('${ck}')" style="animation:fi .3s ease">${sphereHTML(cs,54,`${ct.i} ${ct.l}`,`${ct.w}% · ${cl(cs).lb}`)}</div>`; });
     html += `</div>`;
+    
+    // 4. Problem metrics (red only, compact)
     const worst = ALL_METRICS.map(k => ({k, s:scr(k, d[k]), v:d[k]})).filter(m => !NO(m.s) && m.s < 40).sort((a,b) => a.s - b.s);
-    if (worst.length) html += `<div style="margin-top:18px"><div class="mono" style="color:#dc2626;font-size:10px;font-weight:700;margin-bottom:8px;text-align:center">⚠ КРАСНЫЕ (${worst.length})</div><div style="display:flex;flex-direction:column;gap:5px">${worst.slice(0,6).map(m => metricHTML(m.k, m.v, prev[m.k])).join("")}</div></div>`;
-    const filled = ALL_METRICS.filter(k => !NO(d[k])).length;
-    html += `<div style="margin-top:12px;padding:10px;background:#f0f1f5;border-radius:8px;border:1px solid #d4d6e0"><div class="mono" style="color:#777;font-size:9px">${filled}/32 метрик</div></div>`;
+    if (worst.length) {
+      html += `<div style="margin-top:6px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:12px"><div class="mono" style="color:#dc2626;font-size:10px;font-weight:700;margin-bottom:8px;text-align:center">⚠ ПРОБЛЕМЫ (${worst.length})</div>`;
+      html += `<div style="display:flex;flex-direction:column;gap:4px">${worst.slice(0,8).map(m => {
+        const t = getTH(m.k); const c = cl(m.s);
+        const pv = prev[m.k]; const hasPrev = !NO(pv);
+        return `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:#fef2f2;border-radius:6px"><span style="color:#666;font-size:11px;flex:1">${t.l}</span><span class="mono" style="color:#dc2626;font-size:13px;font-weight:700">${fmt(m.v)}${t.u}</span>${hasPrev?`<span class="mono" style="color:#999;font-size:9px">← ${fmt(pv)}${t.u}</span>`:""}</div>`;
+      }).join("")}</div></div>`;
+    }
   } else if (state.geo && state.cat) {
     const g = state.geo, d = D[g], ct = CATS[state.cat], prev = PREV[g] || {}, fl = FLAGS[g];
     const cs = catSc(d, state.cat); const idx = geoList.indexOf(g);
     html += crumbHTML(g, state.cat);
     html += navHTML(idx);
     if (fl && state.cat === "payments") html += `<div class="alert"><span class="mono" style="color:#ef4444;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span></div>`;
-    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(cs,68,`${ct.i} ${ct.l}`,`${ct.w}% веса · ${g.split(" ").pop()}`)}</div><div class="line"></div>`;
+    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(cs,68,`${ct.i} ${ct.l}`,`${ct.w}% веса · ${g.split(" ").pop()}`)}</div>`;
     html += `<div style="display:flex;flex-direction:column;gap:5px">${ct.m.map(mk => {
       let row = metricHTML(mk, d[mk], prev[mk]);
       // Cross-GEO mini-ranking for this metric
@@ -999,7 +1041,7 @@ function render() {
         ranked.forEach((r,i) => {
           const rc = cl(r.s);
           const isMe = r.g === g;
-          row += `<span class="mono" style="font-size:8px;padding:1px 4px;border-radius:3px;background:${isMe?rc.gw+"33":"#0e0e1c"};color:${isMe?rc.tx:"#444"};${isMe?"font-weight:700":""}">${r.g.split(" ").pop()} ${fmt(r.v)}${t.u}</span>`;
+          row += `<span class="mono" style="font-size:8px;padding:1px 4px;border-radius:3px;background:${isMe?rc.gw+"33":"#f0f1f5"};color:${isMe?rc.tx:"#666"};${isMe?"font-weight:700":""}">${r.g.split(" ").pop()} ${fmt(r.v)}${t.u}</span>`;
         });
         row += `</div>`;
       }
