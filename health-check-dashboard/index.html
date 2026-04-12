@@ -1032,14 +1032,10 @@ function render() {
   const periods = META.periods || [];
   if (periods.length) {
     const monthNames = {1:"Янв",2:"Фев",3:"Мар",4:"Апр",5:"Май",6:"Июн",7:"Июл",8:"Авг",9:"Сен",10:"Окт",11:"Ноя",12:"Дек"};
-    html += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:12px;overflow-x:auto;padding:2px 0">`;
-    periods.forEach((p, i) => {
-      const [yr, mo] = p.split("-");
-      const label = `${monthNames[parseInt(mo)]} '${yr.slice(2)}`;
-      const isLast = i === periods.length - 1;
-      html += `<span class="mono" style="padding:4px 8px;border-radius:6px;font-size:11px;font-weight:${isLast?700:400};cursor:${isLast?"default":"not-allowed"};white-space:nowrap;background:${isLast?"#7c83ff22":"transparent"};color:${isLast?"#7c83ff":"#555"};border:1px solid ${isLast?"#7c83ff33":"transparent"}">${label}</span>`;
-    });
-    html += `</div>`;
+    const lastP = periods[periods.length - 1];
+    const [yr, mo] = lastP.split("-");
+    const label = `${monthNames[parseInt(mo)]} '${yr.slice(2)}`;
+    html += `<div class="mono" style="text-align:center;margin-bottom:12px;font-size:12px;color:#7c83ff;font-weight:600">${label}</div>`;
   }
 
   if (!state.geo) {
