@@ -262,28 +262,35 @@ function summaryHTML(d, prev, hist) {
   }).join("")}</div></div>`;
 }
 
-function buildSparkSVG(data, h, w) {
-  if (!data || data.length < 2) return {svg:"", lastV:0, lastC:"#555"};
-  const pad = 4, cw = w-pad*2, ch = h-pad*2;
+function buildSparkSVG(data, h, w, yFmt) {
+  if (!data || data.length < 2) return {svg:"", lastV:0, lastC:"#555", mn:0, mx:0};
+  const showAxis = !!yFmt;
+  const lpad = showAxis ? 36 : 4, pad = 4, cw = w-lpad-pad, ch = h-pad*2;
   const mn = Math.min(...data), mx = Math.max(...data), range = mx-mn || 1;
-  const pts = data.map((v,i) => `${pad+i/(data.length-1)*cw},${pad+ch-(v-mn)/range*ch}`).join(" ");
+  const pts = data.map((v,i) => `${lpad+i/(data.length-1)*cw},${pad+ch-(v-mn)/range*ch}`).join(" ");
   const lastV = data[data.length-1]; const lastC = lastV >= 0 ? "#16a34a" : "#dc2626";
   const zeroY = mn < 0 ? pad+ch-(-mn)/range*ch : null;
-  const circles = data.map((v,i) => {const x=pad+i/(data.length-1)*cw;const y_=pad+ch-(v-mn)/range*ch;const c=v>=0?"#16a34a":"#dc2626";return `<circle cx="${x}" cy="${y_}" r="${i===data.length-1?3:1.5}" fill="${i===data.length-1?c:c+'66'}" ${i===data.length-1?'stroke="#fff" stroke-width="1"':""}/>`}).join("");
-  const zeroLine = zeroY ? `<line x1="${pad}" y1="${zeroY}" x2="${w-pad}" y2="${zeroY}" stroke="#ffffff11" stroke-dasharray="3,3"/>` : "";
-  return {svg:`<svg width="100%" viewBox="0 0 ${w} ${h}" style="display:block">${zeroLine}<polyline points="${pts}" fill="none" stroke="${lastC}" stroke-width="2" stroke-linejoin="round"/>${circles}</svg>`, lastV, lastC};
+  const circles = data.map((v,i) => {const x=lpad+i/(data.length-1)*cw;const y_=pad+ch-(v-mn)/range*ch;const c=v>=0?"#16a34a":"#dc2626";return `<circle cx="${x}" cy="${y_}" r="${i===data.length-1?3:1.5}" fill="${i===data.length-1?c:c+'66'}" ${i===data.length-1?'stroke="#fff" stroke-width="1"':""}/>`}).join("");
+  const zeroLine = zeroY ? `<line x1="${lpad}" y1="${zeroY}" x2="${w-pad}" y2="${zeroY}" stroke="#dc262622" stroke-dasharray="3,3"/>` : "";
+  let yLabels = "", gridLines = "";
+  if (showAxis) {
+    const mid = (mn+mx)/2;
+    yLabels = [{v:mx,y:pad},{v:mid,y:pad+ch/2},{v:mn,y:pad+ch}].map(({v,y}) => `<text x="${lpad-3}" y="${y+3}" text-anchor="end" fill="#999" font-size="7" font-family="'JetBrains Mono',monospace">${yFmt(v)}</text>`).join("");
+    gridLines = [pad, pad+ch/2, pad+ch].map(y => `<line x1="${lpad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="#e0e2ea" stroke-dasharray="2,4"/>`).join("");
+  }
+  return {svg:`<svg width="100%" viewBox="0 0 ${w} ${h}" style="display:block">${gridLines}${zeroLine}${yLabels}<polyline points="${pts}" fill="none" stroke="${lastC}" stroke-width="2" stroke-linejoin="round"/>${circles}</svg>`, lastV, lastC, mn, mx};
 }
 
 function sparkHTML(geo) {
   const data = TREND[geo]; if (!data || !data.length) return "";
-  const {svg, lastV, lastC} = buildSparkSVG(data, 36, 200);
+  const {svg, lastV, lastC} = buildSparkSVG(data, 50, 240, v => "$"+(v/1000).toFixed(0)+"K");
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#aaa":"#666"};font-size:8px">${l}</span>`).join("");
   return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#777;font-size:9px">NGR · ${TL.length}мес (${metaTrendLabel()})</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 function platSparkHTML() {
   if (!PLAT_TREND.length) return "";
-  const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 32, 200);
+  const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 50, 240, v => "$"+(v/1000).toFixed(0)+"K");
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#aaa":"#666"};font-size:8px">${l}</span>`).join("");
   return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#777;font-size:9px">NGR платформа · ${metaTrendLabel()}</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
