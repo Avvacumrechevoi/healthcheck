@@ -117,7 +117,7 @@ function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DE
 
 // ═══ 3. DYNAMIC DATA ═══
 let D = {}, PREV = {}, TREND = {}, HISTORY = {}, PLAT_TREND = [], PLAT_HISTORY = {}, TL = [], FLAGS = {}, SEGMENTS = {};
-let FUNNEL = {}, RETENTION_TABLE = {};
+let FUNNEL = {}, RETENTION_TABLE = {}, PLATFORM_COHORTS = [];
 let META = { month: "", month_short: "", prev_month_short: "", version: "v31", updated: "" };
 let dataSource = "none";
 
@@ -169,6 +169,7 @@ function applyDataset(ds, source) {
     SEGMENTS = ds.segments || {};
     FUNNEL = ds.funnel || {};
     RETENTION_TABLE = ds.retention_table || {};
+    PLATFORM_COHORTS = ds.platform_cohorts || [];
     dataSource = source || "unknown";
     document.title = `Health Check · SapphireBet · ${META.month}`;
     return true;
@@ -182,7 +183,7 @@ function saveDataToLocal() {
 }
 
 function getDataset() {
-  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE };
+  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE, platform_cohorts: PLATFORM_COHORTS };
 }
 
 async function loadData() {
@@ -319,18 +320,6 @@ function platPulseHTML() {
     h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#222;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} ${metaPrev()}→${metaCur()}</div>`:""}</div>`;
   });
   h += `</div>`;
-  if (PLAT_TREND.length >= 8) {
-    const q4ngr = (PLAT_TREND[2]||0) + (PLAT_TREND[3]||0) + (PLAT_TREND[4]||0);
-    const q1ngr = (PLAT_TREND[5]||0) + (PLAT_TREND[6]||0) + (PLAT_TREND[7]||0);
-    const qoq = q4ngr !== 0 ? ((q1ngr - q4ngr) / Math.abs(q4ngr) * 100).toFixed(0) : "—";
-    const qoqC = typeof qoq === "string" ? "#555" : (parseFloat(qoq) >= 0 ? "#16a34a" : "#dc2626");
-    // Dynamic quarter labels from periods
-    const p = META.periods || [];
-    const curQ = p.length >= 8 ? p[7] : "", prevQ = p.length >= 5 ? p[4] : "";
-    const curQLabel = curQ ? `Q${Math.ceil(parseInt(curQ.split("-")[1])/3)}'${curQ.split("-")[0].slice(2)}` : "cur";
-    const prevQLabel = prevQ ? `Q${Math.ceil(parseInt(prevQ.split("-")[1])/3)}'${prevQ.split("-")[0].slice(2)}` : "prev";
-    h += `<div style="background:#f8f9fc;border-radius:8px;padding:7px 10px;border:1px solid #e0e2ea;margin-bottom:10px;text-align:center"><span class="mono" style="color:#666;font-size:10px">${curQLabel}: <span style="color:#222;font-weight:700">${fmtNGR(q1ngr)}</span> | ${prevQLabel}: <span style="color:#444">${fmtNGR(q4ngr)}</span> | QoQ: <span style="color:${qoqC};font-weight:700">${qoq === "—" ? "—" : (parseFloat(qoq)>=0?"+":"")+qoq+"%"}</span></span></div>`;
-  }
   return h;
 }
 
@@ -678,7 +667,48 @@ function retentionTableHTML() {
   return h;
 }
 
-// ═══ 5g. DEPOSIT CONVERSION FUNNEL ═══
+// ═══ 5g-1. PLATFORM RETENTION COHORT TABLE ═══
+function platformRetentionHTML() {
+  const cohorts = PLATFORM_COHORTS;
+  if (!cohorts || !cohorts.length) return "";
+  
+  function retCell(v) {
+    if (NO(v)) return `<td style="text-align:center;padding:3px 4px;color:#ddd;font-size:10px">·</td>`;
+    const c = v >= 20 ? "#0a8a4a" : v >= 10 ? "#16a34a" : v >= 5 ? "#b45309" : "#dc2626";
+    const bg = v >= 20 ? "#dcfce710" : v >= 10 ? "#dcfce708" : v >= 5 ? "#fef3c708" : "#fecaca08";
+    return `<td style="text-align:center;padding:3px 4px;background:${bg}"><span class="mono" style="color:${c};font-size:11px;font-weight:600">${v.toFixed(1)}</span></td>`;
+  }
+  
+  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:10px;text-align:center">🔄 RETENTION · ПЛАТФОРМА (когорты)</div>`;
+  h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>`;
+  h += `<th style="text-align:left;padding:4px 6px;font-size:11px;color:#555;font-weight:600;border-bottom:2px solid #e0e2ea;white-space:nowrap">Когорта</th>`;
+  h += `<th style="text-align:center;padding:4px;font-size:10px;color:#888;border-bottom:2px solid #e0e2ea">N</th>`;
+  ['M1','M2','M3','M4','M5','M6'].forEach(m => {
+    h += `<th style="text-align:center;padding:4px;font-size:10px;color:#555;font-weight:600;border-bottom:2px solid #e0e2ea">${m}</th>`;
+  });
+  h += `</tr></thead><tbody>`;
+  
+  cohorts.forEach((c, i) => {
+    const isRecent = i >= cohorts.length - 3;
+    h += `<tr style="border-bottom:1px solid ${isRecent?"#e0e2ea":"#f0f1f5"}">`;
+    h += `<td style="padding:3px 6px;font-size:11px;color:${isRecent?"#222":"#666"};font-weight:${isRecent?600:400};white-space:nowrap">${c.cohort}</td>`;
+    h += `<td style="text-align:center;padding:3px 4px;font-size:10px;color:#999">${(c.size/1000).toFixed(1)}K</td>`;
+    h += retCell(c.m1);
+    h += retCell(c.m2);
+    h += retCell(c.m3);
+    h += retCell(c.m4);
+    h += retCell(c.m5);
+    h += retCell(c.m6);
+    h += `</tr>`;
+  });
+  
+  h += `</tbody></table></div>`;
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:6px">48,787 клиентов · Jan 2025 – Mar 2026 · MGM.io</div>`;
+  h += `</div>`;
+  return h;
+}
+
+// ═══ 5g-2. DEPOSIT CONVERSION FUNNEL ═══
 function funnelHTML() {
   let F = {};
   try { F = typeof FUNNEL !== "undefined" ? FUNNEL : {}; } catch(e) {}
@@ -785,27 +815,34 @@ function render() {
   }
 
   if (!state.geo) {
+    // 1. Platform sphere
     html += `<div style="text-align:center;margin-bottom:10px">${sphereHTML(ps,82,"ПЛАТФОРМА",`${metaPeriodLabel()} · ${geos.length} GEO`)}</div>`;
-    html += execSummaryHTML(geos, ps);
-    html += platPulseHTML();
-    html += platSparkHTML();
+    // 2. GEO spheres
     html += `<div class="grid-geo" style="margin-bottom:14px">${geos.map(({g,s,d,flag}) => {
       const mom = d.ngr_mom;
       const momArrow = !NO(mom) ? (mom > 5 ? "↑" : mom < -5 ? "↓" : "→") : "";
       const momC = !NO(mom) ? (mom > 5 ? "#16a34a" : mom < -5 ? "#dc2626" : "#555") : "";
-      const tier = (d.ngr||0) > 20000 ? "" : (d.ngr||0) > 5000 ? "" : "🌱";
       const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}${Math.abs(d.ngr_mom).toFixed(0)}%</span>`:""}`;
       return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag,true)}</div>`;
     }).join("")}</div>`;
-    html += `<div class="mono" style="color:#888;font-size:8px;text-align:center;margin-bottom:12px">↑↓ = MoM</div>`;
-    html += signalsHTML(geos);
-    html += ngrContribHTML(geos);
+    // 3. KPI pulse
+    html += platPulseHTML();
+    // 4. NGR sparkline
+    html += platSparkHTML();
+    // 5. Heatmap matrix
     html += heatmapHTML(geos);
+    // 6. Platform blocks
     html += platBlocksHTML(geos);
+    // 7. Platform retention (cohort table)
+    html += platformRetentionHTML();
+    // 8. Retention by GEO
     html += retentionTableHTML();
+    // 9. Funnel
     html += funnelHTML();
+    // 10. Segments
     html += segmentsHTML();
-    html += `<div style="margin-top:20px;padding:12px;text-align:center;border-top:1px solid #e0e2ea"><button onclick="copyTelegramReport()" style="background:#f0f1f5;border:1px solid #d0d2da;border-radius:8px;padding:8px 16px;color:#888;font-size:11px;cursor:pointer;font-family:inherit">📋 Копировать отчёт для Telegram</button><div class="mono" style="color:#999;font-size:8px;margin-top:8px">${META.version} · ${META.updated||""}</div></div>`;
+    // Footer
+    html += `<div style="margin-top:20px;padding:12px;text-align:center;border-top:1px solid #e0e2ea"><button onclick="copyTelegramReport()" style="background:#f0f1f5;border:1px solid #d0d2da;border-radius:8px;padding:8px 16px;color:#888;font-size:11px;cursor:pointer;font-family:inherit">📋 Telegram</button><div class="mono" style="color:#bbb;font-size:8px;margin-top:6px">${META.version} · ${META.updated||""}</div></div>`;
   } else if (state.geo && !state.cat) {
     const g = state.geo, d = D[g], fl = FLAGS[g], prev = PREV[g] || {}, hist = HISTORY[g] || {};
     const gs = geoSc(d); const idx = geoList.indexOf(g);
@@ -1328,7 +1365,7 @@ function downloadJson() {
 async function resetToFile() {
   localStorage.removeItem("hc_data");
   dataSource = "none";
-  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {};
+  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {}; PLATFORM_COHORTS = [];
   try {
     const res = await fetch("data.json?" + Date.now());
     if (res.ok) {
