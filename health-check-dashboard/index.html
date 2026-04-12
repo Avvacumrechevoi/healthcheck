@@ -606,41 +606,74 @@ function retentionTableHTML() {
   const avgM3 = geos.reduce((s,[,r]) => s + (r.m3||0), 0) / geos.length;
   const avgCore = geos.reduce((s,[,r]) => s + (r.core||0), 0) / geos.length;
 
-  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:10px;text-align:center">🔄 RETENTION ПО GEO</div>`;
-  h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>`;
-  h += `<th style="text-align:left;padding:6px;font-size:12px;color:#555;font-weight:600;border-bottom:2px solid #e0e2ea">GEO</th>`;
-  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#888;border-bottom:2px solid #e0e2ea">N</th>`;
-  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M1</th>`;
-  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#888;border-bottom:2px solid #e0e2ea">цель</th>`;
-  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M3</th>`;
-  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#888;border-bottom:2px solid #e0e2ea">цель</th>`;
-  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M6</th>`;
-  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#888;border-bottom:2px solid #e0e2ea">цель</th>`;
-  h += `</tr></thead><tbody>`;
+  // Use new format with latest cohort data and trends
+  const hasNew = geos.some(([,r]) => r.latest_m1 !== undefined);
+  
+  if (hasNew) {
+    // New retention table with M1 trend
+    const sortedG = geos.sort((a,b) => (b[1].latest_m1||0) - (a[1].latest_m1||0));
+    let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:10px;text-align:center">🔄 RETENTION ПО GEO</div>`;
+    h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>`;
+    h += `<th style="text-align:left;padding:6px 4px;font-size:12px;color:#555;font-weight:600;border-bottom:2px solid #e0e2ea">GEO</th>`;
+    h += `<th style="text-align:center;padding:6px 2px;font-size:10px;color:#777;border-bottom:2px solid #e0e2ea">M1 тренд</th>`;
+    h += `<th style="text-align:center;padding:6px 4px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M1</th>`;
+    h += `<th style="text-align:center;padding:6px 2px;font-size:10px;color:#999;border-bottom:2px solid #e0e2ea">цель</th>`;
+    h += `<th style="text-align:center;padding:6px 4px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M3</th>`;
+    h += `<th style="text-align:center;padding:6px 4px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M6</th>`;
+    h += `</tr></thead><tbody>`;
 
-  function retC2(v, target) { if (NO(v)) return "#aaa"; const ratio = v/target; if (ratio >= 0.8) return "#0a8a4a"; if (ratio >= 0.5) return "#b45309"; return "#dc2626"; }
+    function retC3(v, target) { if (NO(v)||!target) return "#888"; const ratio = v/target; if (ratio >= 0.8) return "#0a8a4a"; if (ratio >= 0.5) return "#b45309"; return "#dc2626"; }
 
-  geos.forEach(([g, r]) => {
-    const tM1 = r.target_m1, tM3 = r.target_m3, tM6 = r.target_m6;
-    h += `<tr onclick="nav('${g}')" style="cursor:pointer;border-bottom:1px solid #f0f1f5" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
-    h += `<td style="padding:6px;font-size:13px;color:#222;font-weight:500">${g.split(" ").pop()}</td>`;
-    h += `<td style="text-align:center;padding:6px;font-size:11px;color:#888">${r.total?r.total.toLocaleString():"—"}</td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:${retC2(r.m1,tM1||20)};font-size:14px;font-weight:700">${NO(r.m1)?"—":r.m1.toFixed(1)}</span></td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#999;font-size:11px">${tM1||"—"}</span></td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:${retC2(r.m3,tM3||8)};font-size:14px;font-weight:700">${NO(r.m3)?"—":r.m3.toFixed(1)}</span></td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#999;font-size:11px">${tM3||"—"}</span></td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:${retC2(r.core,tM6||4.5)};font-size:14px;font-weight:700">${NO(r.core)?"—":r.core.toFixed(1)}</span></td>`;
-    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#999;font-size:11px">${tM6||"—"}</span></td>`;
-    h += `</tr>`;
-  });
+    sortedG.forEach(([g, r]) => {
+      const m1 = r.latest_m1, m3 = r.latest_m3, m6 = r.latest_m6;
+      const tM1 = r.target_m1, tM3 = r.target_m3, tM6 = r.target_m6;
+      const trend = r.m1_trend || [];
+      
+      // Mini bar trend
+      let trendBars = "";
+      if (trend.length >= 2) {
+        const tmx = Math.max(...trend, 1);
+        trendBars = `<div style="display:flex;align-items:flex-end;gap:1px;height:18px;min-width:40px">`;
+        trend.forEach((v,i) => {
+          const pct = Math.max(10, v/tmx*100);
+          const isLast = i === trend.length-1;
+          const c = v >= (tM1||20) ? "#0a8a4a" : v >= (tM1||20)*0.5 ? "#b45309" : "#dc2626";
+          trendBars += `<div style="width:5px;height:${pct}%;background:${isLast?c:c+"55"};border-radius:1px" title="${r.m1_labels?.[i]||''}: ${v.toFixed(1)}%"></div>`;
+        });
+        trendBars += `</div>`;
+      }
+      
+      const cohortLabel = r.latest_m1_cohort ? `<div style="font-size:8px;color:#999">${r.latest_m1_cohort}</div>` : "";
+      
+      h += `<tr onclick="nav('${g}')" style="cursor:pointer;border-bottom:1px solid #f0f1f5" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
+      h += `<td style="padding:6px 4px;font-size:13px;color:#222;font-weight:500">${g.split(" ").pop()}</td>`;
+      h += `<td style="text-align:center;padding:4px 2px">${trendBars}</td>`;
+      h += `<td style="text-align:center;padding:4px"><span class="mono" style="color:${retC3(m1,tM1)};font-size:14px;font-weight:700">${NO(m1)?"—":m1.toFixed(1)}</span>${cohortLabel}</td>`;
+      h += `<td style="text-align:center;padding:4px"><span class="mono" style="color:#bbb;font-size:10px">${tM1||"—"}</span></td>`;
+      h += `<td style="text-align:center;padding:4px"><span class="mono" style="color:${retC3(m3,tM3)};font-size:13px;font-weight:600">${NO(m3)?"—":m3.toFixed(1)}</span></td>`;
+      h += `<td style="text-align:center;padding:4px"><span class="mono" style="color:${retC3(m6,tM6)};font-size:13px;font-weight:600">${NO(m6)?"—":m6.toFixed(1)}</span></td>`;
+      h += `</tr>`;
+    });
 
-  h += `</tbody><tfoot><tr style="border-top:2px solid #e0e2ea">`;
-  h += `<td style="padding:6px;font-size:12px;color:#555;font-weight:600">AVG</td><td></td>`;
-  h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${avgM1.toFixed(1)}</span></td><td></td>`;
-  h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${avgM3.toFixed(1)}</span></td><td></td>`;
-  h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${avgCore.toFixed(1)}</span></td><td></td>`;
-  h += `</tr></tfoot></table></div>`;
-  h += `<div class="mono" style="color:#888;font-size:9px;text-align:center;margin-top:8px">48,787 клиентов · baseline Apr-Sep 2025 · источник: MGM.io</div>`;
+    const aM1 = sortedG.filter(([,r])=>r.latest_m1).reduce((s,[,r])=>s+r.latest_m1,0) / Math.max(sortedG.filter(([,r])=>r.latest_m1).length,1);
+    const aM3 = sortedG.filter(([,r])=>r.latest_m3).reduce((s,[,r])=>s+r.latest_m3,0) / Math.max(sortedG.filter(([,r])=>r.latest_m3).length,1);
+    const aM6 = sortedG.filter(([,r])=>r.latest_m6).reduce((s,[,r])=>s+r.latest_m6,0) / Math.max(sortedG.filter(([,r])=>r.latest_m6).length,1);
+    h += `</tbody><tfoot><tr style="border-top:2px solid #e0e2ea">`;
+    h += `<td style="padding:6px 4px;font-size:12px;color:#555;font-weight:600">AVG</td><td></td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${aM1.toFixed(1)}</span></td><td></td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${aM3.toFixed(1)}</span></td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${aM6.toFixed(1)}</span></td>`;
+    h += `</tr></tfoot></table></div>`;
+    h += `<div class="mono" style="color:#999;font-size:9px;text-align:center;margin-top:8px">M1 = последняя когорта с данными · M3/M6 = последняя доступная когорта · источник: MGM.io</div>`;
+    h += `</div>`;
+    return h;
+  }
+
+  // Fallback: old format
+  const avgM1f = geos.reduce((s,[,r]) => s + (r.m1||0), 0) / geos.length;
+  const avgM3f = geos.reduce((s,[,r]) => s + (r.m3||0), 0) / geos.length;
+  const avgCoref = geos.reduce((s,[,r]) => s + (r.core||0), 0) / geos.length;
+  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:12px"><div class="mono" style="color:#555;font-size:10px;text-align:center;margin-bottom:6px">🔄 RETENTION</div>`;
   h += `</div>`;
   return h;
 }
