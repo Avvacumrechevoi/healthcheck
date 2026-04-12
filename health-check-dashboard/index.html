@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:linear-gradient(180deg,#08080f,#0c0c18 50%,#08080f);color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+body{background:#f4f5f8;color:#1a1a2a;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
 #app{max-width:900px;margin:0 auto;padding:env(safe-area-inset-top,16px) 20px env(safe-area-inset-bottom,16px)}
 @media(max-width:600px){#app{max-width:520px;padding:env(safe-area-inset-top,12px) 12px env(safe-area-inset-bottom,12px)}}
 @media(max-width:480px){.grid-geo{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}.hm-full{display:none}.mobile-expand{display:block!important}}
@@ -17,66 +17,66 @@ body{background:linear-gradient(180deg,#08080f,#0c0c18 50%,#08080f);color:#e0e0e
 .sphere{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:transform .15s}
 .sphere:hover{transform:scale(1.06)}
 .sphere-orb{border-radius:50%;display:flex;align-items:center;justify-content:center}
-.sphere-label{color:#bbb;font-weight:600;text-align:center;line-height:1.15}
+.sphere-label{color:#333;font-weight:600;text-align:center;line-height:1.15}
 .sphere-sub{font-size:9px;font-weight:500}
 .line{width:2px;height:18px;margin:0 auto 10px;background:linear-gradient(180deg,#2a2a40,#12121e)}
 .grid-geo{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:12px;justify-items:center}
 .grid-cat{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px;justify-items:center}
 .grid-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .metric-row{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;min-height:48px;border-left:3px solid}
-.bar-track{height:3px;background:#1a1a2e;border-radius:2px;margin-top:3px;overflow:hidden}
+.bar-track{height:3px;background:#e0e2ea;border-radius:2px;margin-top:3px;overflow:hidden}
 .bar-fill{height:100%;border-radius:2px;transition:width .5s}
 .plat-block{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border-left:3px solid;cursor:pointer;transition:background .15s}
-.plat-block:hover{filter:brightness(1.2)}
+.plat-block:hover{filter:brightness(0.96)}
 .crumb{display:flex;align-items:center;gap:4px;margin-bottom:12px;flex-wrap:wrap}
 .crumb span{font-size:11px;padding:3px 6px;border-radius:4px;cursor:pointer}
 .nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:6px;min-height:36px}
 .nav button{background:none;border:none;font-size:18px;cursor:pointer;padding:4px 8px}
-.alert{background:#1a0810;border:1px solid #ff174433;border-radius:10px;padding:8px 12px;margin-bottom:10px}
-.problems{margin-top:14px;background:#140810;border:1px solid #ff174422;border-radius:10px;padding:12px}
+.alert{background:#fff0f2;border:1px solid #ff174415;border-radius:10px;padding:8px 12px;margin-bottom:10px}
+.problems{margin-top:14px;background:#fff0f2;border:1px solid #ff174415;border-radius:10px;padding:12px}
 .problems-item{padding:6px 0;cursor:pointer;border-bottom:1px solid #1a0a10}
-.spark{background:#0a0a16;border-radius:8px;padding:8px 10px;border:1px solid #1a1a2e;margin-bottom:10px}
+.spark{background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #e0e2ea;margin-bottom:10px}
 .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;padding-top:4px}
 h1{font-size:17px;font-weight:700;background:linear-gradient(90deg,#7c83ff,#00e676);-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer}
 .rank-row{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;margin-bottom:2px;cursor:pointer}
-.rank-row:hover{filter:brightness(1.3)}
+.rank-row:hover{filter:brightness(0.96)}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#7c83ff;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:2000;animation:fi .2s ease}
-.hdr-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:#3a3a55;border:none;background:none}
+.hdr-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:#999;border:none;background:none}
 .hdr-btn:hover{color:#7c83ff}
-.overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.85);display:flex;justify-content:center;padding-top:3vh}
-.modal{width:100%;max-width:500px;max-height:94vh;background:#0e0e1a;border:1px solid #1e1e35;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;animation:fi .25s ease}
-.modal-head{padding:14px 16px 10px;border-bottom:1px solid #1a1a2e;flex-shrink:0}
+.overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.5);display:flex;justify-content:center;padding-top:3vh}
+.modal{width:100%;max-width:500px;max-height:94vh;background:#fff;border:1px solid #d4d6e0;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;animation:fi .25s ease}
+.modal-head{padding:14px 16px 10px;border-bottom:1px solid #e0e2ea;flex-shrink:0}
 .modal-body{flex:1;overflow-y:auto;padding:10px 16px;-webkit-overflow-scrolling:touch}
-.modal-foot{padding:10px 16px;border-top:1px solid #1a1a2e;flex-shrink:0}
+.modal-foot{padding:10px 16px;border-top:1px solid #e0e2ea;flex-shrink:0}
 .btn-primary{width:100%;padding:10px;border-radius:8px;border:none;cursor:pointer;background:#7c83ff;color:#fff;font-size:13px;font-weight:600;min-height:40px}
 .btn-primary:hover{background:#6b72ee}
-.btn-secondary{padding:8px 14px;border-radius:6px;border:1px solid #252540;cursor:pointer;background:#111122;color:#aaa;font-size:12px;font-weight:600}
-.btn-secondary:hover{background:#1a1a30;color:#ccc}
-.btn-danger{padding:8px 14px;border-radius:6px;border:1px solid #ff174433;cursor:pointer;background:#1a0810;color:#ff8a80;font-size:12px;font-weight:600}
+.btn-secondary{padding:8px 14px;border-radius:6px;border:1px solid #d0d2da;cursor:pointer;background:#f4f4fa;color:#444;font-size:12px;font-weight:600}
+.btn-secondary:hover{background:#1a1a30;color:#222}
+.btn-danger{padding:8px 14px;border-radius:6px;border:1px solid #ff174415;cursor:pointer;background:#fff0f2;color:#ff8a80;font-size:12px;font-weight:600}
 .btn-danger:hover{background:#2a0818}
-.ed-input{width:100%;padding:7px;background:#0a0a14;border:1px solid #252540;border-radius:6px;color:#7c83ff;font-size:13px;font-family:monospace;font-weight:600;outline:none;min-height:36px}
+.ed-input{width:100%;padding:7px;background:#f0f1f5;border:1px solid #d0d2da;border-radius:6px;color:#7c83ff;font-size:13px;font-family:monospace;font-weight:600;outline:none;min-height:36px}
 .ed-input:focus{border-color:#7c83ff44}
-.ed-textarea{width:100%;padding:10px;background:#0a0a14;border:1px solid #252540;border-radius:8px;color:#8c8caa;font-size:11px;font-family:monospace;outline:none;resize:vertical;min-height:200px;line-height:1.5}
+.ed-textarea{width:100%;padding:10px;background:#f0f1f5;border:1px solid #d0d2da;border-radius:8px;color:#8c8caa;font-size:11px;font-family:monospace;outline:none;resize:vertical;min-height:200px;line-height:1.5}
 .ed-textarea:focus{border-color:#7c83ff44}
 .tab-bar{display:flex;gap:2px;overflow-x:auto;padding-bottom:4px}
 .tab-btn{padding:6px 10px;border-radius:5px;font-size:12px;cursor:pointer;border:none;flex-shrink:0;min-height:32px;transition:background .15s}
-.geo-ed-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:#111122;margin-bottom:3px;cursor:pointer}
-.geo-ed-row:hover{background:#181830}
+.geo-ed-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:#f4f4fa;margin-bottom:3px;cursor:pointer}
+.geo-ed-row:hover{background:#e8e8f0}
 .data-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600}
-.mini-kpi{background:#0e0e1c;border-radius:8px;padding:7px 8px;border:1px solid #1a1a2e;display:flex;flex-direction:column;gap:2px}
-.mini-kpi-label{color:#666;font-size:9px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-kpi{background:#fff;border-radius:8px;padding:7px 8px;border:1px solid #e0e2ea;display:flex;flex-direction:column;gap:2px}
+.mini-kpi-label{color:#777;font-size:9px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mini-kpi-val{display:flex;align-items:baseline;gap:3px}
 .signal-item{padding:7px 10px;border-radius:8px;margin-bottom:4px;cursor:pointer;transition:background .15s;display:flex;align-items:flex-start;gap:6px}
 .signal-item:hover{filter:brightness(1.2)}
 .signal-icon{font-size:11px;flex-shrink:0;line-height:1.5}
 .signal-text{font-size:11px;line-height:1.4}
 .seg-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px}
-.hist-spark-row{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#0a0a16;border:1px solid #1a1a2e;border-radius:8px;margin-bottom:5px}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+.hist-spark-row{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f0f1f5;border:1px solid #e0e2ea;border-radius:8px;margin-bottom:5px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 </style>
 </head>
 <body>
-<div id="app"><div style="text-align:center;padding:80px 20px"><div class="mono" style="color:#333;font-size:12px">loading...</div></div></div>
+<div id="app"><div style="text-align:center;padding:80px 20px"><div class="mono" style="color:#aaa;font-size:12px">loading...</div></div></div>
 <script>
 /*
  * HEALTH CHECK DASHBOARD · SapphireBet · v31
@@ -221,7 +221,7 @@ function scr(k, v) {
 }
 function catSc(d, ck) { const s = CATS[ck].m.map(m => scr(m, d[m])).filter(x => x !== null); return s.length ? s.reduce((a,b) => a+b, 0)/s.length : null; }
 function geoSc(d) { let tw=0, ts=0; Object.entries(CATS).forEach(([k,c]) => { const s = catSc(d,k); if (s !== null) { tw += c.w; ts += s*c.w; } }); return tw ? ts/tw : null; }
-function cl(s) { if (NO(s)) return {bg:"#1a1a2e",gw:"#555",tx:"#555",lb:"—"}; const r=Math.round(s); if (r>=70) return {bg:"#0f5132",gw:"#00e676",tx:"#00e676",lb:"Норма"}; if (r>=40) return {bg:"#664d03",gw:"#ffc107",tx:"#ffc107",lb:"Внимание"}; return {bg:"#6b1523",gw:"#ff1744",tx:"#ff1744",lb:"Проблема"}; }
+function cl(s) { if (NO(s)) return {bg:"#e0e2ea",gw:"#555",tx:"#555",lb:"—"}; const r=Math.round(s); if (r>=70) return {bg:"#0f5132",gw:"#00e676",tx:"#00e676",lb:"Норма"}; if (r>=40) return {bg:"#664d03",gw:"#ffc107",tx:"#ffc107",lb:"Внимание"}; return {bg:"#6b1523",gw:"#ff1744",tx:"#ff1744",lb:"Проблема"}; }
 function fmt(v) { if (NO(v)) return "—"; if (typeof v !== "number") return v; if (v<0 && Math.abs(v)>=1000) return "-"+(Math.abs(v)/1000).toFixed(1)+"K"; if (Math.abs(v)>=10000) return (v/1000).toFixed(0)+"K"; if (Math.abs(v)>=1000) return (v/1000).toFixed(1)+"K"; return Number.isInteger(v) ? String(v) : v.toFixed(1); }
 function fmtNGR(v) { if (NO(v)) return "—"; if (v<0) return "-$"+(Math.abs(v)/1000).toFixed(1)+"K"; return "$"+(v/1000).toFixed(v>=100000?0:1)+"K"; }
 
@@ -233,7 +233,7 @@ function sphereHTML(s, sz, label, sub, flag, grayFirst) {
   const mc = muted ? {bg:"#0a2a1a",gw:"#00e676",tx:"#00e67688"} : c;
   const anim = ((s !== null && s < 40) || flag) ? "animation:pr 2s infinite;" : "";
   const bg = flag ? "radial-gradient(circle at 35% 35%,#ff174444,#3a0010 70%)" : `radial-gradient(circle at 35% 35%,${mc.gw}44,${mc.bg} 70%)`;
-  const shadow = `0 0 ${sz/3}px ${flag?"#ff174466":mc.gw+"55"},inset 0 -${sz/6}px ${sz/4}px ${flag?"#ff174422":mc.gw+"22"}`;
+  const shadow = `0 0 ${sz/3}px ${flag?"#ff174466":mc.gw+"55"},inset 0 -${sz/6}px ${sz/4}px ${flag?"#ff174415":mc.gw+"22"}`;
   const txt = flag ? "⛔" : NO(s) ? "?" : Math.round(s);
   const subTxt = flag ? "ПС отключены" : sub || "";
   const orbTitle = flag ? "ПС отключены" : "Health Score 0-100. Взвешенная оценка по 8 блокам. 🟢≥70 🟡≥40 🔴<40";
@@ -248,7 +248,7 @@ function metricHTML(mk, val, prev) {
   const arrowC = hasPrev ? (t.d === "h" ? (delta > 0 ? "#00e67688" : "#ff174488") : (delta < 0 ? "#00e67688" : "#ff174488")) : "";
   const prevLabel = META.prev_month_short || "prev";
   const tooltip = `${t.l}: ${NO(val) ? 'нет данных' : val + (t.u||'')}. Score: ${NO(s) ? 'N/A' : Math.round(s)+'/100'}. ${t.d==='h' ? 'Больше = лучше' : 'Меньше = лучше'}. Зелёный: ${t.d==='h'?'≥':'≤'}${t.g}, Жёлтый: ${t.d==='h'?'≥':'≤'}${t.y}`;
-  return `<div class="metric-row" title="${tooltip}" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#252540":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} ${prevLabel} ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:${n?"#1a1a28":"#3a3a55"};font-size:8px;flex-shrink:0;min-width:36px;text-align:right">→${fmt(t.g)}${t.u}</span></div>`;
+  return `<div class="metric-row" title="${tooltip}" style="background:${n?"#12121e":`${c.bg}55`};border-left-color:${n?"#d0d2da":c.gw};opacity:${n?.4:1}"><div style="width:7px;height:7px;border-radius:50%;background:${n?"#333":c.gw};${n?"":"box-shadow:0 0 5px "+c.gw};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="color:${n?"#444":"#999"};font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.l}${n?" ⬜":""}</div>${!n?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(5,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0"><span class="mono" style="color:${n?"#333":c.tx};font-weight:700;font-size:14px">${n?"—":`${sign}${fmt(val)}${t.u}`}</span>${hasPrev&&!n?`<span class="mono" style="color:${arrowC};font-size:8px;opacity:.7">${arrow} ${prevLabel} ${fmt(prev)}</span>`:""}</div><span class="mono" style="color:${n?"#e0e2ea":"#3a3a55"};font-size:8px;flex-shrink:0;min-width:36px;text-align:right">→${fmt(t.g)}${t.u}</span></div>`;
 }
 
 function summaryHTML(d, prev, hist) {
@@ -260,7 +260,7 @@ function summaryHTML(d, prev, hist) {
     const histKey = mk === "ngr" ? "ngr" : mk === "d90_retention" ? null : mk === "core_retention" ? null : mk === "dep_approval" ? null : mk === "csat" ? null : mk === "ngr_mom" ? null : null;
     const hData = hist && histKey ? hist[histKey] : null;
     const miniSpark = hData && hData.length >= 2 ? buildSparkSVG(hData, 20, 60).svg : "";
-    return `<div style="background:#0e0e1c;border-radius:8px;padding:7px 9px;border:1px solid ${!NO(v)?c.gw+"22":"#1a1a2e"};opacity:${NO(v)?.35:1}"><div style="color:#666;font-size:9px;margin-bottom:3px;line-height:1.2">${t.l}</div><div style="display:flex;align-items:baseline;gap:3px"><span class="mono" style="color:${!NO(v)?c.tx:"#333"};font-size:14px;font-weight:700">${!NO(v)&&v>0&&mk.includes("mom")?"+":""}${fmt(v)}${!NO(v)?t.u:""}</span>${hasPrev&&!NO(v)?`<span class="mono" style="color:${arrowC};font-size:8px">${arrow}</span>`:""}</div>${miniSpark?`<div style="margin-top:2px">${miniSpark}</div>`:""}</div>`;
+    return `<div style="background:#f8f9fc;border-radius:8px;padding:7px 9px;border:1px solid ${!NO(v)?c.gw+"22":"#e0e2ea"};opacity:${NO(v)?.35:1}"><div style="color:#777;font-size:9px;margin-bottom:3px;line-height:1.2">${t.l}</div><div style="display:flex;align-items:baseline;gap:3px"><span class="mono" style="color:${!NO(v)?c.tx:"#333"};font-size:14px;font-weight:700">${!NO(v)&&v>0&&mk.includes("mom")?"+":""}${fmt(v)}${!NO(v)?t.u:""}</span>${hasPrev&&!NO(v)?`<span class="mono" style="color:${arrowC};font-size:8px">${arrow}</span>`:""}</div>${miniSpark?`<div style="margin-top:2px">${miniSpark}</div>`:""}</div>`;
   }).join("")}</div></div>`;
 }
 
@@ -280,14 +280,14 @@ function sparkHTML(geo) {
   const data = TREND[geo]; if (!data || !data.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(data, 36, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#aaa":"#666"};font-size:8px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR · ${TL.length}мес (${metaTrendLabel()})</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#777;font-size:9px">NGR · ${TL.length}мес (${metaTrendLabel()})</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 function platSparkHTML() {
   if (!PLAT_TREND.length) return "";
   const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 32, 200);
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#aaa":"#666"};font-size:8px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#666;font-size:9px">NGR платформа · ${metaTrendLabel()}</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
+  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#777;font-size:9px">NGR платформа · ${metaTrendLabel()}</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
 }
 
 // ═══ 5b. MINI KPI CARDS (Platform Pulse) ═══
@@ -311,7 +311,7 @@ function platPulseHTML() {
     const deltaC = delta !== null ? (delta >= 0 ? "#00e676" : "#ff1744") : "#555";
     const miniSpark = hasData ? buildSparkSVG(data, 24, 80).svg : "";
     const valStr = item.label === "Players" ? fmt(totalPlayers) : (cur !== null ? item.fmt(cur) : "—");
-    h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#ccc;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} ${metaPrev()}→${metaCur()}</div>`:""}</div>`;
+    h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#222;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} ${metaPrev()}→${metaCur()}</div>`:""}</div>`;
   });
   h += `</div>`;
   if (PLAT_TREND.length >= 8) {
@@ -324,7 +324,7 @@ function platPulseHTML() {
     const curQ = p.length >= 8 ? p[7] : "", prevQ = p.length >= 5 ? p[4] : "";
     const curQLabel = curQ ? `Q${Math.ceil(parseInt(curQ.split("-")[1])/3)}'${curQ.split("-")[0].slice(2)}` : "cur";
     const prevQLabel = prevQ ? `Q${Math.ceil(parseInt(prevQ.split("-")[1])/3)}'${prevQ.split("-")[0].slice(2)}` : "prev";
-    h += `<div style="background:#0e0e1c;border-radius:8px;padding:7px 10px;border:1px solid #1a1a2e;margin-bottom:10px;text-align:center"><span class="mono" style="color:#888;font-size:10px">${curQLabel}: <span style="color:#ccc;font-weight:700">${fmtNGR(q1ngr)}</span> | ${prevQLabel}: <span style="color:#aaa">${fmtNGR(q4ngr)}</span> | QoQ: <span style="color:${qoqC};font-weight:700">${qoq === "—" ? "—" : (parseFloat(qoq)>=0?"+":"")+qoq+"%"}</span></span></div>`;
+    h += `<div style="background:#f8f9fc;border-radius:8px;padding:7px 10px;border:1px solid #e0e2ea;margin-bottom:10px;text-align:center"><span class="mono" style="color:#666;font-size:10px">${curQLabel}: <span style="color:#222;font-weight:700">${fmtNGR(q1ngr)}</span> | ${prevQLabel}: <span style="color:#444">${fmtNGR(q4ngr)}</span> | QoQ: <span style="color:${qoqC};font-weight:700">${qoq === "—" ? "—" : (parseFloat(qoq)>=0?"+":"")+qoq+"%"}</span></span></div>`;
   }
   return h;
 }
@@ -443,7 +443,7 @@ function execSummaryHTML(geos, ps) {
 
   let lines = [];
   const ngrStr = ngrDelta !== null ? `${ngrDelta > 0 ? "+" : ""}${ngrDelta.toFixed(0)}%` : "";
-  lines.push(`Платформа <span style="color:#ccc;font-weight:700">${fmtNGR(totalNGR)}</span> NGR${ngrStr ? ` (${ngrDelta>0?"📈":"📉"} ${ngrStr} MoM)` : ""}${!NO(marginPct)?`, маржа <span style="color:${marginPct<15?"#ff1744":marginPct<25?"#ffc107":"#00e676"};font-weight:600">${marginPct.toFixed(0)}%</span>`:""}, score <span style="color:${cl(ps).tx};font-weight:700">${NO(ps)?"—":Math.round(ps)}pt</span>. AU ${fmt(totalAU)}, FTD ${fmt(totalFTD)}.`);
+  lines.push(`Платформа <span style="color:#222;font-weight:700">${fmtNGR(totalNGR)}</span> NGR${ngrStr ? ` (${ngrDelta>0?"📈":"📉"} ${ngrStr} MoM)` : ""}${!NO(marginPct)?`, маржа <span style="color:${marginPct<15?"#ff1744":marginPct<25?"#ffc107":"#00e676"};font-weight:600">${marginPct.toFixed(0)}%</span>`:""}, score <span style="color:${cl(ps).tx};font-weight:700">${NO(ps)?"—":Math.round(ps)}pt</span>. AU ${fmt(totalAU)}, FTD ${fmt(totalFTD)}.`);
 
   if (crit > 0) {
     let parts = [];
@@ -466,14 +466,14 @@ function execSummaryHTML(geos, ps) {
 
   if (top2pct > 60) lines.push(`⚠️ Концентрация: ${top2[0]?.g.split(" ").pop()} + ${top2[1]?.g.split(" ").pop()} = <span style="color:#ffc107">${top2pct.toFixed(0)}%</span> NGR.`);
 
-  return `<div style="background:#0c0c18;border-radius:10px;border:1px solid #1a1a2e;padding:10px 12px;margin-bottom:10px"><div style="color:#aaa;font-size:11px;line-height:1.6">${lines.join(" ")}</div></div>`;
+  return `<div style="background:#ffffff;border-radius:10px;border:1px solid #e0e2ea;padding:10px 12px;margin-bottom:10px"><div style="color:#444;font-size:11px;line-height:1.6">${lines.join(" ")}</div></div>`;
 }
 
 function ngrContribHTML(geos) {
   const sorted = [...geos].filter(g => g.d.ngr > 0).sort((a,b) => (b.d.ngr||0) - (a.d.ngr||0));
   const total = sorted.reduce((s,g) => s + (g.d.ngr||0), 0);
   if (!total) return "";
-  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#444;font-size:9px;margin-bottom:4px">NGR вклад по GEO</div><div style="display:flex;border-radius:6px;overflow:hidden;height:18px">`;
+  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#999;font-size:9px;margin-bottom:4px">NGR вклад по GEO</div><div style="display:flex;border-radius:6px;overflow:hidden;height:18px">`;
   const colors = ["#7c83ff","#00e676","#ffc107","#ff6b35","#e040fb","#00bcd4","#8bc34a","#ff5722","#9c27b0","#607d8b"];
   sorted.forEach((g, i) => {
     const pct = (g.d.ngr / total * 100);
@@ -483,7 +483,7 @@ function ngrContribHTML(geos) {
   h += `</div><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">`;
   sorted.forEach((g, i) => {
     const pct = (g.d.ngr / total * 100);
-    h += `<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;color:#555"><span style="width:6px;height:6px;border-radius:2px;background:${colors[i%colors.length]}"></span>${g.g.split(" ").pop()} ${pct.toFixed(0)}%</span>`;
+    h += `<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;color:#888"><span style="width:6px;height:6px;border-radius:2px;background:${colors[i%colors.length]}"></span>${g.g.split(" ").pop()} ${pct.toFixed(0)}%</span>`;
   });
   h += `</div></div>`;
   return h;
@@ -492,14 +492,14 @@ function ngrContribHTML(geos) {
 // ═══ 5h. HEATMAP MATRIX GEO × CATEGORY ═══
 function heatmapHTML(geos) {
   const catKeys = Object.keys(CATS);
-  let h = `<div style="margin-bottom:14px;background:#0c0c18;border-radius:12px;border:1px solid #1a1a2e;padding:10px;overflow-x:auto"><div class="mono" style="color:#777;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📋 МАТРИЦА GEO × БЛОКИ</div>`;
-  h += `<table style="width:100%;border-collapse:collapse;font-size:9px"><thead><tr><th style="text-align:left;padding:3px 4px;color:#444;font-weight:600;min-width:60px">GEO</th>`;
-  catKeys.forEach(ck => { h += `<th style="text-align:center;padding:3px 2px;color:#444;font-weight:500;min-width:28px" title="${CATS[ck].l} (${CATS[ck].w}%)">${CATS[ck].i}</th>`; });
-  h += `<th style="text-align:center;padding:3px 4px;color:#555;font-weight:600;min-width:30px">Σ</th></tr></thead><tbody>`;
+  let h = `<div style="margin-bottom:14px;background:#ffffff;border-radius:12px;border:1px solid #e0e2ea;padding:10px;overflow-x:auto"><div class="mono" style="color:#666;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📋 МАТРИЦА GEO × БЛОКИ</div>`;
+  h += `<table style="width:100%;border-collapse:collapse;font-size:9px"><thead><tr><th style="text-align:left;padding:3px 4px;color:#999;font-weight:600;min-width:60px">GEO</th>`;
+  catKeys.forEach(ck => { h += `<th style="text-align:center;padding:3px 2px;color:#999;font-weight:500;min-width:28px" title="${CATS[ck].l} (${CATS[ck].w}%)">${CATS[ck].i}</th>`; });
+  h += `<th style="text-align:center;padding:3px 4px;color:#888;font-weight:600;min-width:30px">Σ</th></tr></thead><tbody>`;
   const sortedGeos = [...geos].sort((a,b) => (b.s??-1) - (a.s??-1));
   sortedGeos.forEach(({g,s,d,flag}) => {
-    h += `<tr onclick="nav('${g}')" style="cursor:pointer" onmouseenter="this.style.background='#151520'" onmouseleave="this.style.background='transparent'">`;
-    h += `<td style="padding:3px 4px;color:#888;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px">${flag?"⛔ ":""}${g.split(" ").pop()}</td>`;
+    h += `<tr onclick="nav('${g}')" style="cursor:pointer" onmouseenter="this.style.background='#f0f1f5'" onmouseleave="this.style.background='transparent'">`;
+    h += `<td style="padding:3px 4px;color:#666;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px">${flag?"⛔ ":""}${g.split(" ").pop()}</td>`;
     catKeys.forEach(ck => {
       const cs = catSc(d, ck);
       const cc = cl(cs);
@@ -517,12 +517,12 @@ function heatmapHTML(geos) {
 function signalsHTML(geos) {
   const signals = generateSignals(geos);
   if (!signals.length) return "";
-  const bgMap = {critical:"#1a081022",warning:"#1a150822",growth:"#081a0c22"};
-  const borderMap = {critical:"#ff174422",warning:"#ffc10722",growth:"#00e67622"};
-  let h = `<div style="margin-bottom:14px;background:#0c0c18;border-radius:12px;border:1px solid #1a1a2e;padding:10px"><div class="mono" style="color:#888;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center" title="Автоматически сгенерированные сигналы на основе данных">🚨 СИГНАЛЫ</div>`;
+  const bgMap = {critical:"#fff5f5",warning:"#fffbf0",growth:"#f0fff4"};
+  const borderMap = {critical:"#ff174415",warning:"#ffc10715",growth:"#00e67615"};
+  let h = `<div style="margin-bottom:14px;background:#ffffff;border-radius:12px;border:1px solid #e0e2ea;padding:10px"><div class="mono" style="color:#666;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center" title="Автоматически сгенерированные сигналы на основе данных">🚨 СИГНАЛЫ</div>`;
   signals.forEach(s => {
     const onclick = s.geo ? `onclick="nav('${s.geo}')"` : "";
-    h += `<div class="signal-item" ${onclick} style="background:${bgMap[s.type]||"#12121e"};border:1px solid ${borderMap[s.type]||"#1a1a2e"};${s.geo?"cursor:pointer":"cursor:default"}"><span class="signal-icon">${s.icon}</span><span class="signal-text" style="color:${s.type==="growth"?"#00e676cc":s.type==="warning"?"#ffc107cc":"#ff8a80"}">${s.text}</span></div>`;
+    h += `<div class="signal-item" ${onclick} style="background:${bgMap[s.type]||"#12121e"};border:1px solid ${borderMap[s.type]||"#e0e2ea"};${s.geo?"cursor:pointer":"cursor:default"}"><span class="signal-icon">${s.icon}</span><span class="signal-text" style="color:${s.type==="growth"?"#00e676cc":s.type==="warning"?"#ffc107cc":"#ff8a80"}">${s.text}</span></div>`;
   });
   h += `</div>`;
   return h;
@@ -540,7 +540,7 @@ function segmentsHTML() {
   if (!curSeg) return "";
 
   const segNames = Object.keys(curSeg);
-  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#777;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📊 СЕГМЕНТЫ · ${prevKey||""} → ${curKey}</div>`;
+  let h = `<div style="margin-top:14px;background:#f8f9fc;border-radius:12px;border:1px solid #e0e2ea;padding:12px 10px"><div class="mono" style="color:#666;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📊 СЕГМЕНТЫ · ${prevKey||""} → ${curKey}</div>`;
   segNames.forEach(name => {
     const c = curSeg[name];
     const p = prevSeg ? prevSeg[name] : null;
@@ -548,7 +548,7 @@ function segmentsHTML() {
     const ngrPct = p && p.ngr !== 0 ? ((c.ngr - p.ngr) / Math.abs(p.ngr) * 100) : null;
     const deltaColor = c.ngr < 0 ? "#ff1744" : (ngrDelta !== null && ngrDelta < 0 ? "#ff1744" : "#00e676");
     const icon = c.ngr < 0 ? "🔴" : (ngrPct !== null && ngrPct < -20 ? "🔴" : ngrPct !== null && ngrPct > 20 ? "🟢" : "⚪");
-    h += `<div class="seg-row" style="background:#111122"><span style="font-size:10px;color:#aaa;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="mono" style="color:#555;font-size:9px;min-width:36px;text-align:center">${c.players}p</span><span class="mono" style="color:${deltaColor};font-size:10px;font-weight:600;min-width:55px;text-align:right">${fmtNGR(c.ngr)}</span>${ngrPct!==null?`<span class="mono" style="color:${ngrPct>=0?"#00e67688":"#ff174488"};font-size:8px;min-width:36px;text-align:right">${ngrPct>=0?"+":""}${ngrPct.toFixed(0)}%</span>`:`<span style="min-width:36px"></span>`}<span style="font-size:10px;min-width:16px;text-align:center">${icon}</span></div>`;
+    h += `<div class="seg-row" style="background:#f4f4fa"><span style="font-size:10px;color:#444;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="mono" style="color:#888;font-size:9px;min-width:36px;text-align:center">${c.players}p</span><span class="mono" style="color:${deltaColor};font-size:10px;font-weight:600;min-width:55px;text-align:right">${fmtNGR(c.ngr)}</span>${ngrPct!==null?`<span class="mono" style="color:${ngrPct>=0?"#00e67688":"#ff174488"};font-size:8px;min-width:36px;text-align:right">${ngrPct>=0?"+":""}${ngrPct.toFixed(0)}%</span>`:`<span style="min-width:36px"></span>`}<span style="font-size:10px;min-width:16px;text-align:center">${icon}</span></div>`;
   });
   h += `</div>`;
   return h;
@@ -566,7 +566,7 @@ function historySparkHTML(geo) {
   ];
   const available = metrics.filter(m => hist[m.key] && hist[m.key].length >= 2);
   if (!available.length) return "";
-  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#666;font-size:9px;font-weight:600;margin-bottom:6px;text-align:center">📈 ТРЕНДЫ (${metaTrendLabel()})</div>`;
+  let h = `<div style="margin-bottom:10px"><div class="mono" style="color:#777;font-size:9px;font-weight:600;margin-bottom:6px;text-align:center">📈 ТРЕНДЫ (${metaTrendLabel()})</div>`;
   available.forEach(m => {
     const data = hist[m.key];
     const {svg, lastV, lastC} = buildSparkSVG(data, 28, 100);
@@ -576,7 +576,7 @@ function historySparkHTML(geo) {
     const deltaStr = (delta >= 0 ? "+" : "") + delta.toFixed(0) + "%";
     const deltaC = delta >= 0 ? "#00e67688" : "#ff174488";
     const tlLabels = TL.length ? `<div style="display:flex;justify-content:space-between;padding:0 2px">${TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?'#aaa':'#666'};font-size:8px">${l}</span>`).join("")}</div>` : "";
-    h += `<div class="hist-spark-row"><span style="color:#888;font-size:10px;min-width:62px">${m.label}</span><div style="flex:1;min-width:0;max-height:36px;overflow:hidden">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#ccc;font-size:12px;font-weight:600">${m.fmt(cur)}</span><span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span></div></div>`;
+    h += `<div class="hist-spark-row"><span style="color:#666;font-size:10px;min-width:62px">${m.label}</span><div style="flex:1;min-width:0;max-height:36px;overflow:hidden">${svg}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:50px"><span class="mono" style="color:#222;font-size:12px;font-weight:600">${m.fmt(cur)}</span><span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span></div></div>`;
   });
   h += `</div>`;
   return h;
@@ -601,24 +601,41 @@ function retentionTableHTML() {
   const avgM3 = geos.reduce((s,[,r]) => s + (r.m3||0), 0) / geos.length;
   const avgCore = geos.reduce((s,[,r]) => s + (r.core||0), 0) / geos.length;
 
-  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#777;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">🔄 RETENTION ПО GEO (когортный baseline)</div>`;
-  h += `<div style="display:flex;gap:4px;padding:0 4px;margin-bottom:4px"><span style="flex:1;font-size:9px;color:#666">GEO</span><span class="mono" style="width:60px;text-align:center;font-size:8px;color:#666" title="M1 факт / цель">M1</span><span class="mono" style="width:60px;text-align:center;font-size:8px;color:#666" title="M3 факт / цель">M3</span><span class="mono" style="width:60px;text-align:center;font-size:8px;color:#666" title="M6 факт / цель">M6</span></div>`;
+  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:10px;text-align:center">🔄 RETENTION ПО GEO</div>`;
+  h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>`;
+  h += `<th style="text-align:left;padding:6px;font-size:12px;color:#555;font-weight:600;border-bottom:2px solid #e0e2ea">GEO</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#888;border-bottom:2px solid #e0e2ea">N</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M1</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#aaa;border-bottom:2px solid #e0e2ea">цель</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M3</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#aaa;border-bottom:2px solid #e0e2ea">цель</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M6</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#aaa;border-bottom:2px solid #e0e2ea">цель</th>`;
+  h += `</tr></thead><tbody>`;
 
-  function retC(v, target) { if (NO(v)) return "#333"; const ratio = v/target; if (ratio >= 0.8) return "#00e676"; if (ratio >= 0.5) return "#ffc107"; return "#ff1744"; }
+  function retC2(v, target) { if (NO(v)) return "#aaa"; const ratio = v/target; if (ratio >= 0.8) return "#0a8a4a"; if (ratio >= 0.5) return "#b8860b"; return "#d32f2f"; }
 
   geos.forEach(([g, r]) => {
     const tM1 = r.target_m1, tM3 = r.target_m3, tM6 = r.target_m6;
-    function cell(v, t) {
-      if (NO(v)) return `<span class="mono" style="width:60px;text-align:center;font-size:10px;color:#333">—</span>`;
-      const c = retC(v, t||25);
-      const gap = t ? (v - t).toFixed(1) : "";
-      return `<span class="mono" style="width:60px;text-align:center;font-size:10px;display:inline-flex;flex-direction:column;align-items:center"><span style="color:${c};font-weight:600">${v.toFixed(1)}</span>${t?`<span style="color:#444;font-size:7px">→${t}%</span>`:""}</span>`;
-    }
-    h += `<div style="display:flex;gap:4px;padding:4px;border-radius:4px;cursor:pointer;margin-bottom:1px" onclick="nav('${g}')" onmouseenter="this.style.background='#151520'" onmouseleave="this.style.background='transparent'"><span style="flex:1;font-size:10px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.split(" ").pop()}</span>${cell(r.m1, tM1)}${cell(r.m3, tM3)}${cell(r.core, tM6)}</div>`;
+    h += `<tr onclick="nav('${g}')" style="cursor:pointer;border-bottom:1px solid #f0f1f5" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
+    h += `<td style="padding:6px;font-size:13px;color:#222;font-weight:500">${g.split(" ").pop()}</td>`;
+    h += `<td style="text-align:center;padding:6px;font-size:11px;color:#aaa">${r.total?r.total.toLocaleString():"—"}</td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:${retC2(r.m1,tM1||20)};font-size:14px;font-weight:700">${NO(r.m1)?"—":r.m1.toFixed(1)}</span></td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#bbb;font-size:11px">${tM1||"—"}</span></td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:${retC2(r.m3,tM3||8)};font-size:14px;font-weight:700">${NO(r.m3)?"—":r.m3.toFixed(1)}</span></td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#bbb;font-size:11px">${tM3||"—"}</span></td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:${retC2(r.core,tM6||4.5)};font-size:14px;font-weight:700">${NO(r.core)?"—":r.core.toFixed(1)}</span></td>`;
+    h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#bbb;font-size:11px">${tM6||"—"}</span></td>`;
+    h += `</tr>`;
   });
 
-  h += `<div style="display:flex;gap:4px;padding:4px 4px 0;border-top:1px solid #1a1a2e;margin-top:4px"><span style="flex:1;font-size:9px;color:#666;font-weight:600">AVG</span><span class="mono" style="width:60px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgM1.toFixed(1)}</span><span class="mono" style="width:60px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgM3.toFixed(1)}</span><span class="mono" style="width:60px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgCore.toFixed(1)}</span></div>`;
-  h += `<div class="mono" style="color:#444;font-size:8px;text-align:center;margin-top:6px">48,787 клиентов · baseline Apr-Sep 2025 · источник: MGM.io</div>`;
+  h += `</tbody><tfoot><tr style="border-top:2px solid #e0e2ea">`;
+  h += `<td style="padding:6px;font-size:12px;color:#555;font-weight:600">AVG</td><td></td>`;
+  h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${avgM1.toFixed(1)}</span></td><td></td>`;
+  h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${avgM3.toFixed(1)}</span></td><td></td>`;
+  h += `<td style="text-align:center;padding:6px"><span class="mono" style="color:#7c83ff;font-size:13px;font-weight:700">${avgCore.toFixed(1)}</span></td><td></td>`;
+  h += `</tr></tfoot></table></div>`;
+  h += `<div class="mono" style="color:#aaa;font-size:9px;text-align:center;margin-top:8px">48,787 клиентов · baseline Apr-Sep 2025 · источник: MGM.io</div>`;
   h += `</div>`;
   return h;
 }
@@ -629,7 +646,7 @@ function funnelHTML() {
   try { F = typeof FUNNEL !== "undefined" ? FUNNEL : {}; } catch(e) {}
   if (!F.periods || !F.periods.length) return "";
 
-  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#777;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📥 ВОРОНКА КОНВЕРСИИ (платформа)</div>`;
+  let h = `<div style="margin-top:14px;background:#f8f9fc;border-radius:12px;border:1px solid #e0e2ea;padding:12px 10px"><div class="mono" style="color:#666;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">📥 ВОРОНКА КОНВЕРСИИ (платформа)</div>`;
 
   const metrics = [
     {key:"registration",label:"Регистрации",color:"#7c83ff"},
@@ -658,26 +675,26 @@ function funnelHTML() {
       return `<div style="flex:1;background:${isLast?m.color+"66":m.color+"22"};height:${pct}%;border-radius:2px;min-width:4px" title="${F.periods[i]}: ${m.isPct?v.toFixed(1)+"%":fmt(v)}"></div>`;
     }).join("");
 
-    h += `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a2e"><span style="color:${m.color};font-size:11px;min-width:90px;font-weight:500" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="display:flex;align-items:flex-end;gap:2px;height:20px;flex:1;max-width:120px">${bars}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:60px"><span class="mono" style="color:#ccc;font-size:13px;font-weight:700">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span>`:""}</div></div>`;
+    h += `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #e0e2ea"><span style="color:${m.color};font-size:11px;min-width:90px;font-weight:500" ${m.tip?`title="${m.tip}"`:""}>${m.label}</span><div style="display:flex;align-items:flex-end;gap:2px;height:20px;flex:1;max-width:120px">${bars}</div><div style="display:flex;flex-direction:column;align-items:flex-end;min-width:60px"><span class="mono" style="color:#222;font-size:13px;font-weight:700">${valStr}</span>${deltaStr?`<span class="mono" style="color:${deltaC};font-size:9px">${deltaStr}</span>`:""}</div></div>`;
   });
 
-  h += `<div class="mono" style="color:#666;font-size:9px;text-align:center;margin-top:6px">${metaPeriodLabel()} · источник: маркетинговый отчёт</div>`;
+  h += `<div class="mono" style="color:#777;font-size:9px;text-align:center;margin-top:6px">${metaPeriodLabel()} · источник: маркетинговый отчёт</div>`;
   h += `</div>`;
   return h;
 }
 
 function platBlocksHTML(geos) {
-  let html = `<div style="margin-top:18px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#777;font-size:9px;font-weight:600;margin-bottom:10px;text-align:center">ПЛАТФОРМА · БЛОКИ (avg по GEO)</div><div style="display:flex;flex-direction:column;gap:4px">`;
+  let html = `<div style="margin-top:18px;background:#f8f9fc;border-radius:12px;border:1px solid #e0e2ea;padding:12px 10px"><div class="mono" style="color:#666;font-size:9px;font-weight:600;margin-bottom:10px;text-align:center">ПЛАТФОРМА · БЛОКИ (avg по GEO)</div><div style="display:flex;flex-direction:column;gap:4px">`;
   Object.entries(CATS).forEach(([ck, ct]) => {
     const vals = geos.map(g => catSc(g.d, ck)).filter(x => x !== null);
     const s = vals.length ? vals.reduce((a,b) => a+b, 0)/vals.length : null;
     const c = cl(s);
-    html += `<div class="plat-block" onclick="toggleRanking('${ck}')" style="background:${c.bg}33;border-left-color:${NO(s)?"#252540":c.gw}"><span style="font-size:14px;width:20px;text-align:center">${ct.i}</span><div style="flex:1;min-width:0"><div style="color:${NO(s)?"#444":"#bbb"};font-size:11px;font-weight:600">${ct.l}</div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:${Math.min(100,Math.max(3,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div></div><span class="mono" style="color:${NO(s)?"#333":c.tx};font-weight:700;font-size:14px;min-width:28px;text-align:right">${NO(s)?"—":Math.round(s)}</span><span class="mono" style="color:#282840;font-size:8px;min-width:24px;text-align:right">${ct.w}%</span></div>`;
+    html += `<div class="plat-block" onclick="toggleRanking('${ck}')" style="background:${c.bg}33;border-left-color:${NO(s)?"#d0d2da":c.gw}"><span style="font-size:14px;width:20px;text-align:center">${ct.i}</span><div style="flex:1;min-width:0"><div style="color:${NO(s)?"#444":"#bbb"};font-size:11px;font-weight:600">${ct.l}</div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:${Math.min(100,Math.max(3,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div></div><span class="mono" style="color:${NO(s)?"#333":c.tx};font-weight:700;font-size:14px;min-width:28px;text-align:right">${NO(s)?"—":Math.round(s)}</span><span class="mono" style="color:#aaa;font-size:8px;min-width:24px;text-align:right">${ct.w}%</span></div>`;
     html += `<div id="rank-${ck}" style="display:none;padding:2px 0 6px 28px">`;
     const ranked = geos.map(g => ({g:g.g, s:catSc(g.d, ck), d:g.d})).filter(r => r.s !== null).sort((a,b) => b.s - a.s);
     ranked.forEach((r, i) => {
       const rc = cl(r.s);
-      html += `<div class="rank-row" onclick="nav('${r.g}')" style="background:${rc.bg}33"><span class="mono" style="color:#444;font-size:9px;width:16px">${i+1}</span><span style="font-size:10px;flex:1">${r.g}</span><span class="mono" style="color:${rc.tx};font-weight:700;font-size:12px">${Math.round(r.s)}</span></div>`;
+      html += `<div class="rank-row" onclick="nav('${r.g}')" style="background:${rc.bg}33"><span class="mono" style="color:#999;font-size:9px;width:16px">${i+1}</span><span style="font-size:10px;flex:1">${r.g}</span><span class="mono" style="color:${rc.tx};font-weight:700;font-size:12px">${Math.round(r.s)}</span></div>`;
     });
     html += `</div>`;
   });
@@ -685,15 +702,15 @@ function platBlocksHTML(geos) {
 }
 
 function crumbHTML(geo, cat) {
-  let h = `<div class="crumb"><span onclick="navHome()" style="color:#555">GEO</span><span style="color:#252540;font-size:10px;padding:0">›</span>`;
-  h += `<span onclick="navGeo()" style="color:${cat?"#555":"#888"};background:${cat?"transparent":"#1a1a2e"}">${geo.split(" ").pop()}</span>`;
-  if (cat) { const ct = CATS[cat]; h += `<span style="color:#252540;font-size:10px;padding:0">›</span><span style="color:#888;background:#1a1a2e;cursor:default">${ct.i} ${ct.l}</span>`; }
+  let h = `<div class="crumb"><span onclick="navHome()" style="color:#888">GEO</span><span style="color:#d0d2da;font-size:10px;padding:0">›</span>`;
+  h += `<span onclick="navGeo()" style="color:${cat?"#555":"#888"};background:${cat?"transparent":"#e0e2ea"}">${geo.split(" ").pop()}</span>`;
+  if (cat) { const ct = CATS[cat]; h += `<span style="color:#d0d2da;font-size:10px;padding:0">›</span><span style="color:#666;background:#e0e2ea;cursor:default">${ct.i} ${ct.l}</span>`; }
   return h + `</div>`;
 }
 
 function navHTML(idx) {
   const p = idx > 0 ? geoList[idx-1] : null, nx = idx < geoList.length-1 ? geoList[idx+1] : null;
-  return `<div class="nav"><button style="color:${p?"#555":"#1a1a28"}" ${p?`onclick="nav('${p}')"`:"disabled"}>‹</button><span class="mono" style="color:#666;font-size:11px">${idx+1}/${geoList.length}</span><button style="color:${nx?"#555":"#1a1a28"}" ${nx?`onclick="nav('${nx}')"`:"disabled"}>›</button></div>`;
+  return `<div class="nav"><button style="color:${p?"#555":"#e0e2ea"}" ${p?`onclick="nav('${p}')"`:"disabled"}>‹</button><span class="mono" style="color:#777;font-size:11px">${idx+1}/${geoList.length}</span><button style="color:${nx?"#555":"#e0e2ea"}" ${nx?`onclick="nav('${nx}')"`:"disabled"}>›</button></div>`;
 }
 
 // ═══ 6. RENDER ═══
@@ -704,7 +721,7 @@ function rebuildGeoList() { geoList = Object.keys(D); }
 function render() {
   const app = document.getElementById("app");
   if (!Object.keys(D).length) {
-    app.innerHTML = `<div class="header"><div><h1 onclick="navHome()">HEALTH CHECK</h1></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div><div style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:16px">📊</div><div style="color:#666;font-size:14px;margin-bottom:8px">Нет данных</div><div style="color:#444;font-size:12px;margin-bottom:20px">Загрузите data.json</div></div>`;
+    app.innerHTML = `<div class="header"><div><h1 onclick="navHome()">HEALTH CHECK</h1></div><div style="display:flex;gap:2px"><button class="hdr-btn" onclick="openSettings()" title="Настройки"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></button></div></div><div style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:16px">📊</div><div style="color:#777;font-size:14px;margin-bottom:8px">Нет данных</div><div style="color:#999;font-size:12px;margin-bottom:20px">Загрузите data.json</div></div>`;
     return;
   }
 
@@ -742,7 +759,7 @@ function render() {
       const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}${Math.abs(d.ngr_mom).toFixed(0)}%</span>`:""}`;
       return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag,true)}</div>`;
     }).join("")}</div>`;
-    html += `<div class="mono" style="color:#333;font-size:8px;text-align:center;margin-bottom:12px">↑↓ = MoM</div>`;
+    html += `<div class="mono" style="color:#aaa;font-size:8px;text-align:center;margin-bottom:12px">↑↓ = MoM</div>`;
     html += signalsHTML(geos);
     html += ngrContribHTML(geos);
     html += heatmapHTML(geos);
@@ -750,7 +767,7 @@ function render() {
     html += retentionTableHTML();
     html += funnelHTML();
     html += segmentsHTML();
-    html += `<div style="margin-top:20px;padding:12px;text-align:center;border-top:1px solid #1a1a2e"><button onclick="copyTelegramReport()" style="background:#111122;border:1px solid #252540;border-radius:8px;padding:8px 16px;color:#555;font-size:11px;cursor:pointer;font-family:inherit">📋 Копировать отчёт для Telegram</button><div class="mono" style="color:#1e1e30;font-size:8px;margin-top:8px">${META.version} · ${META.updated||""}</div></div>`;
+    html += `<div style="margin-top:20px;padding:12px;text-align:center;border-top:1px solid #e0e2ea"><button onclick="copyTelegramReport()" style="background:#f4f4fa;border:1px solid #d0d2da;border-radius:8px;padding:8px 16px;color:#888;font-size:11px;cursor:pointer;font-family:inherit">📋 Копировать отчёт для Telegram</button><div class="mono" style="color:#bbb;font-size:8px;margin-top:8px">${META.version} · ${META.updated||""}</div></div>`;
   } else if (state.geo && !state.cat) {
     const g = state.geo, d = D[g], fl = FLAGS[g], prev = PREV[g] || {}, hist = HISTORY[g] || {};
     const gs = geoSc(d); const idx = geoList.indexOf(g);
@@ -758,7 +775,7 @@ function render() {
     html += navHTML(idx);
     if (fl) html += `<div class="alert"><span class="mono" style="color:#ff8a80;font-size:11px;font-weight:600">${fl.icon} ${fl.msg}</span><span style="color:#55333e;font-size:9px;margin-left:6px">${fl.detail}</span></div>`;
     const tierLabel = (d.ngr||0) > 20000 ? "🏆 Tier 1" : (d.ngr||0) > 5000 ? "📈 Tier 2" : "🌱 Tier 3";
-    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}<div class="mono" style="color:#333;font-size:8px;margin-top:2px">${tierLabel} · NGR ${fmtNGR(d.ngr)}</div></div>`;
+    html += `<div style="text-align:center;margin-bottom:12px">${sphereHTML(gs,76,g,cl(gs).lb,!!fl)}<div class="mono" style="color:#aaa;font-size:8px;margin-top:2px">${tierLabel} · NGR ${fmtNGR(d.ngr)}</div></div>`;
     html += summaryHTML(d, prev, hist);
     html += sparkHTML(g);
     html += historySparkHTML(g);
@@ -768,7 +785,7 @@ function render() {
     const worst = ALL_METRICS.map(k => ({k, s:scr(k, d[k]), v:d[k]})).filter(m => !NO(m.s) && m.s < 40).sort((a,b) => a.s - b.s);
     if (worst.length) html += `<div style="margin-top:18px"><div class="mono" style="color:#ff1744;font-size:10px;font-weight:700;margin-bottom:8px;text-align:center">⚠ КРАСНЫЕ (${worst.length})</div><div style="display:flex;flex-direction:column;gap:5px">${worst.slice(0,6).map(m => metricHTML(m.k, m.v, prev[m.k])).join("")}</div></div>`;
     const filled = ALL_METRICS.filter(k => !NO(d[k])).length;
-    html += `<div style="margin-top:12px;padding:10px;background:#111122;border-radius:8px;border:1px solid #1e1e35"><div class="mono" style="color:#444;font-size:9px">${filled}/32 метрик</div></div>`;
+    html += `<div style="margin-top:12px;padding:10px;background:#f4f4fa;border-radius:8px;border:1px solid #d4d6e0"><div class="mono" style="color:#999;font-size:9px">${filled}/32 метрик</div></div>`;
   } else if (state.geo && state.cat) {
     const g = state.geo, d = D[g], ct = CATS[state.cat], prev = PREV[g] || {}, fl = FLAGS[g];
     const cs = catSc(d, state.cat); const idx = geoList.indexOf(g);
@@ -1024,7 +1041,7 @@ function openDataEditor() {
   overlay.onclick = e => { if (e.target === overlay) closeDataEditor(); };
 
   function buildEditor() {
-    let h = `<div class="modal"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">📝 Данные</span><button onclick="closeDataEditor()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div class="tab-bar" style="margin-top:10px">`;
+    let h = `<div class="modal"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#1a1a2a;font-size:14px;font-weight:700">📝 Данные</span><button onclick="closeDataEditor()" style="background:none;border:none;color:#999;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div class="tab-bar" style="margin-top:10px">`;
     const tabs = [
       {id:"csv",l:"📊 CSV"},
       {id:"json",l:"📄 JSON"},
@@ -1032,7 +1049,7 @@ function openDataEditor() {
       {id:"meta",l:"⚙ Мета"},
     ];
     tabs.forEach(t => {
-      h += `<button class="tab-btn" onclick="editorTab='${t.id}';editorGeo=null;refreshDataEditor()" style="background:${editorTab===t.id?"#1e1e35":"transparent"};color:${editorTab===t.id?"#ccc":"#444"}">${t.l}</button>`;
+      h += `<button class="tab-btn" onclick="editorTab='${t.id}';editorGeo=null;refreshDataEditor()" style="background:${editorTab===t.id?"#d4d6e0":"transparent"};color:${editorTab===t.id?"#ccc":"#444"}">${t.l}</button>`;
     });
     h += `</div></div><div class="modal-body">`;
 
@@ -1058,29 +1075,29 @@ function openDataEditor() {
   function buildJsonTab() {
     const ds = getDataset();
     const json = JSON.stringify(ds, null, 2);
-    return `<div style="margin-bottom:10px"><div style="color:#666;font-size:11px;margin-bottom:8px">Вставьте полный JSON или загрузите файл. Формат: <code style="color:#7c83ff">{meta, flags, data, prev, trend, ...}</code></div><div style="display:flex;gap:6px;margin-bottom:10px"><label class="btn-secondary" style="cursor:pointer"><input type="file" accept=".json,.csv,.tsv,.txt" onchange="handleFileUpload(event)" style="display:none">📂 Загрузить файл</label></div><textarea id="json-editor" class="ed-textarea" style="min-height:300px">${escHtml(json)}</textarea></div><button class="btn-primary" onclick="applyJsonEditor()">💾 Применить JSON</button>`;
+    return `<div style="margin-bottom:10px"><div style="color:#777;font-size:11px;margin-bottom:8px">Вставьте полный JSON или загрузите файл. Формат: <code style="color:#7c83ff">{meta, flags, data, prev, trend, ...}</code></div><div style="display:flex;gap:6px;margin-bottom:10px"><label class="btn-secondary" style="cursor:pointer"><input type="file" accept=".json,.csv,.tsv,.txt" onchange="handleFileUpload(event)" style="display:none">📂 Загрузить файл</label></div><textarea id="json-editor" class="ed-textarea" style="min-height:300px">${escHtml(json)}</textarea></div><button class="btn-primary" onclick="applyJsonEditor()">💾 Применить JSON</button>`;
   }
 
   function buildCsvTab() {
-    let h = `<div style="margin-bottom:10px"><div style="color:#666;font-size:11px;margin-bottom:8px">Загрузите CSV из WebManagement или вставьте текст. Поддержка: <code style="color:#7c83ff">,</code> <code style="color:#7c83ff">;</code> <code style="color:#7c83ff">tab</code></div>`;
+    let h = `<div style="margin-bottom:10px"><div style="color:#777;font-size:11px;margin-bottom:8px">Загрузите CSV из WebManagement или вставьте текст. Поддержка: <code style="color:#7c83ff">,</code> <code style="color:#7c83ff">;</code> <code style="color:#7c83ff">tab</code></div>`;
     h += `<div style="display:flex;gap:6px;margin-bottom:10px"><label class="btn-secondary" style="cursor:pointer"><input type="file" accept=".csv,.tsv,.txt" onchange="handleCsvFileUpload(event)" style="display:none">📂 Загрузить CSV</label></div>`;
     h += `<textarea id="csv-paste" class="ed-textarea" style="min-height:120px" placeholder="Вставьте CSV сюда...\nCountry;NGR;FTD;AU;...\nBrazil;81765;810;1297;...">${csvState.parsed ? "" : ""}</textarea>`;
     h += `<button class="btn-secondary" style="margin-top:6px;width:100%" onclick="parseCsvFromTextarea()">🔍 Распознать</button></div>`;
     if (csvState.parsed && csvState.parsed.rows.length) {
       const {parsed, countryCol, colMap} = csvState;
-      h += `<div style="margin-top:12px;padding:10px;background:#111122;border-radius:8px;border:1px solid #1e1e35">`;
+      h += `<div style="margin-top:12px;padding:10px;background:#f4f4fa;border-radius:8px;border:1px solid #d4d6e0">`;
       h += `<div class="mono" style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:8px">📋 ${parsed.rows.length} строк · ${parsed.headers.length} колонок · разделитель "${parsed.delim === "\t" ? "tab" : parsed.delim}"</div>`;
-      h += `<div style="margin-bottom:10px"><label style="color:#888;font-size:10px">Колонка со страной</label><select onchange="csvState.countryCol=parseInt(this.value);refreshDataEditor()" style="width:100%;padding:6px;background:#0a0a14;border:1px solid #252540;border-radius:6px;color:#7c83ff;font-size:12px;margin-top:3px">`;
+      h += `<div style="margin-bottom:10px"><label style="color:#666;font-size:10px">Колонка со страной</label><select onchange="csvState.countryCol=parseInt(this.value);refreshDataEditor()" style="width:100%;padding:6px;background:#f0f1f5;border:1px solid #d0d2da;border-radius:6px;color:#7c83ff;font-size:12px;margin-top:3px">`;
       parsed.headers.forEach((hd, i) => {
         h += `<option value="${i}" ${i===countryCol?"selected":""}>${hd}</option>`;
       });
       h += `</select></div>`;
-      h += `<div style="color:#888;font-size:10px;margin-bottom:6px">Маппинг колонок → метрики</div>`;
+      h += `<div style="color:#666;font-size:10px;margin-bottom:6px">Маппинг колонок → метрики</div>`;
       parsed.headers.forEach((hd, i) => {
         if (i === countryCol) return;
         const mapped = colMap[i] || "";
         const preview = parsed.rows.slice(0,2).map(r => r[i] || "—").join(", ");
-        h += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px"><span style="color:#555;font-size:10px;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(hd)}">${escHtml(hd)}</span><span class="mono" style="color:#333;font-size:8px;flex-shrink:0">${escHtml(preview)}</span><select onchange="csvState.colMap[${i}]=this.value;refreshDataEditor()" style="width:140px;flex-shrink:0;padding:4px;background:#0a0a14;border:1px solid #252540;border-radius:4px;color:${mapped?"#00e676":"#444"};font-size:10px"><option value="">— пропустить —</option>`;
+        h += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px"><span style="color:#888;font-size:10px;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(hd)}">${escHtml(hd)}</span><span class="mono" style="color:#aaa;font-size:8px;flex-shrink:0">${escHtml(preview)}</span><select onchange="csvState.colMap[${i}]=this.value;refreshDataEditor()" style="width:140px;flex-shrink:0;padding:4px;background:#f0f1f5;border:1px solid #d0d2da;border-radius:4px;color:${mapped?"#00e676":"#444"};font-size:10px"><option value="">— пропустить —</option>`;
         ALL_METRICS.forEach(mk => {
           const t = DEF_TH[mk];
           h += `<option value="${mk}" ${mapped===mk?"selected":""}>${t.l}</option>`;
@@ -1092,7 +1109,7 @@ function openDataEditor() {
         const geo = resolveGeo(raw);
         return `<span style="color:${geo?"#00e676":"#ff1744"};font-size:9px">${escHtml(raw)} → ${geo||"⚠ не найден"}</span>`;
       }).join("<br>");
-      h += `<div style="margin-top:10px;padding:8px;background:#0a0a16;border-radius:6px"><div class="mono" style="color:#444;font-size:9px;margin-bottom:4px">Превью маппинга стран:</div>${geoPreview}</div>`;
+      h += `<div style="margin-top:10px;padding:8px;background:#f0f1f5;border-radius:6px"><div class="mono" style="color:#999;font-size:9px;margin-bottom:4px">Превью маппинга стран:</div>${geoPreview}</div>`;
       h += `</div>`;
       const mappedCount = Object.values(colMap).filter(v => v).length;
       h += `<button class="btn-primary" style="margin-top:10px" onclick="applyCsvData()">💾 Применить CSV (${mappedCount} метрик)</button>`;
@@ -1102,32 +1119,32 @@ function openDataEditor() {
 
   function buildGeoTab() {
     if (editorGeo) return buildGeoDetailTab(editorGeo);
-    let h = `<div style="color:#666;font-size:11px;margin-bottom:10px">Выберите GEO для редактирования метрик</div>`;
+    let h = `<div style="color:#777;font-size:11px;margin-bottom:10px">Выберите GEO для редактирования метрик</div>`;
     const geos = Object.keys(D);
     if (!geos.length) {
-      h += `<div style="color:#444;font-size:12px;padding:20px;text-align:center">Нет GEO. Загрузите JSON или добавьте вручную.</div>`;
+      h += `<div style="color:#999;font-size:12px;padding:20px;text-align:center">Нет GEO. Загрузите JSON или добавьте вручную.</div>`;
     }
     geos.forEach(g => {
       const d = D[g];
       const gs = geoSc(d);
       const c = cl(gs);
       const filled = ALL_METRICS.filter(k => !NO(d[k])).length;
-      h += `<div class="geo-ed-row" onclick="editorGeo='${g}';refreshDataEditor()"><div style="width:8px;height:8px;border-radius:50%;background:${c.gw};flex-shrink:0"></div><span style="flex:1;font-size:12px">${g}</span><span class="mono" style="color:${c.tx};font-size:12px;font-weight:700">${NO(gs)?"—":Math.round(gs)}pt</span><span class="mono" style="color:#333;font-size:9px">${filled}/32</span><span style="color:#333;font-size:12px">›</span></div>`;
+      h += `<div class="geo-ed-row" onclick="editorGeo='${g}';refreshDataEditor()"><div style="width:8px;height:8px;border-radius:50%;background:${c.gw};flex-shrink:0"></div><span style="flex:1;font-size:12px">${g}</span><span class="mono" style="color:${c.tx};font-size:12px;font-weight:700">${NO(gs)?"—":Math.round(gs)}pt</span><span class="mono" style="color:#aaa;font-size:9px">${filled}/32</span><span style="color:#aaa;font-size:12px">›</span></div>`;
     });
     return h;
   }
 
   function buildGeoDetailTab(geo) {
     const d = D[geo] || {};
-    let h = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px"><button class="btn-secondary" onclick="editorGeo=null;refreshDataEditor()" style="padding:4px 8px">‹</button><span style="color:#ccc;font-size:13px;font-weight:600">${geo}</span></div>`;
+    let h = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px"><button class="btn-secondary" onclick="editorGeo=null;refreshDataEditor()" style="padding:4px 8px">‹</button><span style="color:#222;font-size:13px;font-weight:600">${geo}</span></div>`;
     Object.entries(CATS).forEach(([ck, ct]) => {
-      h += `<div style="margin-bottom:12px"><div style="color:#666;font-size:10px;font-weight:600;margin-bottom:6px">${ct.i} ${ct.l}</div>`;
+      h += `<div style="margin-bottom:12px"><div style="color:#777;font-size:10px;font-weight:600;margin-bottom:6px">${ct.i} ${ct.l}</div>`;
       ct.m.forEach(mk => {
         const t = DEF_TH[mk];
         const val = d[mk];
         const s = scr(mk, val);
         const c = cl(s);
-        h += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="width:6px;height:6px;border-radius:50%;background:${NO(val)?"#333":c.gw};flex-shrink:0"></div><label style="color:#888;font-size:10px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.l}">${t.l}</label><input type="number" step="any" value="${NO(val)?"":val}" placeholder="null" onchange="updateGeoMetric('${geo}','${mk}',this.value)" class="ed-input" style="width:90px;font-size:12px;padding:5px;color:${NO(val)?"#333":c.tx}"><span class="mono" style="color:#252540;font-size:8px;width:14px">${t.u}</span></div>`;
+        h += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="width:6px;height:6px;border-radius:50%;background:${NO(val)?"#333":c.gw};flex-shrink:0"></div><label style="color:#666;font-size:10px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.l}">${t.l}</label><input type="number" step="any" value="${NO(val)?"":val}" placeholder="null" onchange="updateGeoMetric('${geo}','${mk}',this.value)" class="ed-input" style="width:90px;font-size:12px;padding:5px;color:${NO(val)?"#333":c.tx}"><span class="mono" style="color:#d0d2da;font-size:8px;width:14px">${t.u}</span></div>`;
       });
       h += `</div>`;
     });
@@ -1136,7 +1153,7 @@ function openDataEditor() {
   }
 
   function buildMetaTab() {
-    let h = `<div style="color:#666;font-size:11px;margin-bottom:12px">Настройки периода и флаги</div>`;
+    let h = `<div style="color:#777;font-size:11px;margin-bottom:12px">Настройки периода и флаги</div>`;
     const fields = [
       {k:"month",l:"Месяц (полный)",ph:"Апрель 2026"},
       {k:"month_short",l:"Месяц (кратко)",ph:"Apr"},
@@ -1145,10 +1162,10 @@ function openDataEditor() {
       {k:"updated",l:"Дата обновления",ph:"2026-05-01"},
     ];
     fields.forEach(f => {
-      h += `<div style="margin-bottom:8px"><label style="color:#888;font-size:10px">${f.l}</label><input type="text" value="${escHtml(META[f.k]||"")}" placeholder="${f.ph}" onchange="META['${f.k}']=this.value" class="ed-input" style="margin-top:3px"></div>`;
+      h += `<div style="margin-bottom:8px"><label style="color:#666;font-size:10px">${f.l}</label><input type="text" value="${escHtml(META[f.k]||"")}" placeholder="${f.ph}" onchange="META['${f.k}']=this.value" class="ed-input" style="margin-top:3px"></div>`;
     });
-    h += `<div style="margin-top:16px;margin-bottom:8px"><div style="color:#888;font-size:10px;margin-bottom:4px">Trend Labels (через запятую)</div><input type="text" value="${escHtml(TL.join(","))}" onchange="TL=this.value.split(',').map(s=>s.trim()).filter(Boolean)" class="ed-input"></div>`;
-    h += `<div style="margin-top:16px"><div style="color:#888;font-size:10px;margin-bottom:4px">Flags (JSON)</div><textarea id="flags-editor" class="ed-textarea" style="min-height:80px">${escHtml(JSON.stringify(FLAGS,null,2))}</textarea></div>`;
+    h += `<div style="margin-top:16px;margin-bottom:8px"><div style="color:#666;font-size:10px;margin-bottom:4px">Trend Labels (через запятую)</div><input type="text" value="${escHtml(TL.join(","))}" onchange="TL=this.value.split(',').map(s=>s.trim()).filter(Boolean)" class="ed-input"></div>`;
+    h += `<div style="margin-top:16px"><div style="color:#666;font-size:10px;margin-bottom:4px">Flags (JSON)</div><textarea id="flags-editor" class="ed-textarea" style="min-height:80px">${escHtml(JSON.stringify(FLAGS,null,2))}</textarea></div>`;
     h += `<button class="btn-primary" style="margin-top:10px" onclick="saveMetaEdits()">💾 Сохранить мету</button>`;
     return h;
   }
@@ -1296,7 +1313,7 @@ function openSettings() {
   overlay.className = "overlay";
   overlay.onclick = e => { if (e.target === overlay) closeSettings(); };
   function build() {
-    let h = `<div class="modal"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#e0e0e0;font-size:14px;font-weight:700">⚙ Скоринг</span><button onclick="closeSettings()" style="background:none;border:none;color:#444;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div class="tab-bar" style="margin-top:10px"><button class="tab-btn" onclick="settingsView='formula';refreshSettings()" style="background:${settingsView==='formula'?'#1e1e35':'transparent'};color:${settingsView==='formula'?'#ccc':'#444'}">📐 Формула</button><button class="tab-btn" onclick="settingsView='thresholds';refreshSettings()" style="background:${settingsView==='thresholds'?'#1e1e35':'transparent'};color:${settingsView==='thresholds'?'#ccc':'#444'}">🎚 Пороги</button><button class="tab-btn" onclick="settingsView='weights';refreshSettings()" style="background:${settingsView==='weights'?'#1e1e35':'transparent'};color:${settingsView==='weights'?'#ccc':'#444'}">⚖ Веса</button></div></div><div class="modal-body">`;
+    let h = `<div class="modal"><div class="modal-head"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#1a1a2a;font-size:14px;font-weight:700">⚙ Скоринг</span><button onclick="closeSettings()" style="background:none;border:none;color:#999;font-size:20px;cursor:pointer;padding:4px 8px">×</button></div><div class="tab-bar" style="margin-top:10px"><button class="tab-btn" onclick="settingsView='formula';refreshSettings()" style="background:${settingsView==='formula'?'#d4d6e0':'transparent'};color:${settingsView==='formula'?'#ccc':'#444'}">📐 Формула</button><button class="tab-btn" onclick="settingsView='thresholds';refreshSettings()" style="background:${settingsView==='thresholds'?'#d4d6e0':'transparent'};color:${settingsView==='thresholds'?'#ccc':'#444'}">🎚 Пороги</button><button class="tab-btn" onclick="settingsView='weights';refreshSettings()" style="background:${settingsView==='weights'?'#d4d6e0':'transparent'};color:${settingsView==='weights'?'#ccc':'#444'}">⚖ Веса</button></div></div><div class="modal-body">`;
     if (settingsView === "formula") {
       h += buildFormulaView();
     } else if (settingsView === "weights") {
@@ -1308,44 +1325,44 @@ function openSettings() {
     return h;
   }
   function buildFormulaView() {
-    let h = `<div style="color:#aaa;font-size:11px;line-height:1.6">`;
-    h += `<div style="color:#ccc;font-size:12px;font-weight:600;margin-bottom:8px">Как считается рейтинг GEO</div>`;
-    h += `<div style="background:#111122;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #1a1a2e">`;
+    let h = `<div style="color:#444;font-size:11px;line-height:1.6">`;
+    h += `<div style="color:#222;font-size:12px;font-weight:600;margin-bottom:8px">Как считается рейтинг GEO</div>`;
+    h += `<div style="background:#f4f4fa;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #e0e2ea">`;
     h += `<div style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:6px">1. Метрика → Score (0-100)</div>`;
-    h += `<div style="color:#666;font-size:10px;margin-bottom:4px">Каждая метрика получает score от 0 до 100:</div>`;
-    h += `<div class="mono" style="color:#555;font-size:9px;padding:4px 8px;background:#0a0a14;border-radius:4px;margin-bottom:4px">если значение ≥ зелёный порог → 100<br>если значение ≤ жёлтый порог → 0-49 (линейно)<br>между порогами → 50-100 (линейно)</div>`;
-    h += `<div style="display:flex;gap:6px;margin-top:6px"><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#00e676"></span><span style="font-size:9px;color:#888">Score ≥ 70</span></span><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#ffc107"></span><span style="font-size:9px;color:#888">40-69</span></span><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#ff1744"></span><span style="font-size:9px;color:#888">&lt; 40</span></span></div>`;
+    h += `<div style="color:#777;font-size:10px;margin-bottom:4px">Каждая метрика получает score от 0 до 100:</div>`;
+    h += `<div class="mono" style="color:#888;font-size:9px;padding:4px 8px;background:#f0f1f5;border-radius:4px;margin-bottom:4px">если значение ≥ зелёный порог → 100<br>если значение ≤ жёлтый порог → 0-49 (линейно)<br>между порогами → 50-100 (линейно)</div>`;
+    h += `<div style="display:flex;gap:6px;margin-top:6px"><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#00e676"></span><span style="font-size:9px;color:#666">Score ≥ 70</span></span><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#ffc107"></span><span style="font-size:9px;color:#666">40-69</span></span><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#ff1744"></span><span style="font-size:9px;color:#666">&lt; 40</span></span></div>`;
     h += `</div>`;
-    h += `<div style="background:#111122;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #1a1a2e">`;
+    h += `<div style="background:#f4f4fa;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #e0e2ea">`;
     h += `<div style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:6px">2. Блок = среднее метрик</div>`;
-    h += `<div style="color:#666;font-size:10px">Каждый блок = среднее score его метрик (null пропускаются)</div>`;
+    h += `<div style="color:#777;font-size:10px">Каждый блок = среднее score его метрик (null пропускаются)</div>`;
     h += `</div>`;
-    h += `<div style="background:#111122;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #1a1a2e">`;
+    h += `<div style="background:#f4f4fa;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #e0e2ea">`;
     h += `<div style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:6px">3. GEO Score = взвешенная сумма блоков</div>`;
-    h += `<div class="mono" style="color:#555;font-size:9px;padding:4px 8px;background:#0a0a14;border-radius:4px">GEO = Σ(блок × вес) / Σ(веса активных блоков)</div>`;
+    h += `<div class="mono" style="color:#888;font-size:9px;padding:4px 8px;background:#f0f1f5;border-radius:4px">GEO = Σ(блок × вес) / Σ(веса активных блоков)</div>`;
     h += `<div style="margin-top:6px">`;
     Object.entries(CATS).forEach(([ck, ct]) => {
-      h += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><span style="font-size:12px">${ct.i}</span><span style="color:#888;font-size:10px;flex:1">${ct.l}</span><span class="mono" style="color:#7c83ff;font-size:10px;font-weight:600">${ct.w}%</span></div>`;
+      h += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><span style="font-size:12px">${ct.i}</span><span style="color:#666;font-size:10px;flex:1">${ct.l}</span><span class="mono" style="color:#7c83ff;font-size:10px;font-weight:600">${ct.w}%</span></div>`;
     });
     h += `</div></div>`;
-    h += `<div style="background:#111122;border-radius:8px;padding:10px;border:1px solid #1a1a2e">`;
+    h += `<div style="background:#f4f4fa;border-radius:8px;padding:10px;border:1px solid #e0e2ea">`;
     h += `<div style="color:#7c83ff;font-size:10px;font-weight:600;margin-bottom:6px">4. Платформа = среднее GEO score</div>`;
-    h += `<div style="color:#666;font-size:10px">Простое среднее по всем GEO (не взвешенное по NGR)</div>`;
+    h += `<div style="color:#777;font-size:10px">Простое среднее по всем GEO (не взвешенное по NGR)</div>`;
     h += `</div>`;
-    h += `<div style="margin-top:12px;padding:8px;background:#1a150822;border:1px solid #ffc10722;border-radius:8px"><div style="color:#ffc107;font-size:9px">💡 Пороги и веса настраиваются во вкладках «Пороги» и «Веса». Метрики null не участвуют в расчёте.</div></div>`;
+    h += `<div style="margin-top:12px;padding:8px;background:#1a150822;border:1px solid #ffc10715;border-radius:8px"><div style="color:#ffc107;font-size:9px">💡 Пороги и веса настраиваются во вкладках «Пороги» и «Веса». Метрики null не участвуют в расчёте.</div></div>`;
     h += `</div>`;
     return h;
   }
   function buildWeightsView() {
-    let h = `<div style="color:#888;font-size:11px;margin-bottom:10px">Веса блоков (определяют важность каждого блока в итоговом score GEO):</div>`;
+    let h = `<div style="color:#666;font-size:11px;margin-bottom:10px">Веса блоков (определяют важность каждого блока в итоговом score GEO):</div>`;
     let totalW = 0;
     Object.entries(CATS).forEach(([ck, ct]) => { totalW += ct.w; });
     Object.entries(CATS).forEach(([ck, ct]) => {
       const pct = (ct.w / totalW * 100).toFixed(0);
-      h += `<div style="padding:10px;background:#111122;border-radius:8px;margin-bottom:6px;border:1px solid #1a1a2e"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-size:14px">${ct.i}</span><span style="color:#bbb;font-size:12px;font-weight:600;flex:1">${ct.l}</span><span class="mono" style="color:#7c83ff;font-size:14px;font-weight:700">${ct.w}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${ct.w}%;background:#7c83ff"></div></div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">`;
+      h += `<div style="padding:10px;background:#f4f4fa;border-radius:8px;margin-bottom:6px;border:1px solid #e0e2ea"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-size:14px">${ct.i}</span><span style="color:#333;font-size:12px;font-weight:600;flex:1">${ct.l}</span><span class="mono" style="color:#7c83ff;font-size:14px;font-weight:700">${ct.w}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${ct.w}%;background:#7c83ff"></div></div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">`;
       ct.m.forEach(mk => {
         const t = DEF_TH[mk];
-        h += `<span style="font-size:8px;color:#555;background:#0a0a14;padding:2px 5px;border-radius:3px">${t.l}</span>`;
+        h += `<span style="font-size:8px;color:#888;background:#f0f1f5;padding:2px 5px;border-radius:3px">${t.l}</span>`;
       });
       h += `</div></div>`;
     });
@@ -1353,13 +1370,13 @@ function openSettings() {
   }
   function buildThresholdsView() {
     let h = `<div class="tab-bar" style="margin-bottom:8px">`;
-    Object.entries(CATS).forEach(([ck, ct]) => { h += `<button class="tab-btn" onclick="settingsCat='${ck}';refreshSettings()" style="background:${settingsCat===ck?"#1e1e35":"transparent"};color:${settingsCat===ck?"#ccc":"#444"}">${ct.i} ${ct.w}%</button>`; });
+    Object.entries(CATS).forEach(([ck, ct]) => { h += `<button class="tab-btn" onclick="settingsCat='${ck}';refreshSettings()" style="background:${settingsCat===ck?"#d4d6e0":"transparent"};color:${settingsCat===ck?"#ccc":"#444"}">${ct.i} ${ct.w}%</button>`; });
     h += `</div>`;
     const metrics = CATS[settingsCat]?.m || [];
     metrics.forEach(mk => {
       const t = DEF_TH[mk]; const cur = getTH(mk);
       const dirLabel = t.d === "h" ? "↑ больше = лучше" : "↓ меньше = лучше";
-      h += `<div style="padding:12px;background:#111122;border-radius:10px;margin-bottom:8px;border:1px solid #1a1a2e"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="color:#bbb;font-size:12px;font-weight:600">${t.l}</span><span class="mono" style="color:#333;font-size:8px">${dirLabel}</span></div><div style="display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#00e676"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"} зелёный</span></div><input type="number" value="${cur.g}" onchange="updateTH('${mk}','g',this.value)" class="ed-input" style="color:#00e676"></div><div style="color:#222;padding-top:14px">→</div><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#ffc107"></div><span style="color:#555;font-size:9px">${t.d==="h"?"≥":"≤"} жёлтый</span></div><input type="number" value="${cur.y}" onchange="updateTH('${mk}','y',this.value)" class="ed-input" style="color:#ffc107"></div></div></div>`;
+      h += `<div style="padding:12px;background:#f4f4fa;border-radius:10px;margin-bottom:8px;border:1px solid #e0e2ea"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="color:#333;font-size:12px;font-weight:600">${t.l}</span><span class="mono" style="color:#aaa;font-size:8px">${dirLabel}</span></div><div style="display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#00e676"></div><span style="color:#888;font-size:9px">${t.d==="h"?"≥":"≤"} зелёный</span></div><input type="number" value="${cur.g}" onchange="updateTH('${mk}','g',this.value)" class="ed-input" style="color:#00e676"></div><div style="color:#bbb;padding-top:14px">→</div><div style="flex:1"><div style="display:flex;align-items:center;gap:3px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:#ffc107"></div><span style="color:#888;font-size:9px">${t.d==="h"?"≥":"≤"} жёлтый</span></div><input type="number" value="${cur.y}" onchange="updateTH('${mk}','y',this.value)" class="ed-input" style="color:#ffc107"></div></div></div>`;
     });
     return h;
   }
