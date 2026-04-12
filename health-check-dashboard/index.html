@@ -601,16 +601,24 @@ function retentionTableHTML() {
   const avgM3 = geos.reduce((s,[,r]) => s + (r.m3||0), 0) / geos.length;
   const avgCore = geos.reduce((s,[,r]) => s + (r.core||0), 0) / geos.length;
 
-  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#777;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">🔄 RETENTION ПО GEO</div>`;
-  h += `<div style="display:flex;gap:4px;padding:0 4px;margin-bottom:4px"><span style="flex:1;font-size:8px;color:#444">GEO</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444" title="Retention Month 1: % игроков вернувшихся через 30 дней. Зелёный ≥25%, Жёлтый ≥15%">M1</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444" title="Retention Month 3: % игроков вернувшихся через 90 дней. Зелёный ≥10%, Жёлтый ≥5%">M3</span><span class="mono" style="width:44px;text-align:center;font-size:8px;color:#444" title="Core Retention: % ядра (4+ из 6 мес). Зелёный ≥25%, Жёлтый ≥12%">Core</span><span class="mono" style="width:40px;text-align:center;font-size:8px;color:#444" title="Bettor Retention: % бетторов вернувшихся. Зелёный ≥40%, Жёлтый ≥25%">Bettor</span></div>`;
+  let h = `<div style="margin-top:14px;background:#0e0e1c;border-radius:12px;border:1px solid #1a1a2e;padding:12px 10px"><div class="mono" style="color:#777;font-size:9px;font-weight:600;margin-bottom:8px;text-align:center">🔄 RETENTION ПО GEO (когортный baseline)</div>`;
+  h += `<div style="display:flex;gap:4px;padding:0 4px;margin-bottom:4px"><span style="flex:1;font-size:9px;color:#666">GEO</span><span class="mono" style="width:60px;text-align:center;font-size:8px;color:#666" title="M1 факт / цель">M1</span><span class="mono" style="width:60px;text-align:center;font-size:8px;color:#666" title="M3 факт / цель">M3</span><span class="mono" style="width:60px;text-align:center;font-size:8px;color:#666" title="M6 факт / цель">M6</span></div>`;
 
-  function retC(v, th_g, th_y) { if (NO(v)) return "#333"; if (v >= th_g) return "#00e676"; if (v >= th_y) return "#ffc107"; return "#ff1744"; }
+  function retC(v, target) { if (NO(v)) return "#333"; const ratio = v/target; if (ratio >= 0.8) return "#00e676"; if (ratio >= 0.5) return "#ffc107"; return "#ff1744"; }
 
   geos.forEach(([g, r]) => {
-    h += `<div style="display:flex;gap:4px;padding:3px 4px;border-radius:4px;cursor:pointer;margin-bottom:1px" onclick="nav('${g}')" onmouseenter="this.style.background='#151520'" onmouseleave="this.style.background='transparent'"><span style="flex:1;font-size:10px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.split(" ").pop()}</span><span class="mono" style="width:40px;text-align:center;font-size:10px;font-weight:600;color:${retC(r.m1,25,15)}">${NO(r.m1)?"—":r.m1.toFixed(1)}</span><span class="mono" style="width:40px;text-align:center;font-size:10px;font-weight:600;color:${retC(r.m3,10,5)}">${NO(r.m3)?"—":r.m3.toFixed(1)}</span><span class="mono" style="width:44px;text-align:center;font-size:10px;font-weight:600;color:${retC(r.core,25,12)}">${NO(r.core)?"—":r.core.toFixed(1)}</span><span class="mono" style="width:40px;text-align:center;font-size:10px;font-weight:600;color:${retC(r.bettor_ret,40,25)}">${NO(r.bettor_ret)?"—":r.bettor_ret.toFixed(0)}</span></div>`;
+    const tM1 = r.target_m1, tM3 = r.target_m3, tM6 = r.target_m6;
+    function cell(v, t) {
+      if (NO(v)) return `<span class="mono" style="width:60px;text-align:center;font-size:10px;color:#333">—</span>`;
+      const c = retC(v, t||25);
+      const gap = t ? (v - t).toFixed(1) : "";
+      return `<span class="mono" style="width:60px;text-align:center;font-size:10px;display:inline-flex;flex-direction:column;align-items:center"><span style="color:${c};font-weight:600">${v.toFixed(1)}</span>${t?`<span style="color:#444;font-size:7px">→${t}%</span>`:""}</span>`;
+    }
+    h += `<div style="display:flex;gap:4px;padding:4px;border-radius:4px;cursor:pointer;margin-bottom:1px" onclick="nav('${g}')" onmouseenter="this.style.background='#151520'" onmouseleave="this.style.background='transparent'"><span style="flex:1;font-size:10px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.split(" ").pop()}</span>${cell(r.m1, tM1)}${cell(r.m3, tM3)}${cell(r.core, tM6)}</div>`;
   });
 
-  h += `<div style="display:flex;gap:4px;padding:4px 4px 0;border-top:1px solid #1a1a2e;margin-top:4px"><span style="flex:1;font-size:9px;color:#666;font-weight:600">AVG</span><span class="mono" style="width:40px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgM1.toFixed(1)}</span><span class="mono" style="width:40px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgM3.toFixed(1)}</span><span class="mono" style="width:44px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgCore.toFixed(1)}</span><span class="mono" style="width:40px;text-align:center;font-size:9px;color:#555">—</span></div>`;
+  h += `<div style="display:flex;gap:4px;padding:4px 4px 0;border-top:1px solid #1a1a2e;margin-top:4px"><span style="flex:1;font-size:9px;color:#666;font-weight:600">AVG</span><span class="mono" style="width:60px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgM1.toFixed(1)}</span><span class="mono" style="width:60px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgM3.toFixed(1)}</span><span class="mono" style="width:60px;text-align:center;font-size:9px;font-weight:700;color:#7c83ff">${avgCore.toFixed(1)}</span></div>`;
+  h += `<div class="mono" style="color:#444;font-size:8px;text-align:center;margin-top:6px">48,787 клиентов · baseline Apr-Sep 2025 · источник: MGM.io</div>`;
   h += `</div>`;
   return h;
 }
