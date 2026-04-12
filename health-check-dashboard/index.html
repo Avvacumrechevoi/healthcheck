@@ -88,7 +88,7 @@ h1{font-size:17px;font-weight:700;background:linear-gradient(90deg,#7c83ff,#16a3
 const DEF_TH = {
   ftd_count:{g:200,y:50,u:"",l:"FTD за месяц",d:"h"},reg_ftd_conv:{g:15,y:10,u:"%",l:"Reg → FTD",d:"h"},au:{g:500,y:150,u:"",l:"Active Unique",d:"h"},cac:{g:25,y:40,u:"$",l:"CAC",d:"l"},
   dep_approval:{g:80,y:60,u:"%",l:"Approval депозитов",d:"h"},wd_approval:{g:75,y:55,u:"%",l:"Approval выводов",d:"h"},avg_deposit:{g:25,y:12,u:"$",l:"Средний депозит",d:"h"},cashout_pct:{g:90,y:100,u:"%",l:"Cashout %",d:"l"},
-  ngr:{g:30000,y:10000,u:"$",l:"NGR",d:"h"},ngr_mom:{g:5,y:-15,u:"%",l:"NGR MoM",d:"h"},ngr_target:{g:50,y:20,u:"%",l:"NGR vs $150K",d:"h"},arppu:{g:20,y:5,u:"$",l:"ARPPU",d:"h"},
+  ngr:{g:30000,y:10000,u:"$",l:"NGR",d:"h"},ngr_mom:{g:5,y:-15,u:"%",l:"NGR MoM",d:"h"},ngr_target:{g:50,y:20,u:"%",l:"NGR vs $150K",d:"h"},arppu:{g:20,y:5,u:"$",l:"ARPPU",d:"h"},margin_pct:{g:25,y:15,u:"%",l:"Маржа %",d:"h"},
   casino_share:{g:30,y:20,u:"%",l:"Доля Casino GGR",d:"h"},casino_margin:{g:5,y:2,u:"%",l:"Маржа Casino",d:"h"},casino_players:{g:1000,y:300,u:"",l:"Casino игроки",d:"h"},casino_ggr_mom:{g:0,y:-10,u:"%",l:"Casino GGR MoM",d:"h"},
   sport_margin:{g:8,y:4,u:"%",l:"Маржа Sport",d:"h"},sport_players:{g:100,y:20,u:"",l:"Sport ставок/день",d:"h"},sport_ggr_mom:{g:0,y:-10,u:"%",l:"Sport GGR MoM",d:"h"},avg_bet:{g:25,y:10,u:"$",l:"Средняя ставка",d:"h"},
   d30_retention:{g:25,y:15,u:"%",l:"Ret M1 (активация)",d:"h"},d90_retention:{g:10,y:5,u:"%",l:"Ret M3 (стабилиз.)",d:"h"},core_retention:{g:25,y:12,u:"%",l:"Удержание ядра (4+/6м)",d:"h"},active_mom:{g:10,y:0,u:"%",l:"Активные MoM",d:"h"},
@@ -99,7 +99,7 @@ const ALL_METRICS = Object.keys(DEF_TH);
 
 const CATS = {
   payments:{l:"Платежи",i:"💳",m:["dep_approval","wd_approval","avg_deposit","cashout_pct"],w:25},
-  revenue:{l:"Выручка",i:"💰",m:["ngr","ngr_mom","ngr_target","arppu"],w:20},
+  revenue:{l:"Выручка",i:"💰",m:["ngr","ngr_mom","margin_pct","arppu"],w:20},
   acquisition:{l:"Привлечение",i:"📥",m:["au","ftd_count","reg_ftd_conv","cac"],w:15},
   retention:{l:"Удержание",i:"🔄",m:["d30_retention","d90_retention","core_retention","active_mom"],w:15},
   sport:{l:"Спорт",i:"⚽",m:["sport_margin","sport_players","sport_ggr_mom","avg_bet"],w:10},
