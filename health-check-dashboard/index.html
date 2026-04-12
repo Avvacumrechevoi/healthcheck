@@ -117,7 +117,7 @@ function getTH(mk) { return customTH[mk] ? {...DEF_TH[mk], ...customTH[mk]} : DE
 
 // ═══ 3. DYNAMIC DATA ═══
 let D = {}, PREV = {}, TREND = {}, HISTORY = {}, PLAT_TREND = [], PLAT_HISTORY = {}, TL = [], FLAGS = {}, SEGMENTS = {};
-let FUNNEL = {}, RETENTION_TABLE = {}, PLATFORM_COHORTS = [], GEO_COHORTS = {};
+let FUNNEL = {}, RETENTION_TABLE = {}, PLATFORM_COHORTS = [], GEO_COHORTS = {}, MARGIN_DYN = {};
 let META = { month: "", month_short: "", prev_month_short: "", version: "v31", updated: "" };
 let dataSource = "none";
 
@@ -171,6 +171,7 @@ function applyDataset(ds, source) {
     RETENTION_TABLE = ds.retention_table || {};
     PLATFORM_COHORTS = ds.platform_cohorts || [];
     GEO_COHORTS = ds.geo_cohorts || {};
+    MARGIN_DYN = ds.margin_dynamics || {};
     dataSource = source || "unknown";
     document.title = `Health Check · SapphireBet · ${META.month}`;
     return true;
@@ -184,7 +185,7 @@ function saveDataToLocal() {
 }
 
 function getDataset() {
-  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE, platform_cohorts: PLATFORM_COHORTS, geo_cohorts: GEO_COHORTS };
+  return { meta: META, flags: FLAGS, trend_labels: TL, plat_trend: PLAT_TREND, plat_history: PLAT_HISTORY, prev: PREV, trend: TREND, history: HISTORY, data: D, segments: SEGMENTS, funnel: FUNNEL, retention_table: RETENTION_TABLE, platform_cohorts: PLATFORM_COHORTS, geo_cohorts: GEO_COHORTS, margin_dynamics: MARGIN_DYN };
 }
 
 async function loadData() {
@@ -292,7 +293,7 @@ function sparkHTML(geo) {
 
 function platSparkHTML() {
   if (!PLAT_TREND.length) return "";
-  const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 60, 260, v => "$"+(v/1000).toFixed(0)+"K");
+  const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 40, 240, v => "$"+(v/1000).toFixed(0)+"K");
   const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#555":"#bbb"};font-size:9px">${l}</span>`).join("");
   
   // Key stats below chart
@@ -678,7 +679,66 @@ function retentionTableHTML() {
   return h;
 }
 
-// ═══ 5g-1. PLATFORM RETENTION COHORT TABLE ═══
+// ═══ 5g-1a. MARGIN DYNAMICS HEATMAP ═══
+function marginHeatmapHTML() {
+  const M = MARGIN_DYN;
+  if (!M.months || !M.margin_pct) return "";
+  const months = M.months;
+  const mp = M.margin_pct;
+  const geoMap = {'Brazil':'🇧🇷','Argentina':'🇦🇷','Chile':'🇨🇱','Mexico':'🇲🇽','Peru':'🇵🇪','Colombia':'🇨🇴','India':'🇮🇳','Bangladesh':'🇧🇩','Poland':'🇵🇱','Portugal':'🇵🇹'};
+  
+  function mrgC(v) {
+    if (v === null || v === undefined) return {c:"#999",bg:"transparent"};
+    if (v < 0) return {c:"#dc2626",bg:"#fecaca33"};
+    if (v < 10) return {c:"#dc2626",bg:"#fecaca22"};
+    if (v < 20) return {c:"#b45309",bg:"#fef3c711"};
+    if (v < 30) return {c:"#16a34a",bg:"transparent"};
+    return {c:"#0a8a4a",bg:"#dcfce711"};
+  }
+  
+  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:10px;text-align:center">📊 МАРЖА % ПО GEO</div>`;
+  h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>`;
+  h += `<th style="text-align:left;padding:3px 6px;font-size:10px;color:#999;border-bottom:2px solid #e0e2ea">GEO</th>`;
+  months.forEach((m,i) => {
+    const isLast = i === months.length-1;
+    h += `<th style="text-align:center;padding:3px 4px;font-size:9px;color:${isLast?"#333":"#999"};font-weight:${isLast?700:400};border-bottom:2px solid #e0e2ea">${m}</th>`;
+  });
+  h += `</tr></thead><tbody>`;
+  
+  // Platform first
+  if (mp.Platform) {
+    h += `<tr style="border-bottom:2px solid #e0e2ea;background:#f8f9fc"><td style="padding:4px 6px;font-size:11px;color:#333;font-weight:600">Платформа</td>`;
+    mp.Platform.forEach((v,i) => {
+      const {c,bg} = mrgC(v);
+      h += `<td style="text-align:center;padding:3px 4px;background:${bg}"><span class="mono" style="color:${c};font-size:11px;font-weight:600">${v!==null?v.toFixed(1):"—"}</span></td>`;
+    });
+    h += `</tr>`;
+  }
+  
+  // GEOs sorted by NGR
+  const geoOrder = Object.keys(mp).filter(g=>g!=='Platform').sort((a,b) => {
+    const ga = '🇧🇷 '+a, gb = '🇧🇷 '+b;
+    return ((D[Object.keys(D).find(k=>k.includes(b))]||{}).ngr||0) - ((D[Object.keys(D).find(k=>k.includes(a))]||{}).ngr||0);
+  });
+  
+  geoOrder.forEach(geo => {
+    const data = mp[geo];
+    if (!data) return;
+    const flag = geoMap[geo]||"";
+    h += `<tr style="border-bottom:1px solid #f4f5f8"><td style="padding:3px 6px;font-size:11px;color:#444">${flag} ${geo}</td>`;
+    data.forEach((v,i) => {
+      const {c,bg} = mrgC(v);
+      h += `<td style="text-align:center;padding:3px 4px;background:${bg}"><span class="mono" style="color:${c};font-size:10px">${v!==null?v.toFixed(1):"—"}</span></td>`;
+    });
+    h += `</tr>`;
+  });
+  
+  h += `</tbody></table></div>`;
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:6px">NGR/Deposits · норма 20-30% · красный &lt;10% · источник: margin_dynamics</div></div>`;
+  return h;
+}
+
+// ═══ 5g-1b. PLATFORM RETENTION COHORT TABLE ═══
 function platformRetentionHTML() {
   const cohorts = PLATFORM_COHORTS;
   if (!cohorts || !cohorts.length) return "";
@@ -888,9 +948,11 @@ function render() {
     }).join("")}</div>`;
     // 3. KPI pulse
     html += platPulseHTML();
-    // 4. NGR sparkline
+    // 4. NGR sparkline + key metrics
     html += platSparkHTML();
-    // 5. Heatmap matrix
+    // 5. Margin dynamics
+    html += marginHeatmapHTML();
+    // 6. Heatmap matrix
     html += heatmapHTML(geos);
     // 6. Platform blocks
     html += platBlocksHTML(geos);
@@ -1426,7 +1488,7 @@ function downloadJson() {
 async function resetToFile() {
   localStorage.removeItem("hc_data");
   dataSource = "none";
-  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {}; PLATFORM_COHORTS = []; GEO_COHORTS = {};
+  D = {}; PREV = {}; TREND = {}; HISTORY = {}; PLAT_TREND = []; PLAT_HISTORY = {}; TL = []; FLAGS = {}; SEGMENTS = {}; FUNNEL = {}; RETENTION_TABLE = {}; PLATFORM_COHORTS = []; GEO_COHORTS = {}; MARGIN_DYN = {};
   try {
     const res = await fetch("data.json?" + Date.now());
     if (res.ok) {
