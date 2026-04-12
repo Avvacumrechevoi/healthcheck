@@ -292,37 +292,45 @@ function sparkHTML(geo) {
 
 function platSparkHTML() {
   if (!PLAT_TREND.length) return "";
-  const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 50, 240, v => "$"+(v/1000).toFixed(0)+"K");
-  const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#aaa":"#666"};font-size:8px">${l}</span>`).join("");
-  return `<div class="spark"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="mono" style="color:#777;font-size:9px">NGR платформа · ${metaTrendLabel()}</span><span class="mono" style="color:${lastC};font-size:10px;font-weight:700">${fmtNGR(lastV)}</span></div>${svg}<div style="display:flex;justify-content:space-between;padding:0 2px">${labels}</div></div>`;
-}
-
-// ═══ 5b. MINI KPI CARDS (Platform Pulse) ═══
-function platPulseHTML() {
+  const {svg, lastV, lastC} = buildSparkSVG(PLAT_TREND, 60, 260, v => "$"+(v/1000).toFixed(0)+"K");
+  const labels = TL.map((l,i) => `<span class="mono" style="color:${i===TL.length-1?"#555":"#bbb"};font-size:9px">${l}</span>`).join("");
+  
+  // Key stats below chart
   const ph = PLAT_HISTORY;
-  const items = [
-    {label:"NGR",data:ph.ngr,fmt:v=>fmtNGR(v)},
-    {label:"Deposits",data:ph.deposits,fmt:v=>fmtNGR(v)},
-    {label:"Margin%",data:ph.margin_pct,fmt:v=>NO(v)?"—":v.toFixed(1)+"%"},
-    {label:"Players",data:null,fmt:v=>fmt(v)},
-  ];
   const totalPlayers = Object.values(D).reduce((s,d) => s + (d.au || 0), 0);
-  let h = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px">`;
-  items.forEach(item => {
-    const data = item.data;
-    const hasData = data && data.length >= 2;
-    const cur = hasData ? data[data.length-1] : (item.label === "Players" ? totalPlayers : null);
-    const prev = hasData ? data[data.length-2] : null;
-    const delta = (cur !== null && prev !== null) ? ((cur - prev) / Math.max(Math.abs(prev), 1) * 100) : null;
-    const deltaStr = delta !== null ? (delta >= 0 ? "+" : "") + delta.toFixed(0) + "%" : "";
-    const deltaC = delta !== null ? (delta >= 0 ? "#16a34a" : "#dc2626") : "#555";
-    const miniSpark = hasData ? buildSparkSVG(data, 24, 80).svg : "";
-    const valStr = item.label === "Players" ? fmt(totalPlayers) : (cur !== null ? item.fmt(cur) : "—");
-    h += `<div class="mini-kpi"><div class="mini-kpi-label">${item.label}</div><div class="mini-kpi-val"><span class="mono" style="color:#222;font-size:12px;font-weight:700">${valStr}</span></div>${miniSpark?`<div style="margin-top:1px">${miniSpark}</div>`:""}${deltaStr?`<div class="mono" style="color:${deltaC};font-size:8px">${deltaStr} ${metaPrev()}→${metaCur()}</div>`:""}</div>`;
-  });
-  h += `</div>`;
+  
+  function statPill(label, cur, prev, fmtFn) {
+    const valStr = cur !== null ? fmtFn(cur) : "—";
+    const delta = (cur !== null && prev !== null && prev !== 0) ? ((cur - prev) / Math.abs(prev) * 100) : null;
+    const dStr = delta !== null ? `${delta >= 0 ? "+" : ""}${delta.toFixed(0)}%` : "";
+    const dC = delta !== null ? (delta >= 0 ? "#16a34a" : "#dc2626") : "#999";
+    return `<div style="flex:1;text-align:center"><div style="font-size:10px;color:#999;margin-bottom:2px">${label}</div><div class="mono" style="font-size:14px;font-weight:700;color:#222">${valStr}</div>${dStr?`<div class="mono" style="font-size:9px;color:${dC}">${dStr}</div>`:""}</div>`;
+  }
+  
+  const depCur = ph.deposits?.length ? ph.deposits[ph.deposits.length-1] : null;
+  const depPrev = ph.deposits?.length >= 2 ? ph.deposits[ph.deposits.length-2] : null;
+  const mrgCur = ph.margin_pct?.length ? ph.margin_pct[ph.margin_pct.length-1] : null;
+  const mrgPrev = ph.margin_pct?.length >= 2 ? ph.margin_pct[ph.margin_pct.length-2] : null;
+  
+  let h = `<div style="background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px;margin-bottom:12px">`;
+  // NGR header
+  h += `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="color:#333;font-size:13px;font-weight:600">NGR платформа</span><span class="mono" style="color:${lastC};font-size:18px;font-weight:700">${fmtNGR(lastV)}</span></div>`;
+  // Chart
+  h += svg;
+  h += `<div style="display:flex;justify-content:space-between;padding:0 36px 0 36px;margin-bottom:14px">${labels}</div>`;
+  // Stats row
+  h += `<div style="display:flex;gap:1px;border-top:1px solid #e0e2ea;padding-top:10px">`;
+  h += statPill("Депозиты", depCur, depPrev, v => fmtNGR(v));
+  h += `<div style="width:1px;background:#e0e2ea"></div>`;
+  h += statPill("Маржа", mrgCur, mrgPrev, v => v.toFixed(1)+"%");
+  h += `<div style="width:1px;background:#e0e2ea"></div>`;
+  h += statPill("Игроки", totalPlayers, null, v => fmt(v));
+  h += `</div></div>`;
   return h;
 }
+
+// platPulseHTML removed - integrated into platSparkHTML
+function platPulseHTML() { return ""; }
 
 // ═══ 5c. SIGNALS GENERATOR ═══
 const SIGNAL_ACTIONS = {
