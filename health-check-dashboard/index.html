@@ -946,17 +946,15 @@ function render() {
       const sub = `${fmtNGR(d.ngr)}${momArrow?` <span style="color:${momC}">${momArrow}${Math.abs(d.ngr_mom).toFixed(0)}%</span>`:""}`;
       return `<div onclick="nav('${g}')" style="animation:fi .3s ease">${sphereHTML(s,62,g,sub,flag,true)}</div>`;
     }).join("")}</div>`;
-    // 3. KPI pulse
-    html += platPulseHTML();
-    // 4. NGR sparkline + key metrics
+    // 3. NGR sparkline + key metrics
     html += platSparkHTML();
-    // 5. Margin dynamics
-    html += marginHeatmapHTML();
-    // 6. Platform blocks (summary)
+    // 5. Platform blocks — what's weak?
     html += platBlocksHTML(geos);
-    // 7. Heatmap matrix (detail per GEO)
+    // 6. Heatmap matrix — where is it weak?
     html += heatmapHTML(geos);
-    // 7. Platform retention (cohort table)
+    // 7. Margin dynamics — why revenue is down?
+    html += marginHeatmapHTML();
+    // 8. Platform retention
     html += platformRetentionHTML();
     // 8. Retention by GEO
     html += retentionTableHTML();
