@@ -717,37 +717,39 @@ function funnelHTML() {
   try { F = typeof FUNNEL !== "undefined" ? FUNNEL : {}; } catch(e) {}
   if (!F.periods || !F.periods.length) return "";
   const p = F.periods;
-  const last = p.length - 1;
+  const li = p.length - 1;
 
-  // Current month values
-  const reg = F.registration?.[last], ftd = F.ftd?.[last];
-  const r2d = F.reg2dep_pct?.[last], cr2 = F.cr2_pct?.[last];
-  const cr3 = F.cr3_pct?.[last], cr5 = F.cr5_pct?.[last];
-  
+  const reg = F.registration?.[li], ftd = F.ftd?.[li];
+  const r2d = F.reg2dep_pct?.[li], cr2 = F.cr2_pct?.[li];
+  const cr3 = F.cr3_pct?.[li], cr5 = F.cr5_pct?.[li];
   if (!reg) return "";
 
-  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:14px;text-align:center">📥 ВОРОНКА · ${p[last]}</div>`;
+  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:14px;text-align:center">📥 ВОРОНКА · ${p[li]}</div>`;
 
-  // Visual funnel - horizontal bars narrowing
+  // Funnel stages with tooltips and step conversion
   const stages = [
-    {label:"Регистрации", val:reg, pct:100, fmt:fmt(reg)},
-    {label:"FTD", val:ftd, pct:ftd/reg*100, fmt:fmt(ftd), conv:`${(ftd/reg*100).toFixed(0)}%`},
-    {label:"2+ деп", val:null, pct:cr2||0, fmt:`${(cr2||0).toFixed(0)}%`, conv:`CR ${(cr2||0).toFixed(0)}%`},
-    {label:"3+ деп", val:null, pct:cr3||0, fmt:`${(cr3||0).toFixed(0)}%`, conv:`CR ${(cr3||0).toFixed(0)}%`},
-    {label:"5+ деп", val:null, pct:cr5||0, fmt:`${(cr5||0).toFixed(0)}%`, conv:`CR ${(cr5||0).toFixed(0)}%`},
+    {label:"Регистрации", w:100, val:fmt(reg), tip:"Всего новых регистраций за месяц"},
+    {label:"FTD", w:ftd/reg*100, val:fmt(ftd), step:`${(ftd/reg*100).toFixed(0)}% от рег.`, tip:"First Time Depositors — сделали первый депозит. Конверсия из регистрации."},
+    {label:"2+ деп", w:cr2||0, val:`${(cr2||0).toFixed(0)}%`, step:`${(cr2||0).toFixed(0)}% от FTD`, tip:"% FTD-игроков, сделавших 2+ депозита. Показывает возврат после первого опыта. Хорошо: >50%"},
+    {label:"3+ деп", w:cr3||0, val:`${(cr3||0).toFixed(0)}%`, step:`${(cr3||0).toFixed(0)}% от FTD`, tip:"% FTD-игроков с 3+ депозитами. Формирование привычки. Хорошо: >35%"},
+    {label:"5+ деп", w:cr5||0, val:`${(cr5||0).toFixed(0)}%`, step:`${(cr5||0).toFixed(0)}% от FTD`, tip:"% FTD-игроков с 5+ депозитами — лояльное ядро. Хорошо: >25%"},
   ];
 
   stages.forEach((s, i) => {
-    const width = i === 0 ? 100 : (i === 1 ? s.pct : s.pct);
-    const barW = Math.max(8, width);
-    const opacity = 1 - i * 0.15;
-    h += `<div style="margin-bottom:3px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:#555;min-width:70px">${s.label}</span><div style="flex:1;position:relative;height:24px"><div style="height:100%;width:${barW}%;background:#6366f1;opacity:${opacity};border-radius:4px"></div><span class="mono" style="position:absolute;left:${Math.min(barW+1,85)}%;top:4px;font-size:11px;font-weight:600;color:#333">${s.fmt}</span></div></div></div>`;
+    const barW = Math.max(6, s.w);
+    const op = 1 - i * 0.12;
+    const stepConv = i > 0 && stages[i-1].w > 0 ? (s.w / stages[i-1].w * 100).toFixed(0) : null;
+    h += `<div style="margin-bottom:2px" title="${s.tip}">`;
+    if (i > 0) h += `<div style="padding-left:78px;margin-bottom:1px"><span class="mono" style="font-size:8px;color:#999">↓ ${s.step}</span></div>`;
+    h += `<div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:#555;min-width:70px;cursor:help">${s.label}</span><div style="flex:1;position:relative;height:26px"><div style="height:100%;width:${barW}%;background:#6366f1;opacity:${op};border-radius:4px;display:flex;align-items:center;justify-content:${barW>30?"center":"flex-end"};padding:0 8px"><span class="mono" style="color:${barW>30?"#fff":"#333"};font-size:12px;font-weight:700;${barW<=30?"margin-left:4px":""}">${s.val}</span></div></div></div></div>`;
   });
 
-  // Monthly trend table below
-  h += `<div style="margin-top:14px;border-top:1px solid #e0e2ea;padding-top:10px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr><th style="text-align:left;padding:3px 4px;color:#999;font-weight:500"></th>`;
+  // Expandable monthly trend table
+  h += `<div style="margin-top:12px"><div onclick="document.getElementById('funnel-detail').style.display=document.getElementById('funnel-detail').style.display==='none'?'block':'none'" style="display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:6px;border-top:1px solid #e0e2ea"><span style="color:#999;font-size:10px">Динамика по месяцам</span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg></div>`;
+  
+  h += `<div id="funnel-detail" style="display:none;padding-top:6px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr><th style="text-align:left;padding:3px 4px;color:#999;font-weight:500"></th>`;
   p.forEach((period, i) => {
-    h += `<th style="text-align:center;padding:3px 4px;color:${i===last?"#333":"#999"};font-weight:${i===last?700:400}">${period}</th>`;
+    h += `<th style="text-align:center;padding:3px 4px;color:${i===li?"#333":"#999"};font-weight:${i===li?700:400}">${period}</th>`;
   });
   h += `</tr></thead><tbody>`;
 
@@ -755,7 +757,7 @@ function funnelHTML() {
     {label:"Рег.", data:F.registration, fmt:v=>fmt(v)},
     {label:"FTD", data:F.ftd, fmt:v=>fmt(v)},
     {label:"Reg→Dep", data:F.reg2dep_pct, fmt:v=>v.toFixed(0)+"%"},
-    {label:"CR2", data:F.cr2_pct, fmt:v=>v.toFixed(0)+"%"},
+    {label:"CR2+", data:F.cr2_pct, fmt:v=>v.toFixed(0)+"%"},
     {label:"CR3+", data:F.cr3_pct, fmt:v=>v.toFixed(0)+"%"},
     {label:"CR5+", data:F.cr5_pct, fmt:v=>v.toFixed(0)+"%"},
   ];
@@ -764,17 +766,18 @@ function funnelHTML() {
     if (!r.data) return;
     h += `<tr style="border-bottom:1px solid #f4f5f8"><td style="padding:3px 4px;color:#666">${r.label}</td>`;
     r.data.forEach((v, i) => {
-      const isLast = i === last;
+      const isLast = i === li;
       const prev = i > 0 ? r.data[i-1] : null;
-      const up = prev !== null ? v > prev : null;
-      const cellC = isLast ? "#222" : "#999";
-      h += `<td style="text-align:center;padding:3px 4px"><span class="mono" style="color:${cellC};font-weight:${isLast?600:400}">${r.fmt(v)}</span></td>`;
+      const delta = prev !== null ? v - prev : null;
+      const up = delta !== null && delta > 0;
+      const dn = delta !== null && delta < 0;
+      h += `<td style="text-align:center;padding:3px 4px"><span class="mono" style="color:${isLast?"#222":"#999"};font-weight:${isLast?600:400}">${r.fmt(v)}</span>${isLast && delta !== null ? `<span class="mono" style="color:${up?"#16a34a":"#dc2626"};font-size:8px;margin-left:1px">${up?"+":""}${typeof v==="number"&&v<100?delta.toFixed(1):fmt(delta)}</span>` : ""}</td>`;
     });
     h += `</tr>`;
   });
 
-  h += `</tbody></table></div>`;
-  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:6px">маркетинговый отчёт</div></div>`;
+  h += `</tbody></table></div></div>`;
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:6px">маркетинговый отчёт · % от FTD кроме Reg→Dep</div></div>`;
   return h;
 }
 
