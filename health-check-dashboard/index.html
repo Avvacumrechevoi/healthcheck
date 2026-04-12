@@ -592,15 +592,17 @@ function retentionTableHTML() {
   const geoOrder = Object.keys(GC).sort((a,b) => ((D[b]||{}).ngr||0) - ((D[a]||{}).ngr||0));
   
   // Determine which cohort to show (latest with M1 for majority)
+  const moMap = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  function cohortSortKey(name) {
+    const parts = name.split(" ");
+    if (parts.length === 2) { const mo = moMap[parts[0]]||0; const yr = parseInt(parts[1])||0; return yr*100+mo; }
+    return 0;
+  }
   let cohortCounts = {};
   geoOrder.forEach(geo => {
     (GC[geo]||[]).forEach(c => { if (c.m1 !== null) cohortCounts[c.cohort] = (cohortCounts[c.cohort]||0) + 1; });
   });
-  const sortedCohorts = Object.entries(cohortCounts).sort((a,b) => {
-    const pa = a[0].replace(/(\w+)\s(\d+)/,(m,mo,yr)=>`20${yr}-${mo}`);
-    const pb = b[0].replace(/(\w+)\s(\d+)/,(m,mo,yr)=>`20${yr}-${mo}`);
-    return pb.localeCompare(pa);
-  });
+  const sortedCohorts = Object.entries(cohortCounts).sort((a,b) => cohortSortKey(b[0]) - cohortSortKey(a[0]));
   const latestCohort = sortedCohorts.length ? sortedCohorts[0][0] : "";
   
   let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px">`;
@@ -638,7 +640,7 @@ function retentionTableHTML() {
     h += `<td style="text-align:center;padding:7px 4px;font-size:12px;color:#666">${latest.size.toLocaleString()}</td>`;
     h += `<td style="text-align:center;padding:7px 4px"><span class="mono" style="color:${m1Color};font-size:15px;font-weight:700">${latest.m1.toFixed(1)}%</span></td>`;
     h += `<td style="text-align:center;padding:7px 4px"><span class="mono" style="color:#bbb;font-size:11px">${prev ? prev.m1.toFixed(1)+"%" : "—"}</span>${deltaStr ? `<span class="mono" style="color:${deltaColor};font-size:9px;margin-left:2px">${deltaStr}</span>` : ""}</td>`;
-    h += `<td style="text-align:center;color:#ccc;font-size:10px">▾</td>`;
+    h += `<td style="text-align:center;padding:4px"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg></td>`;
     h += `</tr>`;
     
     // Expandable cohort history
@@ -660,7 +662,7 @@ function retentionTableHTML() {
   });
   
   h += `</tbody></table>`;
-  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:8px">▾ раскрыть когортную таблицу GEO · источник: MGM.io</div>`;
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:8px">⌄ раскрыть когортную таблицу GEO · источник: MGM.io</div>`;
   h += `</div>`;
   return h;
 }
