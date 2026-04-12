@@ -772,21 +772,54 @@ function funnelHTML() {
 }
 
 function platBlocksHTML(geos) {
-  let html = `<div style="margin-top:18px;background:#f8f9fc;border-radius:12px;border:1px solid #e0e2ea;padding:12px 10px"><div class="mono" style="color:#666;font-size:9px;font-weight:600;margin-bottom:10px;text-align:center">ПЛАТФОРМА · БЛОКИ (avg по GEO)</div><div style="display:flex;flex-direction:column;gap:4px">`;
-  Object.entries(CATS).forEach(([ck, ct]) => {
+  let html = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:12px;text-align:center">ПЛАТФОРМА · БЛОКИ</div>`;
+  
+  // Sort by weight desc
+  const cats = Object.entries(CATS).sort((a,b) => b[1].w - a[1].w);
+  
+  cats.forEach(([ck, ct]) => {
     const vals = geos.map(g => catSc(g.d, ck)).filter(x => x !== null);
     const s = vals.length ? vals.reduce((a,b) => a+b, 0)/vals.length : null;
     const c = cl(s);
-    html += `<div class="plat-block" onclick="toggleRanking('${ck}')" style="background:${c.bg}15;border-left-color:${NO(s)?"#d0d2da":c.gw}"><span style="font-size:14px;width:20px;text-align:center">${ct.i}</span><div style="flex:1;min-width:0"><div style="color:${NO(s)?"#444":"#bbb"};font-size:11px;font-weight:600">${ct.l}</div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:${Math.min(100,Math.max(3,s??0))}%;background:linear-gradient(90deg,${c.gw}88,${c.gw})"></div></div></div><span class="mono" style="color:${NO(s)?"#333":c.tx};font-weight:700;font-size:14px;min-width:28px;text-align:right">${NO(s)?"—":Math.round(s)}</span><span class="mono" style="color:#888;font-size:8px;min-width:24px;text-align:right">${ct.w}%</span></div>`;
-    html += `<div id="rank-${ck}" style="display:none;padding:2px 0 6px 28px">`;
+    const score = NO(s) ? 0 : Math.round(s);
+    const barW = Math.max(3, score);
+    
+    html += `<div style="margin-bottom:4px">`;
+    html += `<div onclick="toggleRanking('${ck}')" style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-radius:6px" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
+    // Label + weight
+    html += `<div style="min-width:90px;display:flex;align-items:center;gap:4px"><span style="font-size:12px">${ct.i}</span><span style="font-size:12px;color:#333;font-weight:500">${ct.l}</span></div>`;
+    // Bar
+    html += `<div style="flex:1;height:22px;background:#f0f1f5;border-radius:4px;position:relative;overflow:hidden">`;
+    html += `<div style="height:100%;width:${barW}%;background:${c.gw};border-radius:4px;opacity:0.85"></div>`;
+    if (score >= 20) html += `<span class="mono" style="position:absolute;left:6px;top:3px;font-size:11px;font-weight:700;color:#fff">${score}</span>`;
+    html += `</div>`;
+    // Score (outside if bar too narrow)
+    if (score < 20) html += `<span class="mono" style="color:${c.tx};font-size:14px;font-weight:700;min-width:24px;text-align:right">${NO(s)?"—":score}</span>`;
+    // Weight
+    html += `<span class="mono" style="color:#bbb;font-size:9px;min-width:20px;text-align:right">${ct.w}%</span>`;
+    // Expand
+    html += `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg>`;
+    html += `</div>`;
+    
+    // Per-GEO ranking (expandable)
+    html += `<div id="rank-${ck}" style="display:none;padding:4px 0 6px 24px">`;
     const ranked = geos.map(g => ({g:g.g, s:catSc(g.d, ck), d:g.d})).filter(r => r.s !== null).sort((a,b) => b.s - a.s);
     ranked.forEach((r, i) => {
       const rc = cl(r.s);
-      html += `<div class="rank-row" onclick="nav('${r.g}')" style="background:${rc.bg}33"><span class="mono" style="color:#777;font-size:9px;width:16px">${i+1}</span><span style="font-size:10px;flex:1">${r.g}</span><span class="mono" style="color:${rc.tx};font-weight:700;font-size:12px">${Math.round(r.s)}</span></div>`;
+      const rs = Math.round(r.s);
+      const rw = Math.max(3, rs);
+      html += `<div onclick="nav('${r.g}')" style="display:flex;align-items:center;gap:6px;padding:3px 4px;cursor:pointer;border-radius:4px" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
+      html += `<span class="mono" style="color:#bbb;font-size:9px;width:14px">${i+1}</span>`;
+      html += `<span style="font-size:11px;color:#444;min-width:80px">${r.g.split(" ").pop()}</span>`;
+      html += `<div style="flex:1;height:14px;background:#f0f1f5;border-radius:3px;overflow:hidden"><div style="height:100%;width:${rw}%;background:${rc.gw};opacity:0.7;border-radius:3px"></div></div>`;
+      html += `<span class="mono" style="color:${rc.tx};font-weight:700;font-size:11px;min-width:20px;text-align:right">${rs}</span>`;
+      html += `</div>`;
     });
-    html += `</div>`;
+    html += `</div></div>`;
   });
-  return html + `</div></div>`;
+  
+  html += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:6px">⌄ раскрыть рейтинг GEO · вес в общем score справа</div>`;
+  return html + `</div>`;
 }
 
 function crumbHTML(geo, cat) {
