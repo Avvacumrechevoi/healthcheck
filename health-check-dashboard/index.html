@@ -92,7 +92,7 @@ const DEF_TH = {
   casino_share:{g:30,y:20,u:"%",l:"Доля Casino GGR",d:"h"},casino_margin:{g:5,y:2,u:"%",l:"Маржа Casino",d:"h"},casino_players:{g:1000,y:300,u:"",l:"Casino игроки",d:"h"},casino_ggr_mom:{g:0,y:-10,u:"%",l:"Casino GGR MoM",d:"h"},
   sport_margin:{g:8,y:4,u:"%",l:"Маржа Sport",d:"h"},sport_players:{g:100,y:20,u:"",l:"Sport ставок/день",d:"h"},sport_ggr_mom:{g:0,y:-10,u:"%",l:"Sport GGR MoM",d:"h"},avg_bet:{g:25,y:10,u:"$",l:"Средняя ставка",d:"h"},
   d30_retention:{g:25,y:15,u:"%",l:"Ret M1 (активация)",d:"h"},d90_retention:{g:10,y:5,u:"%",l:"Ret M3 (стабилиз.)",d:"h"},core_retention:{g:25,y:12,u:"%",l:"Удержание ядра (4+/6м)",d:"h"},active_mom:{g:10,y:0,u:"%",l:"Активные MoM",d:"h"},
-  bettor_pct:{g:15,y:5,u:"%",l:"Доля бетторов",d:"h"},active_daily:{g:50,y:15,u:"",l:"DAU",d:"h"},bettor_ret:{g:40,y:25,u:"%",l:"Retention бетторов",d:"h"},whale_top20:{g:40,y:60,u:"%",l:"Конц. TOP20 в NGR",d:"l"},
+  bettor_pct:{g:15,y:5,u:"%",l:"Доля бетторов",d:"h"},active_daily:{g:50,y:15,u:"",l:"DAU",d:"h"},dau_pct:{g:15,y:8,u:"%",l:"DAU/AU (stickiness)",d:"h"},bettor_ret:{g:40,y:25,u:"%",l:"Retention бетторов",d:"h"},whale_top20:{g:40,y:60,u:"%",l:"Конц. TOP20 в NGR",d:"l"},
   frt_sec:{g:30,y:60,u:"с",l:"FRT (медиана)",d:"l"},csat:{g:70,y:55,u:"%",l:"CSAT",d:"h"},abandon_rate:{g:3,y:8,u:"%",l:"AR% пропущено",d:"l"},aht_min:{g:10,y:18,u:"м",l:"AHT (медиана)",d:"l"},
 };
 const ALL_METRICS = Object.keys(DEF_TH);
@@ -104,7 +104,7 @@ const CATS = {
   retention:{l:"Удержание",i:"🔄",m:["d30_retention","d90_retention","core_retention","active_mom"],w:15},
   sport:{l:"Спорт",i:"⚽",m:["sport_margin","sport_players","sport_ggr_mom","avg_bet"],w:10},
   casino:{l:"Казино",i:"🎰",m:["casino_share","casino_margin","casino_players","casino_ggr_mom"],w:7},
-  player_health:{l:"База игроков",i:"👥",m:["active_daily","bettor_pct","bettor_ret","whale_top20"],w:5},
+  player_health:{l:"База игроков",i:"👥",m:["dau_pct","bettor_pct","bettor_ret","whale_top20"],w:5},
   support:{l:"Саппорт",i:"🎧",m:["frt_sec","csat","abandon_rate","aht_min"],w:3},
 };
 const SM = ["ngr","ngr_mom","dep_approval","core_retention","d90_retention","csat"];

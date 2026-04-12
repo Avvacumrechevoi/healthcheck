@@ -1015,7 +1015,8 @@
       "aht_min": 18.5,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 16.8
+      "margin_pct": 16.8,
+      "dau_pct": 9.8
     },
     "🇧🇩 Bangladesh": {
       "au": 376,
@@ -1050,7 +1051,8 @@
       "aht_min": 19.6,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 21.6
+      "margin_pct": 21.6,
+      "dau_pct": 10.6
     },
     "🇧🇷 Brazil": {
       "au": 1325,
@@ -1085,7 +1087,8 @@
       "aht_min": 15.8,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 19.6
+      "margin_pct": 19.6,
+      "dau_pct": 13.9
     },
     "🇮🇳 India": {
       "au": 109,
@@ -1120,7 +1123,8 @@
       "aht_min": 25.5,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 17.5
+      "margin_pct": 17.5,
+      "dau_pct": 20.2
     },
     "🇨🇴 Colombia": {
       "au": 106,
@@ -1155,7 +1159,8 @@
       "aht_min": 19.2,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 10.1
+      "margin_pct": 10.1,
+      "dau_pct": 14.2
     },
     "🇲🇽 Mexico": {
       "au": 234,
@@ -1190,7 +1195,8 @@
       "aht_min": 16.9,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 17.0
+      "margin_pct": 17.0,
+      "dau_pct": 15.0
     },
     "🇵🇪 Peru": {
       "au": 163,
@@ -1225,7 +1231,8 @@
       "aht_min": 20.9,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": -0.9
+      "margin_pct": -0.9,
+      "dau_pct": 13.5
     },
     "🇵🇱 Poland": {
       "au": 73,
@@ -1260,7 +1267,8 @@
       "aht_min": 18.7,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 29.1
+      "margin_pct": 29.1,
+      "dau_pct": 27.4
     },
     "🇵🇹 Portugal": {
       "au": 48,
@@ -1295,7 +1303,8 @@
       "aht_min": 17.5,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 4.4
+      "margin_pct": 4.4,
+      "dau_pct": 12.5
     },
     "🇨🇱 Chile": {
       "au": 555,
@@ -1330,7 +1339,8 @@
       "aht_min": 20.2,
       "casino_ggr_mom": null,
       "sport_ggr_mom": null,
-      "margin_pct": 46.7
+      "margin_pct": 46.7,
+      "dau_pct": 7.6
     }
   },
   "segments": {
