@@ -588,34 +588,61 @@ function retentionTableHTML() {
     return `<td style="text-align:center;padding:2px 3px"><span class="mono" style="color:${c};font-size:10px;font-weight:600">${v.toFixed(1)}</span></td>`;
   }
   
-  // Sort GEOs by NGR (biggest first)
+  // Find the latest cohort that has M1 data across most GEOs
   const geoOrder = Object.keys(GC).sort((a,b) => ((D[b]||{}).ngr||0) - ((D[a]||{}).ngr||0));
   
-  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px"><div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:10px;text-align:center">🔄 RETENTION ПО GEO (когорты)</div>`;
+  // Determine which cohort to show (latest with M1 for majority)
+  let cohortCounts = {};
+  geoOrder.forEach(geo => {
+    (GC[geo]||[]).forEach(c => { if (c.m1 !== null) cohortCounts[c.cohort] = (cohortCounts[c.cohort]||0) + 1; });
+  });
+  const sortedCohorts = Object.entries(cohortCounts).sort((a,b) => {
+    const pa = a[0].replace(/(\w+)\s(\d+)/,(m,mo,yr)=>`20${yr}-${mo}`);
+    const pb = b[0].replace(/(\w+)\s(\d+)/,(m,mo,yr)=>`20${yr}-${mo}`);
+    return pb.localeCompare(pa);
+  });
+  const latestCohort = sortedCohorts.length ? sortedCohorts[0][0] : "";
+  
+  let h = `<div style="margin-top:14px;background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 12px">`;
+  h += `<div class="mono" style="color:#555;font-size:11px;font-weight:600;margin-bottom:4px;text-align:center">🔄 RETENTION ПО GEO</div>`;
+  h += `<div class="mono" style="color:#999;font-size:10px;margin-bottom:12px;text-align:center">M1 retention когорты <span style="color:#7c83ff;font-weight:600">${latestCohort}</span> · % вернувшихся через 30 дней</div>`;
+  
+  // Summary table: GEO | cohort size | M1%
+  h += `<table style="width:100%;border-collapse:collapse">`;
+  h += `<thead><tr><th style="text-align:left;padding:6px;font-size:11px;color:#555;font-weight:600;border-bottom:2px solid #e0e2ea">GEO</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:10px;color:#888;border-bottom:2px solid #e0e2ea">Новых</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:11px;color:#333;font-weight:600;border-bottom:2px solid #e0e2ea">M1 Retention</th>`;
+  h += `<th style="text-align:center;padding:6px;font-size:10px;color:#888;border-bottom:2px solid #e0e2ea">пред. когорта</th>`;
+  h += `<th style="width:20px;border-bottom:2px solid #e0e2ea"></th>`;
+  h += `</tr></thead><tbody>`;
   
   geoOrder.forEach(geo => {
-    const cohorts = GC[geo];
-    if (!cohorts || !cohorts.length) return;
-    
-    // Latest M1 for summary
-    const m1c = cohorts.filter(c => c.m1 !== null);
-    const latestM1 = m1c.length ? m1c[m1c.length-1] : null;
-    const latestLabel = latestM1 ? `M1 ${latestM1.m1.toFixed(1)}% (${latestM1.cohort})` : "";
-    const totalPlayers = cohorts.reduce((s,c) => s + (c.size||0), 0);
-    
+    const cohorts = GC[geo] || [];
     const geoShort = geo.split(" ").pop();
     const geoId = geoShort.replace(/[^a-zA-Z]/g,"");
     
-    h += `<div style="margin-bottom:6px">`;
-    h += `<div onclick="document.getElementById('ret-${geoId}').style.display=document.getElementById('ret-${geoId}').style.display==='none'?'block':'none'" style="display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer;border-radius:6px;border-bottom:1px solid #f0f1f5" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
-    h += `<span style="font-size:13px;color:#222;font-weight:500;flex:1">${geo}</span>`;
-    h += `<span class="mono" style="color:#888;font-size:10px">${totalPlayers.toLocaleString()} игроков</span>`;
-    if (latestM1) h += `<span class="mono" style="color:${latestM1.m1>=15?"#0a8a4a":latestM1.m1>=8?"#b45309":"#dc2626"};font-size:12px;font-weight:700">${latestM1.m1.toFixed(1)}%</span>`;
-    h += `<span style="color:#bbb;font-size:10px">▾</span>`;
-    h += `</div>`;
+    // Find latest cohort data and previous
+    const m1c = cohorts.filter(c => c.m1 !== null);
+    const latest = m1c.length ? m1c[m1c.length-1] : null;
+    const prev = m1c.length >= 2 ? m1c[m1c.length-2] : null;
     
-    // Expandable cohort table (hidden by default)
-    h += `<div id="ret-${geoId}" style="display:none;padding:4px 0 8px 0">`;
+    if (!latest) return;
+    
+    const m1Color = latest.m1 >= 20 ? "#0a8a4a" : latest.m1 >= 10 ? "#16a34a" : latest.m1 >= 5 ? "#b45309" : "#dc2626";
+    const delta = prev ? (latest.m1 - prev.m1) : null;
+    const deltaStr = delta !== null ? `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}` : "";
+    const deltaColor = delta !== null ? (delta >= 0 ? "#0a8a4a" : "#dc2626") : "#999";
+    
+    h += `<tr onclick="document.getElementById('ret-${geoId}').style.display=document.getElementById('ret-${geoId}').style.display==='none'?'block':'none'" style="cursor:pointer;border-bottom:1px solid #f0f1f5" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
+    h += `<td style="padding:7px 6px;font-size:13px;color:#222;font-weight:500">${geo}</td>`;
+    h += `<td style="text-align:center;padding:7px 4px;font-size:12px;color:#666">${latest.size.toLocaleString()}</td>`;
+    h += `<td style="text-align:center;padding:7px 4px"><span class="mono" style="color:${m1Color};font-size:15px;font-weight:700">${latest.m1.toFixed(1)}%</span></td>`;
+    h += `<td style="text-align:center;padding:7px 4px"><span class="mono" style="color:#bbb;font-size:11px">${prev ? prev.m1.toFixed(1)+"%" : "—"}</span>${deltaStr ? `<span class="mono" style="color:${deltaColor};font-size:9px;margin-left:2px">${deltaStr}</span>` : ""}</td>`;
+    h += `<td style="text-align:center;color:#ccc;font-size:10px">▾</td>`;
+    h += `</tr>`;
+    
+    // Expandable cohort history
+    h += `<tr><td colspan="5" style="padding:0"><div id="ret-${geoId}" style="display:none;padding:4px 8px 10px">`;
     h += `<table style="width:100%;border-collapse:collapse"><thead><tr>`;
     h += `<th style="text-align:left;padding:2px 4px;font-size:9px;color:#999">Когорта</th>`;
     h += `<th style="text-align:center;padding:2px 3px;font-size:9px;color:#999">N</th>`;
@@ -623,25 +650,17 @@ function retentionTableHTML() {
       h += `<th style="text-align:center;padding:2px 3px;font-size:9px;color:#555;font-weight:600">${m}</th>`;
     });
     h += `</tr></thead><tbody>`;
-    
     cohorts.forEach((c, i) => {
       const isRecent = i >= cohorts.length - 3;
-      h += `<tr style="border-bottom:1px solid #f8f8fa">`;
-      h += `<td style="padding:2px 4px;font-size:10px;color:${isRecent?"#333":"#777"};font-weight:${isRecent?500:400};white-space:nowrap">${c.cohort}</td>`;
-      h += `<td style="text-align:center;padding:2px 3px;font-size:9px;color:#aaa">${c.size}</td>`;
-      h += retCell(c.m1);
-      h += retCell(c.m2);
-      h += retCell(c.m3);
-      h += retCell(c.m4);
-      h += retCell(c.m5);
-      h += retCell(c.m6);
+      h += `<tr style="border-bottom:1px solid #f8f8fa"><td style="padding:2px 4px;font-size:10px;color:${isRecent?"#333":"#777"};font-weight:${isRecent?500:400};white-space:nowrap">${c.cohort}</td><td style="text-align:center;padding:2px 3px;font-size:9px;color:#aaa">${c.size}</td>`;
+      h += retCell(c.m1) + retCell(c.m2) + retCell(c.m3) + retCell(c.m4) + retCell(c.m5) + retCell(c.m6);
       h += `</tr>`;
     });
-    
-    h += `</tbody></table></div></div>`;
+    h += `</tbody></table></div></td></tr>`;
   });
   
-  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:6px">Клик на GEO → раскрыть когорты · источник: MGM.io</div>`;
+  h += `</tbody></table>`;
+  h += `<div class="mono" style="color:#bbb;font-size:8px;text-align:center;margin-top:8px">▾ раскрыть когортную таблицу GEO · источник: MGM.io</div>`;
   h += `</div>`;
   return h;
 }
