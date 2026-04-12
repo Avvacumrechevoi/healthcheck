@@ -679,7 +679,147 @@ function retentionTableHTML() {
   return h;
 }
 
-// ═══ 5g-1a. MARGIN DYNAMICS HEATMAP ═══
+// ═══ 5h. GEO METRIC GROUPS (4 blocks) ═══
+function geoMetricGroupsHTML(geo, d, prev, hist) {
+  const h8 = hist || {};
+  const MD = MARGIN_DYN;
+  const geoShort = geo.replace(/^[^\s]+\s/,"");
+  const mdKey = Object.keys(MD.margin_pct||{}).find(k => geoShort.includes(k) || k.includes(geoShort));
+  const marginHist = mdKey ? MD.margin_pct[mdKey] : (h8.margin_pct||null);
+  const cashoutHist = mdKey ? (MD.cashout_pct||{})[mdKey] : (h8.cashout_pct||null);
+  const months = MD.months || [];
+  
+  function metricRow(label, val, prevVal, unit, dir, histData, mk) {
+    const s = mk ? scr(mk, val) : (NO(val) ? null : (dir==="h" ? (val >= 25 ? 80 : val >= 15 ? 50 : 20) : (val <= 80 ? 80 : val <= 95 ? 50 : 20)));
+    const c = cl(s);
+    const hasPrev = !NO(prevVal);
+    const delta = hasPrev && !NO(val) ? val - prevVal : null;
+    const arrow = delta !== null ? (dir==="h" ? (delta>0?"↑":delta<0?"↓":"→") : (delta<0?"↑":delta>0?"↓":"→")) : "";
+    const arrowC = delta !== null ? (dir==="h" ? (delta>0?"#16a34a":"#dc2626") : (delta<0?"#16a34a":"#dc2626")) : "";
+    let miniSpark = "";
+    if (histData && histData.length >= 3) {
+      const mx = Math.max(...histData.map(v=>Math.abs(v||0)));
+      miniSpark = `<div style="display:flex;align-items:flex-end;gap:1px;height:14px;width:48px">`;
+      histData.forEach((v,i) => {
+        const bh = mx ? Math.max(2, Math.abs(v||0)/mx*100) : 2;
+        const neg = v < 0;
+        miniSpark += `<div style="flex:1;height:${bh}%;background:${i===histData.length-1?(neg?"#dc2626":"#16a34a"):(neg?"#dc262644":"#16a34a33")};border-radius:1px"></div>`;
+      });
+      miniSpark += `</div>`;
+    }
+    let row = `<div style="display:flex;align-items:center;gap:4px;padding:4px 0;border-bottom:1px solid #f8f8fa">`;
+    row += `<span style="font-size:11px;color:#555;min-width:90px">${label}</span>`;
+    if (miniSpark) row += miniSpark;
+    row += `<div style="flex:1"></div>`;
+    if (!NO(val)) {
+      row += `<span class="mono" style="color:${c.tx};font-size:13px;font-weight:600">${typeof val==="number"?(Number.isInteger(val)?val:val.toFixed(1)):val}${unit}</span>`;
+      if (arrow) row += `<span style="color:${arrowC};font-size:10px;margin:0 2px">${arrow}</span>`;
+      if (hasPrev) row += `<span class="mono" style="color:#bbb;font-size:9px">${typeof prevVal==="number"?(Number.isInteger(prevVal)?prevVal:prevVal.toFixed(1)):prevVal}${unit}</span>`;
+    } else {
+      row += `<span class="mono" style="color:#ddd">—</span>`;
+    }
+    row += `</div>`;
+    return row;
+  }
+
+  function groupBlock(icon, title, score, rows, extra) {
+    const c = cl(score);
+    const sc = NO(score) ? "?" : Math.round(score);
+    const barW = Math.max(3, sc === "?" ? 0 : sc);
+    const id = `geo-grp-${title.replace(/\s/g,"")}`;
+    let h = `<div style="margin-bottom:6px;background:#fff;border-radius:10px;border:1px solid #e0e2ea;overflow:hidden">`;
+    h += `<div onclick="document.getElementById('${id}').style.display=document.getElementById('${id}').style.display==='none'?'block':'none'" style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
+    h += `<span style="font-size:13px">${icon}</span><span style="font-size:12px;color:#333;font-weight:500;flex:1">${title}</span>`;
+    h += `<div style="width:50px;height:14px;background:#f0f1f5;border-radius:3px;overflow:hidden"><div style="height:100%;width:${barW}%;background:${c.gw};opacity:0.85;border-radius:3px"></div></div>`;
+    h += `<span class="mono" style="color:${c.tx};font-size:13px;font-weight:700;min-width:20px;text-align:right">${sc}</span>`;
+    h += `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg>`;
+    h += `</div><div id="${id}" style="display:none;padding:4px 12px 10px;border-top:1px solid #f0f1f5">`;
+    h += rows;
+    if (extra) h += extra;
+    h += `</div></div>`;
+    return h;
+  }
+
+  let html = `<div style="margin-bottom:14px">`;
+  
+  // 1. ФИНАНСЫ (revenue + payments merged)
+  const finScore = (catSc(d,"revenue") || 0) * 0.5 + (catSc(d,"payments") || 0) * 0.5;
+  let finRows = "";
+  finRows += metricRow("NGR", d.ngr, prev?.ngr, "$", "h", h8.ngr, "ngr");
+  finRows += metricRow("Маржа %", d.margin_pct, prev?.margin_pct, "%", "h", marginHist, "margin_pct");
+  finRows += metricRow("ARPPU", d.arppu, prev?.arppu, "$", "h", null, "arppu");
+  finRows += metricRow("Cashout %", d.cashout_pct, prev?.cashout_pct, "%", "l", cashoutHist, "cashout_pct");
+  finRows += metricRow("Депозиты appr.", d.dep_approval, prev?.dep_approval, "%", "h", null, "dep_approval");
+  finRows += metricRow("Выводы appr.", d.wd_approval, prev?.wd_approval, "%", "h", null, "wd_approval");
+  html += groupBlock("💰", "Финансы", finScore, finRows);
+  
+  // 2. ПРИВЛЕЧЕНИЕ
+  const acqScore = catSc(d,"acquisition");
+  let acqRows = "";
+  acqRows += metricRow("Active Unique", d.au, prev?.au, "", "h", null, "au");
+  acqRows += metricRow("FTD", d.ftd_count, prev?.ftd_count, "", "h", null, "ftd_count");
+  acqRows += metricRow("Reg→FTD", d.reg_ftd_conv, prev?.reg_ftd_conv, "%", "h", null, "reg_ftd_conv");
+  acqRows += metricRow("Активных/день", d.active_daily, prev?.active_daily, "", "h", null, "active_daily");
+  html += groupBlock("📥", "Привлечение", acqScore, acqRows);
+  
+  // 3. УДЕРЖАНИЕ (with cohort table)
+  const retScore = catSc(d,"retention");
+  let retRows = "";
+  retRows += metricRow("M1 (активация)", d.d30_retention, prev?.d30_retention, "%", "h", null, "d30_retention");
+  retRows += metricRow("M3 (стабилиз.)", d.d90_retention, prev?.d90_retention, "%", "h", null, "d90_retention");
+  retRows += metricRow("M6 (ядро)", d.core_retention, prev?.core_retention, "%", "h", null, "core_retention");
+  retRows += metricRow("Активные MoM", d.active_mom, prev?.active_mom, "%", "h", null, "active_mom");
+  // Cohort mini-table
+  let cohortExtra = "";
+  const gc = GEO_COHORTS[geo];
+  if (gc && gc.length) {
+    cohortExtra = `<div style="margin-top:8px;padding-top:6px;border-top:1px solid #e0e2ea"><div class="mono" style="color:#999;font-size:9px;margin-bottom:4px">Когорты (M1-M6)</div>`;
+    cohortExtra += `<table style="width:100%;border-collapse:collapse;font-size:9px"><thead><tr><th style="text-align:left;padding:2px;color:#999"></th><th style="text-align:center;padding:2px;color:#666">N</th>`;
+    ['M1','M2','M3','M4','M5','M6'].forEach(m => { cohortExtra += `<th style="text-align:center;padding:2px;color:#666">${m}</th>`; });
+    cohortExtra += `</tr></thead><tbody>`;
+    gc.slice(-5).forEach((co,i) => {
+      const isLast = i === Math.min(gc.length, 5) - 1;
+      cohortExtra += `<tr><td style="padding:1px 2px;color:${isLast?"#333":"#999"};font-weight:${isLast?500:400}">${co.cohort}</td><td style="text-align:center;padding:1px 2px;color:#bbb">${co.size}</td>`;
+      ['m1','m2','m3','m4','m5','m6'].forEach(mk => {
+        const v = co[mk];
+        if (NO(v)) { cohortExtra += `<td style="text-align:center;padding:1px;color:#ddd">·</td>`; }
+        else { const cc = v >= 15 ? "#0a8a4a" : v >= 5 ? "#b45309" : "#dc2626"; cohortExtra += `<td style="text-align:center;padding:1px"><span class="mono" style="color:${cc};font-weight:${isLast?600:400}">${v.toFixed(1)}</span></td>`; }
+      });
+      cohortExtra += `</tr>`;
+    });
+    cohortExtra += `</tbody></table></div>`;
+  }
+  html += groupBlock("🔄", "Удержание", retScore, retRows, cohortExtra);
+  
+  // 4. ПРОДУКТ (sport + casino + support merged, skip empty)
+  const hasAnySport = !NO(d.sport_margin) || !NO(d.sport_players);
+  const hasAnyCasino = !NO(d.casino_share) || !NO(d.casino_margin);
+  const hasSupport = !NO(d.csat) || !NO(d.frt_sec);
+  if (hasAnySport || hasAnyCasino || hasSupport) {
+    const prodScores = [catSc(d,"sport"), catSc(d,"casino"), catSc(d,"support")].filter(x=>x!==null);
+    const prodScore = prodScores.length ? prodScores.reduce((a,b)=>a+b)/prodScores.length : null;
+    let prodRows = "";
+    if (hasAnySport) {
+      prodRows += metricRow("Sport маржа", d.sport_margin, prev?.sport_margin, "%", "h", null, "sport_margin");
+      prodRows += metricRow("Sport ставок/день", d.sport_players, prev?.sport_players, "", "h", null, "sport_players");
+      prodRows += metricRow("Средняя ставка", d.avg_bet, prev?.avg_bet, "$", "h", null, "avg_bet");
+    }
+    if (hasAnyCasino) {
+      prodRows += metricRow("Casino доля GGR", d.casino_share, prev?.casino_share, "%", "h", null, "casino_share");
+      prodRows += metricRow("Casino маржа", d.casino_margin, prev?.casino_margin, "%", "h", null, "casino_margin");
+    }
+    if (hasSupport) {
+      prodRows += metricRow("CSAT", d.csat, prev?.csat, "%", "h", null, "csat");
+      if (!NO(d.frt_sec)) prodRows += metricRow("Время ответа", d.frt_sec, prev?.frt_sec, "с", "l", null, "frt_sec");
+      if (!NO(d.abandon_rate)) prodRows += metricRow("Abandon %", d.abandon_rate, prev?.abandon_rate, "%", "l", null, "abandon_rate");
+    }
+    html += groupBlock("🎮", "Продукт", prodScore, prodRows);
+  }
+  
+  html += `</div>`;
+  return html;
+}
+
 function marginHeatmapHTML() {
   const M = MARGIN_DYN;
   if (!M.months || !M.margin_pct) return "";
@@ -1009,54 +1149,8 @@ function render() {
       html += `</div></div>`;
     }
     
-    // 3. Category blocks (inline, scrollable)
-    html += `<div style="margin-bottom:14px">`;
-    Object.entries(CATS).forEach(([ck, ct]) => {
-      const cs = catSc(d, ck);
-      const c = cl(cs);
-      const score = NO(cs) ? "?" : Math.round(cs);
-      const barW = Math.max(3, score);
-      const metrics = ct.m;
-      const catId = `geo-cat-${ck}`;
-      
-      // Header bar (like platform blocks)
-      html += `<div style="margin-bottom:4px;background:#fff;border-radius:10px;border:1px solid #e0e2ea;overflow:hidden">`;
-      html += `<div onclick="document.getElementById('${catId}').style.display=document.getElementById('${catId}').style.display==='none'?'block':'none'" style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
-      html += `<span style="font-size:12px">${ct.i}</span>`;
-      html += `<span style="font-size:12px;color:#333;font-weight:500;flex:1">${ct.l}</span>`;
-      // Mini bar
-      html += `<div style="width:60px;height:16px;background:#f0f1f5;border-radius:3px;overflow:hidden"><div style="height:100%;width:${barW}%;background:${c.gw};opacity:0.85;border-radius:3px"></div></div>`;
-      html += `<span class="mono" style="color:${c.tx};font-size:14px;font-weight:700;min-width:24px;text-align:right">${score}</span>`;
-      html += `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg>`;
-      html += `</div>`;
-      
-      // Expandable metrics
-      html += `<div id="${catId}" style="display:none;padding:4px 12px 10px;border-top:1px solid #f0f1f5">`;
-      metrics.forEach(mk => {
-        const t = getTH(mk);
-        const v = d[mk];
-        const s = scr(mk, v);
-        const mc = cl(s);
-        const pv = prev[mk];
-        const hasPrev = !NO(pv);
-        const delta = hasPrev ? v - pv : null;
-        const arrow = hasPrev && !NO(v) ? (t.d === "h" ? (delta > 0 ? "↑" : delta < 0 ? "↓" : "→") : (delta < 0 ? "↑" : delta > 0 ? "↓" : "→")) : "";
-        const arrowC = hasPrev && !NO(v) ? (t.d === "h" ? (delta > 0 ? "#16a34a" : "#dc2626") : (delta < 0 ? "#16a34a" : "#dc2626")) : "#999";
-        
-        html += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f8f8fa">`;
-        html += `<span style="font-size:11px;color:#555;flex:1">${t.l}</span>`;
-        if (!NO(v)) {
-          html += `<span class="mono" style="color:${mc.tx};font-size:13px;font-weight:600">${fmt(v)}${t.u}</span>`;
-          if (arrow) html += `<span class="mono" style="color:${arrowC};font-size:10px">${arrow}</span>`;
-          if (hasPrev) html += `<span class="mono" style="color:#bbb;font-size:9px">← ${fmt(pv)}${t.u}</span>`;
-        } else {
-          html += `<span class="mono" style="color:#ddd;font-size:12px">—</span>`;
-        }
-        html += `</div>`;
-      });
-      html += `</div></div>`;
-    });
-    html += `</div>`;
+    // 3. Metric groups (4 logical blocks with trends)
+    html += geoMetricGroupsHTML(g, d, prev, hist);
   } else if (state.geo && state.cat) {
     const g = state.geo, d = D[g], ct = CATS[state.cat], prev = PREV[g] || {}, fl = FLAGS[g];
     const cs = catSc(d, state.cat); const idx = geoList.indexOf(g);
