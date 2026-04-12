@@ -9,6 +9,9 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:#f4f5f8;color:#1a1a2a;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
 #app{max-width:900px;margin:0 auto;padding:env(safe-area-inset-top,16px) 20px env(safe-area-inset-bottom,16px)}
+.info-tip{position:relative;display:inline-flex;cursor:help}
+.info-tip .info-pop{display:none;position:absolute;left:0;top:20px;z-index:100;background:#fff;border:1px solid #e0e2ea;border-radius:8px;padding:10px 12px;min-width:220px;max-width:300px;box-shadow:0 4px 16px rgba(0,0,0,0.1);font-size:11px;line-height:1.5;color:#555}
+.info-tip:hover .info-pop,.info-tip:focus .info-pop{display:block}
 @media(max-width:600px){#app{max-width:520px;padding:env(safe-area-inset-top,12px) 12px env(safe-area-inset-bottom,12px)}}
 @media(max-width:480px){.grid-geo{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}.hm-full{display:none}.mobile-expand{display:block!important}}
 .mono{font-family:'JetBrains Mono',monospace}
@@ -679,6 +682,18 @@ function retentionTableHTML() {
   return h;
 }
 
+// ═══ 5g-0. BLOCK INFO TOOLTIPS ═══
+function blockInfoHTML(ck) {
+  const ct = CATS[ck];
+  if (!ct) return "";
+  const lines = ct.m.map(mk => {
+    const t = getTH(mk);
+    const dir = t.d === "h" ? "↑ больше лучше" : "↓ меньше лучше";
+    return `<div style="display:flex;gap:4px;padding:1px 0"><span style="color:#16a34a">🟢</span><span style="flex:1">${t.l}</span><span class="mono" style="color:#888">${t.d==="h"?"≥":"≤"}${t.g}${t.u||""}</span></div><div style="display:flex;gap:4px;padding:1px 0"><span style="color:#d97706">🟡</span><span style="flex:1"></span><span class="mono" style="color:#888">${t.d==="h"?"≥":"≤"}${t.y}${t.u||""}</span></div>`;
+  }).join("");
+  return `<div class="info-tip" onclick="event.stopPropagation()" tabindex="0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#bbb" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 5v.5"/></svg><div class="info-pop"><div style="font-weight:600;color:#333;margin-bottom:6px">${ct.i} ${ct.l} <span style="color:#999;font-weight:400">(${ct.w}% веса)</span></div><div style="color:#777;margin-bottom:6px">Score = среднее по ${ct.m.length} метрикам. Каждая метрика → 0-100 баллов.</div><div style="border-top:1px solid #f0f1f5;padding-top:4px">${lines}</div></div></div>`;
+}
+
 // ═══ 5h. GEO METRIC BLOCKS (same 8 as platform) ═══
 function geoMetricGroupsHTML(geo, d, prev, hist) {
   const h8 = hist || {};
@@ -730,7 +745,7 @@ function geoMetricGroupsHTML(geo, d, prev, hist) {
     
     html += `<div style="margin-bottom:4px;background:#fff;border-radius:10px;border:1px solid #e0e2ea;overflow:hidden">`;
     html += `<div onclick="document.getElementById('${catId}').style.display=document.getElementById('${catId}').style.display==='none'?'block':'none'" style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
-    html += `<span style="font-size:13px">${ct.i}</span><span style="font-size:12px;color:#333;font-weight:500;flex:1">${ct.l}</span>`;
+    html += `<span style="font-size:13px">${ct.i}</span><span style="font-size:12px;color:#333;font-weight:500;flex:1">${ct.l}</span>${blockInfoHTML(ck)}`;
     html += `<div style="width:50px;height:14px;background:#f0f1f5;border-radius:3px;overflow:hidden"><div style="height:100%;width:${barW}%;background:${c.gw};opacity:0.85;border-radius:3px"></div></div>`;
     html += `<span class="mono" style="color:${c.tx};font-size:13px;font-weight:700;min-width:20px;text-align:right">${score}</span>`;
     html += `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round"><path d="M3 4.5l3 3 3-3"/></svg>`;
@@ -945,7 +960,7 @@ function platBlocksHTML(geos) {
     html += `<div style="margin-bottom:4px">`;
     html += `<div onclick="toggleRanking('${ck}')" style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-radius:6px" onmouseenter="this.style.background='#f4f5f8'" onmouseleave="this.style.background=''">`;
     // Label + weight
-    html += `<div style="min-width:90px;display:flex;align-items:center;gap:4px"><span style="font-size:12px">${ct.i}</span><span style="font-size:12px;color:#333;font-weight:500">${ct.l}</span></div>`;
+    html += `<div style="min-width:90px;display:flex;align-items:center;gap:4px"><span style="font-size:12px">${ct.i}</span><span style="font-size:12px;color:#333;font-weight:500">${ct.l}</span>${blockInfoHTML(ck)}</div>`;
     // Bar
     html += `<div style="flex:1;height:22px;background:#f0f1f5;border-radius:4px;position:relative;overflow:hidden">`;
     html += `<div style="height:100%;width:${barW}%;background:${c.gw};border-radius:4px;opacity:0.85"></div>`;
