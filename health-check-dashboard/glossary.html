@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Глоссарий метрик · SapphireBet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f4f5f8;color:#1a1a2a;font-family:'Inter',system-ui,sans-serif;line-height:1.6}
+.tab-bar{max-width:900px;margin:0 auto;padding:12px 20px 0;display:flex;gap:0;border-bottom:2px solid #e0e2ea}
+.tab-btn{padding:8px 16px;font-size:13px;font-weight:600;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:all .15s;text-decoration:none}
+.tab-btn.active{color:#7c83ff;border-bottom-color:#7c83ff}
+.tab-btn:hover{color:#555}
+.wrap{max-width:900px;margin:0 auto;padding:24px 20px}
+h1{font-size:22px;font-weight:700;color:#222;margin-bottom:4px}
+.subtitle{color:#888;font-size:13px;margin-bottom:24px}
+.search{width:100%;padding:10px 14px;border:1px solid #e0e2ea;border-radius:8px;font-size:14px;font-family:inherit;background:#fff;margin-bottom:24px;outline:none}
+.search:focus{border-color:#7c83ff;box-shadow:0 0 0 3px #7c83ff22}
+.block{background:#fff;border-radius:12px;border:1px solid #e0e2ea;margin-bottom:16px;overflow:hidden}
+.block-hdr{padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.block-hdr:hover{background:#f8f9fc}
+.block-title{font-size:15px;font-weight:600;color:#222;flex:1}
+.block-weight{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7c83ff;background:#7c83ff15;padding:2px 8px;border-radius:4px}
+.block-body{border-top:1px solid #f0f1f5}
+.metric{padding:12px 16px;border-bottom:1px solid #f8f8fa;display:flex;gap:12px}
+.metric:last-child{border-bottom:none}
+.metric:hover{background:#fafbfe}
+.m-left{flex:1;min-width:0}
+.m-name{font-size:14px;font-weight:600;color:#333;margin-bottom:2px}
+.m-desc{font-size:12px;color:#666;line-height:1.5}
+.m-formula{font-family:'JetBrains Mono',monospace;font-size:11px;color:#888;margin-top:4px;background:#f4f5f8;padding:3px 8px;border-radius:4px;display:inline-block}
+.m-right{min-width:140px;text-align:right;display:flex;flex-direction:column;gap:3px}
+.m-source{font-size:10px;color:#999;background:#f0f1f5;padding:2px 6px;border-radius:3px;display:inline-block}
+.m-thresh{font-family:'JetBrains Mono',monospace;font-size:10px}
+.tg{color:#16a34a}.ty{color:#d97706}.tr{color:#dc2626}
+.m-dir{font-size:10px;color:#aaa}
+.tag{display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;margin-right:3px}
+.tag-hc{background:#7c83ff20;color:#7c83ff}
+.tag-calc{background:#e5a00d20;color:#b8860b}
+.tag-both{background:#16a34a20;color:#16a34a}
+.legend{background:#fff;border-radius:12px;border:1px solid #e0e2ea;padding:14px 16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#666}
+.legend-item{display:flex;align-items:center;gap:4px}
+</style>
+</head>
+<body>
+<div class="tab-bar">
+<a class="tab-btn" href="index.html">Health Check</a>
+<a class="tab-btn" href="https://avvacumrechevoi.github.io/ngr-target-calculator/">NGR Калькулятор</a>
+<a class="tab-btn active" href="#">Глоссарий</a>
+</div>
+<div class="wrap">
+<h1>📖 Глоссарий метрик</h1>
+<p class="subtitle">Определения, источники, пороги скоринга. Используйте для заполнения ежемесячного отчёта.</p>
+
+<input class="search" type="text" placeholder="Поиск метрики..." oninput="filterMetrics(this.value)">
+
+<div class="legend">
+<div class="legend-item"><span class="tag tag-hc">HC</span> Health Check</div>
+<div class="legend-item"><span class="tag tag-calc">CALC</span> NGR Калькулятор</div>
+<div class="legend-item"><span class="tag tag-both">ОБА</span> Оба инструмента</div>
+<div class="legend-item"><span class="tg">🟢 норма</span></div>
+<div class="legend-item"><span class="ty">🟡 внимание</span></div>
+<div class="legend-item"><span class="tr">🔴 проблема</span></div>
+</div>
+
+<div id="blocks">
+
+<!-- ФИНАНСЫ / ПЛАТЕЖИ -->
+<div class="block" data-block="payments">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">💳</span>
+<span class="block-title">Платежи</span>
+<span class="block-weight">25% веса</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="approval депозитов deposits dep">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Dep Approval %</div>
+<div class="m-desc">Процент успешно проведённых депозитов из всех попыток. Низкий = проблема с платёжным провайдером или фрод-фильтрами.</div>
+<div class="m-formula">Успешные депозиты / Все попытки × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Deposits</span>
+<span class="m-thresh"><span class="tg">🟢 ≥80%</span> <span class="ty">🟡 ≥60%</span></span>
+<span class="m-dir">↑ больше лучше</span>
+</div>
+</div>
+
+<div class="metric" data-search="approval выводов withdrawals wd">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Wd Approval %</div>
+<div class="m-desc">Процент успешных выводов. Низкий = проблемы с провайдером вывода или ручная модерация задерживает.</div>
+<div class="m-formula">Успешные выводы / Все запросы на вывод × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Withdrawals</span>
+<span class="m-thresh"><span class="tg">🟢 ≥75%</span> <span class="ty">🟡 ≥55%</span></span>
+<span class="m-dir">↑ больше лучше</span>
+</div>
+</div>
+
+<div class="metric" data-search="средний депозит average deposit std">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-both">ОБА</span> Avg Deposit ($)</div>
+<div class="m-desc">Средний размер депозита за месяц. В калькуляторе используется как STD (standard deposit) для моделирования.</div>
+<div class="m-formula">Сумма всех депозитов / Количество транзакций</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Deposits</span>
+<span class="m-thresh"><span class="tg">🟢 ≥$25</span> <span class="ty">🟡 ≥$12</span></span>
+<span class="m-dir">↑ больше лучше</span>
+</div>
+</div>
+
+<div class="metric" data-search="cashout кешаут вывод withdrawal ratio">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-both">ОБА</span> Cashout %</div>
+<div class="m-desc">Отношение выводов к депозитам. Показывает сколько денег «уходит обратно» игрокам. Высокий = низкая маржа. В калькуляторе влияет на модель NGR.</div>
+<div class="m-formula">Withdrawals / Deposits × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">Margin File</span>
+<span class="m-thresh"><span class="tg">🟢 ≤90%</span> <span class="ty">🟡 ≤100%</span></span>
+<span class="m-dir">↓ меньше лучше</span>
+</div>
+</div>
+
+</div></div>
+
+<!-- ВЫРУЧКА -->
+<div class="block" data-block="revenue">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">💰</span>
+<span class="block-title">Выручка</span>
+<span class="block-weight">20% веса</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="ngr net gaming revenue чистый доход">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-both">ОБА</span> NGR ($)</div>
+<div class="m-desc">Net Gaming Revenue — чистая выручка. Deposits минус Withdrawals минус бонусы и комиссии. Главный финансовый показатель платформы.</div>
+<div class="m-formula">Deposits − Withdrawals − Bonuses − Provider Fees</div>
+</div>
+<div class="m-right">
+<span class="m-source">Margin File (FIN_Result)</span>
+<span class="m-thresh">Абсолютное значение, не скорится</span>
+<span class="m-dir">↑ больше лучше</span>
+</div>
+</div>
+
+<div class="metric" data-search="ngr mom месяц к месяцу month динамика">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> NGR MoM %</div>
+<div class="m-desc">Изменение NGR по сравнению с предыдущим месяцем. Показывает динамику: растём или падаем.</div>
+<div class="m-formula">(NGR текущий − NGR прошлый) / |NGR прошлый| × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">Рассчитывается</span>
+<span class="m-thresh"><span class="tg">🟢 ≥+5%</span> <span class="ty">🟡 ≥−15%</span></span>
+<span class="m-dir">↑ рост лучше</span>
+</div>
+</div>
+
+<div class="metric" data-search="маржа margin процент маржинальность">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Маржа %</div>
+<div class="m-desc">Доля NGR от депозитов. Показывает эффективность монетизации. Падение маржи при росте депозитов = игроки больше выигрывают (whale-риск).</div>
+<div class="m-formula">NGR / Deposits × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">Margin File</span>
+<span class="m-thresh"><span class="tg">🟢 ≥25%</span> <span class="ty">🟡 ≥15%</span></span>
+<span class="m-dir">↑ больше лучше</span>
+</div>
+</div>
+
+<div class="metric" data-search="arppu average revenue per paying user средний доход">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-both">ОБА</span> ARPPU ($)</div>
+<div class="m-desc">Средний доход на платящего игрока. NGR делённый на количество уникальных активных игроков.</div>
+<div class="m-formula">NGR / Active Unique</div>
+</div>
+<div class="m-right">
+<span class="m-source">Рассчитывается</span>
+<span class="m-thresh"><span class="tg">🟢 ≥$20</span> <span class="ty">🟡 ≥$5</span></span>
+<span class="m-dir">↑ больше лучше</span>
+</div>
+</div>
+
+<div class="metric" data-search="deposits депозиты сумма total">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-both">ОБА</span> Deposits ($)</div>
+<div class="m-desc">Общая сумма всех депозитов за месяц по GEO. Включает первые и повторные.</div>
+<div class="m-formula">SUM(все депозиты за месяц)</div>
+</div>
+<div class="m-right">
+<span class="m-source">Margin File / MGM.io</span>
+</div>
+</div>
+
+<div class="metric" data-search="withdrawals выводы сумма">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-both">ОБА</span> Withdrawals ($)</div>
+<div class="m-desc">Общая сумма всех выводов за месяц. Без транзитных/аффилиатских счетов.</div>
+<div class="m-formula">SUM(все выводы за месяц). Исключить transit IDs</div>
+</div>
+<div class="m-right">
+<span class="m-source">Margin File</span>
+</div>
+</div>
+
+</div></div>
+
+<!-- ПРИВЛЕЧЕНИЕ -->
+<div class="block" data-block="acquisition">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">📥</span>
+<span class="block-title">Привлечение</span>
+<span class="block-weight">15% веса</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="au active unique активные уникальные игроки">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-both">ОБА</span> Active Unique (AU)</div>
+<div class="m-desc">Количество уникальных игроков, совершивших хотя бы одну ставку или депозит за месяц.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Players</span>
+<span class="m-thresh"><span class="tg">🟢 ≥500</span> <span class="ty">🟡 ≥100</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="ftd first time deposit первый депозит новые">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-both">ОБА</span> FTD</div>
+<div class="m-desc">First Time Depositors — количество игроков, сделавших первый депозит за месяц. Ключевая метрика привлечения.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → FTD report</span>
+<span class="m-thresh"><span class="tg">🟢 ≥200</span> <span class="ty">🟡 ≥50</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="reg ftd conversion конверсия регистрация">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Reg→FTD %</div>
+<div class="m-desc">Конверсия из регистрации в первый депозит. Низкая = проблема с онбордингом или качеством трафика.</div>
+<div class="m-formula">FTD / Регистрации × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">Маркетинговый отчёт</span>
+<span class="m-thresh"><span class="tg">🟢 ≥30%</span> <span class="ty">🟡 ≥12%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="dau daily active дневная активность">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> DAU</div>
+<div class="m-desc">Среднее количество уникальных активных игроков в день. Используется для расчёта DAU/AU% (stickiness).</div>
+<div class="m-formula">SUM(daily uniques) / Дней в месяце</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Activity</span>
+</div>
+</div>
+
+</div></div>
+
+<!-- УДЕРЖАНИЕ -->
+<div class="block" data-block="retention">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">🔄</span>
+<span class="block-title">Удержание</span>
+<span class="block-weight">15% веса</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="m1 retention d30 активация 30 дней месяц">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> M1 Retention (d30)</div>
+<div class="m-desc">% игроков из когорты, вернувшихся через 1 месяц. Когорта = все FTD за конкретный месяц. M1 = были активны в следующем месяце. Главный показатель «активации».</div>
+<div class="m-formula">Активны в M+1 / Размер когорты × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Retention</span>
+<span class="m-thresh"><span class="tg">🟢 ≥20%</span> <span class="ty">🟡 ≥10%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="m3 retention d90 стабилизация">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> M3 Retention (d90)</div>
+<div class="m-desc">% когорты, активных через 3 месяца. Показывает «стабилизацию» — кто остаётся после начального оттока.</div>
+<div class="m-formula">Активны в M+3 / Размер когорты × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Retention</span>
+<span class="m-thresh"><span class="tg">🟢 ≥8%</span> <span class="ty">🟡 ≥3%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="m6 core retention ядро лояльное">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> M6 Core Retention</div>
+<div class="m-desc">% когорты, активных через 6 месяцев. Это «ядро» — лояльные игроки, формирующие стабильный доход.</div>
+<div class="m-formula">Активны в M+6 / Размер когорты × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Retention</span>
+<span class="m-thresh"><span class="tg">🟢 ≥4%</span> <span class="ty">🟡 ≥1.5%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="active mom месяц активные рост">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Active MoM %</div>
+<div class="m-desc">Рост/падение активной базы месяц к месяцу. Рассчитывается из AU текущий vs AU прошлый.</div>
+<div class="m-formula">(AU текущий − AU прошлый) / AU прошлый × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">Рассчитывается</span>
+<span class="m-thresh"><span class="tg">🟢 ≥0%</span> <span class="ty">🟡 ≥−10%</span></span>
+</div>
+</div>
+
+</div></div>
+
+<!-- СПОРТ -->
+<div class="block" data-block="sport">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">⚽</span>
+<span class="block-title">Спорт</span>
+<span class="block-weight">10% веса</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="sport margin маржа спорт">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Sport Margin %</div>
+<div class="m-desc">Маржинальность спортивных ставок. GGR Sport / Turnover Sport. Нормальная маржа для спорта: 5-10%.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Sport</span>
+<span class="m-thresh"><span class="tg">🟢 ≥8%</span> <span class="ty">🟡 ≥4%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="sport bets ставки день daily">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Sport Bets/Day</div>
+<div class="m-desc">Среднее количество спортивных ставок в день. Показывает активность спортивного продукта.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Sport</span>
+<span class="m-thresh"><span class="tg">🟢 ≥100</span> <span class="ty">🟡 ≥20</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="avg bet средняя ставка">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Avg Bet ($)</div>
+<div class="m-desc">Средний размер ставки. Аномально высокий = whale-активность, может исказить маржу.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Sport</span>
+<span class="m-thresh"><span class="tg">🟢 ≥$25</span> <span class="ty">🟡 ≥$10</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="sport ggr гросс доход">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-calc">CALC</span> Sport GGR ($)</div>
+<div class="m-desc">Gross Gaming Revenue от спорта. Turnover минус выплаты выигрышей. Используется в калькуляторе для структуры GGR.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Sport → GGR</span>
+</div>
+</div>
+
+</div></div>
+
+<!-- КАЗИНО -->
+<div class="block" data-block="casino">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">🎰</span>
+<span class="block-title">Казино</span>
+<span class="block-weight">7% веса</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="casino share доля ggr">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Casino Share GGR %</div>
+<div class="m-desc">Доля казино в общем GGR. У SapphireBet ~22% (индустрия 40-70%). Рост этой метрики = диверсификация.</div>
+<div class="m-formula">Casino GGR / Total GGR × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io</span>
+<span class="m-thresh"><span class="tg">🟢 ≥30%</span> <span class="ty">🟡 ≥20%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="casino margin маржа казино">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Casino Margin %</div>
+<div class="m-desc">Маржинальность казино. Casino GGR / Casino Turnover. Нормальная для слотов: 3-5%.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Casino</span>
+<span class="m-thresh"><span class="tg">🟢 ≥5%</span> <span class="ty">🟡 ≥2%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="casino ggr доход">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-calc">CALC</span> Casino GGR ($)</div>
+<div class="m-desc">Gross Gaming Revenue от казино. Wagers минус выплаты. Используется в калькуляторе.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Casino → GGR</span>
+</div>
+</div>
+
+</div></div>
+
+<!-- БАЗА ИГРОКОВ -->
+<div class="block" data-block="player_health">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">👥</span>
+<span class="block-title">База игроков</span>
+<span class="block-weight">5% веса</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="dau au stickiness вовлечённость">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> DAU/AU % (Stickiness)</div>
+<div class="m-desc">Какой % месячных игроков заходит ежедневно. Показывает вовлечённость. Рассчитывается: DAU / AU × 100. Не зависит от размера GEO.</div>
+<div class="m-formula">DAU / Active Unique × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">Рассчитывается из DAU и AU</span>
+<span class="m-thresh"><span class="tg">🟢 ≥15%</span> <span class="ty">🟡 ≥8%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="бетторов bettor процент доля">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Доля бетторов %</div>
+<div class="m-desc">% активных игроков, делающих спортивные ставки. Бетторы удерживаются в 2-8× лучше остальных.</div>
+<div class="m-formula">Игроки с ≥1 ставкой / AU × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Sport</span>
+<span class="m-thresh"><span class="tg">🟢 ≥15%</span> <span class="ty">🟡 ≥5%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="retention бетторов bettor ret">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Retention бетторов %</div>
+<div class="m-desc">M1 retention игроков-бетторов. Обычно в 2-8× выше общего retention.</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → анализ</span>
+<span class="m-thresh"><span class="tg">🟢 ≥40%</span> <span class="ty">🟡 ≥25%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="whale top20 концентрация кит зависимость">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> TOP20 Concentration %</div>
+<div class="m-desc">Доля NGR, генерируемая ТОП-20 игроками. Высокая = зависимость от «китов» (структурный риск). NGR может колебаться ±40-70% если один кит уйдёт.</div>
+<div class="m-formula">NGR от TOP20 игроков / Total NGR × 100</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → BI</span>
+<span class="m-thresh"><span class="tg">🟢 ≤40%</span> <span class="ty">🟡 ≤60%</span></span>
+<span class="m-dir">↓ меньше лучше</span>
+</div>
+</div>
+
+</div></div>
+
+<!-- САППОРТ -->
+<div class="block" data-block="support">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">🎧</span>
+<span class="block-title">Саппорт</span>
+<span class="block-weight">3% веса</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="csat satisfaction удовлетворённость">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> CSAT %</div>
+<div class="m-desc">Customer Satisfaction Score. Процент положительных оценок от игроков после обращения в поддержку.</div>
+</div>
+<div class="m-right">
+<span class="m-source">SupportYourApp</span>
+<span class="m-thresh"><span class="tg">🟢 ≥80%</span> <span class="ty">🟡 ≥60%</span></span>
+</div>
+</div>
+
+<div class="metric" data-search="frt first response время ответа">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> FRT (сек)</div>
+<div class="m-desc">First Response Time — время до первого ответа оператора в секундах. KPI: ≤30 сек.</div>
+</div>
+<div class="m-right">
+<span class="m-source">SupportYourApp</span>
+<span class="m-thresh"><span class="tg">🟢 ≤30с</span> <span class="ty">🟡 ≤120с</span></span>
+<span class="m-dir">↓ меньше лучше</span>
+</div>
+</div>
+
+<div class="metric" data-search="abandon rate отказ пропущенные">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-hc">HC</span> Abandon Rate %</div>
+<div class="m-desc">Процент обращений, которые клиент закрыл не дождавшись ответа. KPI: ≤5%.</div>
+</div>
+<div class="m-right">
+<span class="m-source">SupportYourApp</span>
+<span class="m-thresh"><span class="tg">🟢 ≤5%</span> <span class="ty">🟡 ≤10%</span></span>
+<span class="m-dir">↓ меньше лучше</span>
+</div>
+</div>
+
+</div></div>
+
+<!-- КАЛЬКУЛЯТОР: ДОПОЛНИТЕЛЬНЫЕ -->
+<div class="block" data-block="calculator">
+<div class="block-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+<span style="font-size:16px">🧮</span>
+<span class="block-title">NGR Калькулятор (доп. поля)</span>
+<span class="block-weight">только калькулятор</span>
+<span style="color:#ccc">▾</span>
+</div>
+<div class="block-body">
+
+<div class="metric" data-search="redeposit повторный депозит rtd">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-calc">CALC</span> Redeposit Total ($)</div>
+<div class="m-desc">Сумма всех повторных депозитов (не первых) за месяц. Используется для моделирования «пути к NGR через redeposit».</div>
+<div class="m-formula">Total Deposits − (FTD × Avg First Deposit)</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io → Deposits (filter: not first)</span>
+</div>
+</div>
+
+<div class="metric" data-search="ggr total gross gaming revenue валовый">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-calc">CALC</span> GGR Total ($)</div>
+<div class="m-desc">Общий Gross Gaming Revenue. Sport GGR + Casino GGR. Отличается от NGR: GGR не вычитает бонусы и комиссии провайдеров.</div>
+<div class="m-formula">Sport GGR + Casino GGR</div>
+</div>
+<div class="m-right">
+<span class="m-source">MGM.io</span>
+</div>
+</div>
+
+<div class="metric" data-search="ltv lifetime value пожизненная ценность">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-calc">CALC</span> LTV ($)</div>
+<div class="m-desc">Lifetime Value — средний доход от одного игрока за всё время. Используется для оценки окупаемости привлечения.</div>
+<div class="m-formula">NGR / FTD × Avg Active Months</div>
+</div>
+<div class="m-right">
+<span class="m-source">Рассчитывается / BI</span>
+</div>
+</div>
+
+<div class="metric" data-search="payback окупаемость cac">
+<div class="m-left">
+<div class="m-name"><span class="tag tag-calc">CALC</span> Payback (мес)</div>
+<div class="m-desc">Срок окупаемости привлечения в месяцах. Сколько месяцев нужно чтобы CAC отбился через ARPPU.</div>
+<div class="m-formula">CAC / (ARPPU × Margin%)</div>
+</div>
+<div class="m-right">
+<span class="m-source">Рассчитывается</span>
+</div>
+</div>
+
+</div></div>
+
+</div><!-- /blocks -->
+</div>
+
+<script>
+function filterMetrics(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.metric').forEach(m => {
+    const text = (m.textContent + ' ' + (m.dataset.search||'')).toLowerCase();
+    m.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('.block').forEach(b => {
+    const body = b.querySelector('.block-body');
+    const visible = body.querySelectorAll('.metric:not([style*="display: none"])').length;
+    b.style.display = !q || visible > 0 ? '' : 'none';
+    if (q && visible > 0) body.style.display = 'block';
+  });
+}
+// Open all by default
+document.querySelectorAll('.block-body').forEach(b => b.style.display = 'block');
+</script>
+</body>
+</html>
